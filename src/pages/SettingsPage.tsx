@@ -17,7 +17,7 @@ export function SettingsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `thola-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `mizdon-travels-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     toast("Backup downloaded");
@@ -28,7 +28,7 @@ export function SettingsPage() {
       const parsed: unknown = JSON.parse(await file.text());
       const next = sanitizeState(parsed);
       if (!next) {
-        toast("That file doesn't look like a Thola backup.");
+        toast("That file doesn't look like a MIzDon Travels backup.");
         return;
       }
       dispatch({ type: "state/import", state: next });
@@ -57,7 +57,7 @@ export function SettingsPage() {
 
       <div className="card settings-section">
         <h3><Icon3D id="inbox" size={19} /> Restore</h3>
-        <p>Import a Thola backup file. This replaces what's currently on this device.</p>
+        <p>Import a MIzDon Travels backup file. This replaces what's currently on this device.</p>
         <button className="btn secondary" onClick={() => fileInput.current?.click()}>
           Import backup
         </button>
@@ -83,8 +83,8 @@ export function SettingsPage() {
       </div>
 
       <p className="muted">
-        Thola (isiZulu: <em>to discover</em>) is an offline-first travel planner. No account, no
-        tracking — everything is stored locally in your browser. v1.0.0
+        MIzDon Travels is an offline-first travel planner. No account, no tracking — everything
+        is stored locally in your browser. v1.0.0
       </p>
 
       {confirmingReset && (

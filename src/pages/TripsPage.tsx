@@ -91,7 +91,7 @@ export function TripsPage() {
         <EmptyState
           icon={<Icon3D id="compass" size={52} />}
           title="No trips yet"
-          body="Thola means “discover” in isiZulu. Start planning your first adventure."
+          body="Start planning your first adventure with MIzDon Travels."
           action={
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
               <button className="btn" onClick={() => setCreating(true)}>

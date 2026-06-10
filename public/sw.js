@@ -1,5 +1,5 @@
-/* Thola service worker: cache-first for same-origin assets so the app works offline. */
-const CACHE = "thola-v1";
+/* MIzDon Travels service worker: cache-first for same-origin assets so the app works offline. */
+const CACHE = "mizdon-v2";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

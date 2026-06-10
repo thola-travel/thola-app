@@ -1,6 +1,6 @@
-# Thola 🧭
+# MIzDon Travels 🧭
 
-**Thola** (isiZulu: *to discover*) is an offline-first travel planner. Plan day-by-day
+**MIzDon Travels** is an offline-first travel planner. Plan day-by-day
 itineraries, track your budget, and pack with confidence — no account, no backend, no
 tracking. Everything lives on your device.
 

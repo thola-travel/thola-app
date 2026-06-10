@@ -1,8 +1,8 @@
 {
-  "name": "thola",
+  "name": "mizdon-travels",
   "private": true,
   "version": "1.0.0",
-  "description": "Thola — plan, budget, and pack for every trip. Offline-first travel planner.",
+  "description": "MIzDon Travels — plan, budget, and pack for every trip. Offline-first travel planner.",
   "type": "module",
   "scripts": {
     "dev": "vite",

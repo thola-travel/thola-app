@@ -42,7 +42,7 @@ export default function App() {
             <div className="topbar-inner">
               <a className="brand" href="#/">
                 <Icon3D id="compass" size={24} className="brand-mark" />
-                <span className="brand-name">Thola</span>
+                <span className="brand-name">MIzDon Travels</span>
                 <span className="brand-tag">discover · plan · go</span>
               </a>
               <nav className="topnav" aria-label="Primary">

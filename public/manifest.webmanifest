@@ -1,6 +1,6 @@
 {
-  "name": "Thola — Travel Planner",
-  "short_name": "Thola",
+  "name": "MIzDon Travels",
+  "short_name": "MIzDon",
   "description": "Plan, budget, and pack for every trip. Offline-first.",
   "start_url": "./",
   "display": "standalone",
