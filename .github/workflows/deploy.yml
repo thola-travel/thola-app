@@ -24,6 +24,18 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - name: Keep previous build assets
+        # A CDN-cached index.html may reference the previous bundle for a few
+        # minutes after a deploy; keeping old hashed assets prevents blank pages.
+        run: |
+          if git fetch origin gh-pages --depth 1; then
+            git checkout origin/gh-pages -- assets 2>/dev/null || true
+            if [ -d assets ]; then
+              cp -r --update=none assets/. dist/assets/ || true
+              rm -rf assets
+              git rm -r --cached -q assets || true
+            fi
+          fi
       - name: Publish dist to gh-pages
         run: |
           cd dist
