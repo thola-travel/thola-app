@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { CreditCard, Plus, Trash2, Wallet } from "lucide-react";
 import type { ExpenseCategory, Trip } from "../../types";
 import { EXPENSE_CATEGORIES } from "../../types";
 import { useAppDispatch } from "../../store/store";
@@ -71,7 +72,7 @@ function AddExpenseForm({
           >
             {EXPENSE_CATEGORIES.map((c) => (
               <option key={c.value} value={c.value}>
-                {c.icon} {c.label}
+                {c.label}
               </option>
             ))}
           </select>
@@ -138,13 +139,13 @@ export function BudgetTab({ trip }: { trip: Trip }) {
         </h2>
         <span className="spacer" />
         <button className="btn small" onClick={() => setAdding(true)}>
-          + Add expense
+          <Plus size={15} aria-hidden /> Add expense
         </button>
       </div>
 
       {trip.expenses.length === 0 ? (
         <EmptyState
-          icon="💸"
+          icon={<Wallet size={44} strokeWidth={1.5} />}
           title="Nothing logged yet"
           body="Track bookings and on-the-ground spending to stay inside your budget."
         />
@@ -152,10 +153,11 @@ export function BudgetTab({ trip }: { trip: Trip }) {
         <>
           {trip.expenses.map((e) => {
             const cat = EXPENSE_CATEGORIES.find((c) => c.value === e.category);
+            const CatIcon = cat?.Icon ?? CreditCard;
             return (
               <div key={e.id} className="expense-row">
                 <span className="exp-icon" aria-hidden>
-                  {cat?.icon}
+                  <CatIcon size={18} />
                 </span>
                 <div className="exp-label">
                   {e.label}
@@ -167,7 +169,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
                   aria-label={`Delete ${e.label}`}
                   onClick={() => dispatch({ type: "expense/delete", tripId: trip.id, id: e.id })}
                 >
-                  🗑️
+                  <Trash2 size={16} />
                 </button>
               </div>
             );
@@ -180,7 +182,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
                 {byCategory.map((c) => (
                   <div key={c.value} className="cat-line">
                     <span className="cat-name">
-                      {c.icon} {c.label}
+                      <c.Icon size={14} aria-hidden /> {c.label}
                     </span>
                     <div className="cat-bar">
                       <div className="cat-bar-fill" style={{ width: `${(c.total / maxCat) * 100}%` }} />

@@ -16,7 +16,7 @@ describe("App", () => {
 
   it("creates a trip from the dashboard and lands on its itinerary", async () => {
     render(<App />);
-    fireEvent.click(screen.getByRole("button", { name: "+ New trip" }));
+    fireEvent.click(screen.getByRole("button", { name: "New trip" }));
 
     const dialog = screen.getByRole("dialog");
     fireEvent.change(within(dialog).getByLabelText("Trip name"), {
@@ -45,7 +45,7 @@ describe("App", () => {
 
   it("validates the trip form", () => {
     render(<App />);
-    fireEvent.click(screen.getByRole("button", { name: "+ New trip" }));
+    fireEvent.click(screen.getByRole("button", { name: "New trip" }));
     const dialog = screen.getByRole("dialog");
     fireEvent.click(within(dialog).getByRole("button", { name: "Create trip" }));
     expect(within(dialog).getByText("Give your trip a name.")).toBeInTheDocument();

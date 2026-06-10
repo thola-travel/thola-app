@@ -7,7 +7,7 @@ const draft: TripDraft = {
   destination: "San Andrés, Colombia",
   startDate: "2026-07-01",
   endDate: "2026-07-06",
-  emoji: "🌊",
+  icon: "waves",
   budget: 1900,
   currency: "USD",
   notes: "",
@@ -144,7 +144,15 @@ describe("sanitizeState", () => {
     expect(state).not.toBeNull();
     expect(state!.trips.map((t) => t.name)).toEqual(["A", "B"]);
     expect(state!.trips[0].currency).toBe("USD");
+    expect(state!.trips[0].icon).toBe("globe");
     expect(state!.trips[0].activities).toEqual([]);
+  });
+
+  it("migrates trips saved with legacy emoji to icon ids", () => {
+    const state = sanitizeState({
+      trips: [{ name: "Old", startDate: "2026-01-01", endDate: "2026-01-02", emoji: "\u{1F3DD}\u{FE0F}" }],
+    });
+    expect(state!.trips[0].icon).toBe("beach");
   });
 
   it("rejects garbage", () => {

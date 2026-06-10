@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Backpack, Trash2 } from "lucide-react";
 import type { Trip } from "../../types";
 import { useAppDispatch } from "../../store/store";
 import { PACKING_TEMPLATES } from "../../data/packing";
@@ -57,17 +58,17 @@ export function PackingTab({ trip }: { trip: Trip }) {
             className="chip-btn"
             onClick={() => {
               dispatch({ type: "packing/add", tripId: trip.id, labels: tpl.items });
-              toast(`${tpl.icon} ${tpl.label} items added`);
+              toast(`${tpl.label} items added`);
             }}
           >
-            {tpl.icon} {tpl.label}
+            <tpl.Icon size={14} aria-hidden /> {tpl.label}
           </button>
         ))}
       </div>
 
       {total === 0 ? (
         <EmptyState
-          icon="🎒"
+          icon={<Backpack size={44} strokeWidth={1.5} />}
           title="Pack light, pack right"
           body="Add items one by one, or tap a template above to start from a smart list."
         />
@@ -88,7 +89,7 @@ export function PackingTab({ trip }: { trip: Trip }) {
                 aria-label={`Remove ${item.label}`}
                 onClick={() => dispatch({ type: "packing/delete", tripId: trip.id, id: item.id })}
               >
-                🗑️
+                <Trash2 size={16} />
               </button>
             </div>
           ))}

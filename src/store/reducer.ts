@@ -7,6 +7,7 @@ import type {
 } from "../types";
 import { uid } from "../lib/id";
 import { tripDayCount } from "../lib/dates";
+import { LEGACY_EMOJI_ICONS } from "../lib/icons";
 
 export type TripDraft = Omit<
   Trip,
@@ -145,13 +146,19 @@ export function sanitizeState(raw: unknown): AppState | null {
     ) {
       return null;
     }
+    const tripIcon =
+      typeof trip.icon === "string" && trip.icon !== ""
+        ? trip.icon
+        : typeof trip.emoji === "string"
+          ? (LEGACY_EMOJI_ICONS[trip.emoji] ?? "globe")
+          : "globe";
     trips.push({
       id: typeof trip.id === "string" ? trip.id : uid(),
       name: trip.name,
       destination: typeof trip.destination === "string" ? trip.destination : "",
       startDate: trip.startDate,
       endDate: trip.endDate,
-      emoji: typeof trip.emoji === "string" ? trip.emoji : "🌍",
+      icon: tripIcon,
       budget: typeof trip.budget === "number" && trip.budget >= 0 ? trip.budget : 0,
       currency: typeof trip.currency === "string" ? trip.currency : "USD",
       notes: typeof trip.notes === "string" ? trip.notes : "",

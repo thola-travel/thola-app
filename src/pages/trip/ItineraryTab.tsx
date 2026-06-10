@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from "react";
+import { MapPin, Pencil, Trash2 } from "lucide-react";
 import type { Activity, ActivityCategory, Trip } from "../../types";
 import { ACTIVITY_CATEGORIES } from "../../types";
 import { useAppDispatch } from "../../store/store";
 import { dateOfDay, formatDayLabel, tripDayCount } from "../../lib/dates";
 import { Modal } from "../../components/Modal";
 
-function categoryIcon(category: ActivityCategory): string {
-  return ACTIVITY_CATEGORIES.find((c) => c.value === category)?.icon ?? "📌";
+function categoryOf(category: ActivityCategory) {
+  return ACTIVITY_CATEGORIES.find((c) => c.value === category);
 }
 
 function sortActivities(activities: Activity[]): Activity[] {
@@ -82,7 +83,7 @@ function ActivityForm({ dayCount, initial, initialDay, onSubmit, onCancel, start
         >
           {ACTIVITY_CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
-              {c.icon} {c.label}
+              {c.label}
             </option>
           ))}
         </select>
@@ -130,31 +131,35 @@ export function ItineraryTab({ trip }: { trip: Trip }) {
               <h3>Day {day + 1}</h3>
               <span className="day-date">{formatDayLabel(dateOfDay(trip.startDate, day))}</span>
             </div>
-            {activities.map((a) => (
-              <div key={a.id} className="activity">
-                <span className="act-icon" aria-hidden>
-                  {categoryIcon(a.category)}
-                </span>
-                <div className="act-body">
-                  <div className="act-title">{a.title}</div>
-                  <div className="act-meta">
-                    {a.time && <span className="act-time">{a.time}</span>}
-                    <span>{ACTIVITY_CATEGORIES.find((c) => c.value === a.category)?.label}</span>
+            {activities.map((a) => {
+              const cat = categoryOf(a.category);
+              const CatIcon = cat?.Icon ?? MapPin;
+              return (
+                <div key={a.id} className="activity">
+                  <span className="act-icon" aria-hidden>
+                    <CatIcon size={19} />
+                  </span>
+                  <div className="act-body">
+                    <div className="act-title">{a.title}</div>
+                    <div className="act-meta">
+                      {a.time && <span className="act-time">{a.time}</span>}
+                      <span>{cat?.label}</span>
+                    </div>
+                    {a.notes && <div className="act-notes">{a.notes}</div>}
                   </div>
-                  {a.notes && <div className="act-notes">{a.notes}</div>}
+                  <button className="icon-btn" aria-label={`Edit ${a.title}`} onClick={() => setEditing(a)}>
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    className="icon-btn"
+                    aria-label={`Delete ${a.title}`}
+                    onClick={() => dispatch({ type: "activity/delete", tripId: trip.id, id: a.id })}
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
-                <button className="icon-btn" aria-label={`Edit ${a.title}`} onClick={() => setEditing(a)}>
-                  ✏️
-                </button>
-                <button
-                  className="icon-btn"
-                  aria-label={`Delete ${a.title}`}
-                  onClick={() => dispatch({ type: "activity/delete", tripId: trip.id, id: a.id })}
-                >
-                  🗑️
-                </button>
-              </div>
-            ))}
+              );
+            })}
             <button className="add-inline" onClick={() => setAdding(day)}>
               + Add plan for day {day + 1}
             </button>

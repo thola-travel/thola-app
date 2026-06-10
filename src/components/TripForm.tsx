@@ -4,8 +4,7 @@ import { CURRENCIES } from "../types";
 import type { TripDraft } from "../store/reducer";
 import { isValidISODate, toISODate } from "../lib/dates";
 import { parseAmount } from "../lib/money";
-
-const EMOJI_CHOICES = ["🌍", "🏝️", "⛰️", "🏙️", "🎒", "🛫", "🚗", "🛳️", "🏕️", "🎢", "💼", "❤️"];
+import { getIcon, TRIP_ICON_CHOICES } from "../lib/icons";
 
 interface TripFormProps {
   /** Existing trip to edit; omit to create a new one. */
@@ -31,7 +30,7 @@ export function TripForm({ trip, prefill, submitLabel, onSubmit, onCancel }: Tri
   const [destination, setDestination] = useState(trip?.destination ?? prefill?.destination ?? "");
   const [startDate, setStartDate] = useState(trip?.startDate ?? prefill?.startDate ?? defaults.start);
   const [endDate, setEndDate] = useState(trip?.endDate ?? prefill?.endDate ?? defaults.end);
-  const [emoji, setEmoji] = useState(trip?.emoji ?? prefill?.emoji ?? "🌍");
+  const [icon, setIcon] = useState(trip?.icon ?? prefill?.icon ?? "globe");
   const [budgetText, setBudgetText] = useState(
     trip && trip.budget > 0 ? String(trip.budget) : ""
   );
@@ -64,7 +63,7 @@ export function TripForm({ trip, prefill, submitLabel, onSubmit, onCancel }: Tri
       destination: destination.trim(),
       startDate,
       endDate,
-      emoji,
+      icon,
       budget,
       currency,
       notes: notes.trim(),
@@ -140,18 +139,23 @@ export function TripForm({ trip, prefill, submitLabel, onSubmit, onCancel }: Tri
       <div className="field">
         <label>Icon</label>
         <div className="chip-row" role="radiogroup" aria-label="Trip icon">
-          {EMOJI_CHOICES.map((e) => (
-            <button
-              key={e}
-              type="button"
-              role="radio"
-              aria-checked={emoji === e}
-              className={`chip-btn ${emoji === e ? "selected" : ""}`}
-              onClick={() => setEmoji(e)}
-            >
-              {e}
-            </button>
-          ))}
+          {TRIP_ICON_CHOICES.map((choice) => {
+            const Icon = getIcon(choice.id);
+            return (
+              <button
+                key={choice.id}
+                type="button"
+                role="radio"
+                aria-checked={icon === choice.id}
+                aria-label={choice.label}
+                title={choice.label}
+                className={`chip-btn icon-chip ${icon === choice.id ? "selected" : ""}`}
+                onClick={() => setIcon(choice.id)}
+              >
+                <Icon size={18} aria-hidden />
+              </button>
+            );
+          })}
         </div>
       </div>
       <div className="field">

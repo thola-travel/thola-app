@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CalendarDays, Compass, CreditCard, MapPin, Plane, Plus } from "lucide-react";
 import type { Trip } from "../types";
 import { useAppDispatch, useAppState } from "../store/store";
 import { daysUntil, formatRange, tripDayCount, tripPhase } from "../lib/dates";
@@ -10,10 +11,16 @@ import { PACKING_ESSENTIALS } from "../data/packing";
 import { navigate } from "../lib/router";
 import { useToast } from "../components/Toast";
 import { uid } from "../lib/id";
+import { getIcon } from "../lib/icons";
 
 function countdownChip(trip: Trip) {
   const phase = tripPhase(trip.startDate, trip.endDate);
-  if (phase === "active") return <span className="chip amber">✈️ Happening now</span>;
+  if (phase === "active")
+    return (
+      <span className="chip amber">
+        <Plane size={13} aria-hidden /> Happening now
+      </span>
+    );
   if (phase === "past") return <span className="chip">Done & dusted</span>;
   const days = daysUntil(trip.startDate);
   return <span className="chip teal">{days === 1 ? "Tomorrow!" : `In ${days} days`}</span>;
@@ -22,15 +29,20 @@ function countdownChip(trip: Trip) {
 function TripCard({ trip }: { trip: Trip }) {
   const days = tripDayCount(trip.startDate, trip.endDate);
   const spent = totalExpenses(trip.expenses);
+  const Icon = getIcon(trip.icon);
   return (
     <a className="trip-card" href={`#/trip/${trip.id}/itinerary`}>
       <div className="trip-card-top">
         <span className="trip-emoji" aria-hidden>
-          {trip.emoji}
+          <Icon size={26} />
         </span>
         <div>
           <h3>{trip.name}</h3>
-          {trip.destination && <p className="dest">📍 {trip.destination}</p>}
+          {trip.destination && (
+            <p className="dest">
+              <MapPin size={13} aria-hidden /> {trip.destination}
+            </p>
+          )}
           <p className="dest">
             {formatRange(trip.startDate, trip.endDate)} · {days} {days === 1 ? "day" : "days"}
           </p>
@@ -40,10 +52,15 @@ function TripCard({ trip }: { trip: Trip }) {
         {countdownChip(trip)}
         {trip.activities.length > 0 && (
           <span className="chip">
-            🗓️ {trip.activities.length} {trip.activities.length === 1 ? "plan" : "plans"}
+            <CalendarDays size={13} aria-hidden /> {trip.activities.length}{" "}
+            {trip.activities.length === 1 ? "plan" : "plans"}
           </span>
         )}
-        {spent > 0 && <span className="chip">💳 {formatMoney(spent, trip.currency)} spent</span>}
+        {spent > 0 && (
+          <span className="chip">
+            <CreditCard size={13} aria-hidden /> {formatMoney(spent, trip.currency)} spent
+          </span>
+        )}
       </div>
     </a>
   );
@@ -67,13 +84,13 @@ export function TripsPage() {
         </div>
         <span className="spacer" />
         <button className="btn" onClick={() => setCreating(true)}>
-          + New trip
+          <Plus size={16} aria-hidden /> New trip
         </button>
       </div>
 
       {trips.length === 0 && (
         <EmptyState
-          icon="🧭"
+          icon={<Compass size={44} strokeWidth={1.5} />}
           title="No trips yet"
           body="Thola means “discover” in isiZulu. Start planning your first adventure."
           action={
@@ -120,7 +137,7 @@ export function TripsPage() {
               const id = uid();
               dispatch({ type: "trip/add", draft, id, packing: PACKING_ESSENTIALS });
               setCreating(false);
-              toast(`${draft.emoji} Trip created — let's plan it!`);
+              toast("Trip created — let's plan it!");
               navigate({ page: "trip", tripId: id, tab: "itinerary" });
             }}
           />

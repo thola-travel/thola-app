@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 interface EmptyStateProps {
-  icon: string;
+  icon: ReactNode;
   title: string;
   body: string;
   action?: ReactNode;

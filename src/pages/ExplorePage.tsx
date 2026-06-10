@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { CalendarDays, SearchX } from "lucide-react";
 import { COST_LABELS, DESTINATIONS, type Destination } from "../data/destinations";
 import { useAppDispatch } from "../store/store";
 import { Modal } from "../components/Modal";
@@ -8,15 +9,17 @@ import { PACKING_ESSENTIALS } from "../data/packing";
 import { navigate } from "../lib/router";
 import { useToast } from "../components/Toast";
 import { uid } from "../lib/id";
+import { getIcon } from "../lib/icons";
 
 const REGIONS = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"] as const;
 
 function DestinationCard({ dest, onStart }: { dest: Destination; onStart: () => void }) {
+  const Icon = getIcon(dest.icon);
   return (
     <article className="dest-card">
       <div className="dest-head">
         <span className="dest-emoji" aria-hidden>
-          {dest.emoji}
+          <Icon size={24} />
         </span>
         <div>
           <h3>{dest.name}</h3>
@@ -25,7 +28,9 @@ function DestinationCard({ dest, onStart }: { dest: Destination; onStart: () => 
       </div>
       <p className="dest-blurb">{dest.blurb}</p>
       <div className="dest-facts">
-        <span className="chip teal">🗓️ Best: {dest.bestTime}</span>
+        <span className="chip teal">
+          <CalendarDays size={13} aria-hidden /> Best: {dest.bestTime}
+        </span>
         <span className="chip">{COST_LABELS[dest.costLevel]}</span>
         <span className="chip">~{dest.suggestedDays} days</span>
       </div>
@@ -91,7 +96,7 @@ export function ExplorePage() {
 
       {filtered.length === 0 ? (
         <EmptyState
-          icon="🔎"
+          icon={<SearchX size={44} strokeWidth={1.5} />}
           title="Nothing matches"
           body="Try a different search or region — or plan a custom trip from the Trips page."
         />
@@ -109,7 +114,7 @@ export function ExplorePage() {
             prefill={{
               name: `${starting.name} ${new Date().getFullYear()}`,
               destination: `${starting.name}, ${starting.country}`,
-              emoji: starting.emoji,
+              icon: starting.icon,
             }}
             submitLabel="Start planning"
             onCancel={() => setStarting(null)}
@@ -117,7 +122,7 @@ export function ExplorePage() {
               const id = uid();
               dispatch({ type: "trip/add", draft, id, packing: PACKING_ESSENTIALS });
               setStarting(null);
-              toast(`${draft.emoji} ${starting.name} — great choice!`);
+              toast(`${starting.name} — great choice!`);
               navigate({ page: "trip", tripId: id, tab: "itinerary" });
             }}
           />
