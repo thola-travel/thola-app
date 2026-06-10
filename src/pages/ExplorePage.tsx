@@ -95,8 +95,33 @@ export function ExplorePage() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={<AppIcon id="search" size={52} />}
-          title="Nothing matches"
-          body="Try a different search or region — or plan a custom trip from the Trips page."
+          title="Not in our hand-picked list"
+          body="No problem — the whole world is searchable. Start a trip and search any real city or town in the destination box."
+          action={
+            <button
+              className="btn"
+              onClick={() =>
+                setStarting({
+                  id: "custom",
+                  name: query.trim() || "My destination",
+                  country: "",
+                  icon: "globe",
+                  lat: 0,
+                  lon: 0,
+                  countryCode: "",
+                  region: "Africa",
+                  blurb: "",
+                  bestTime: "",
+                  costLevel: 1,
+                  suggestedDays: 5,
+                  tags: [],
+                  highlights: [],
+                })
+              }
+            >
+              Plan a trip to “{query.trim() || "anywhere"}”
+            </button>
+          }
         />
       ) : (
         <div className="dest-grid">
@@ -107,13 +132,20 @@ export function ExplorePage() {
       )}
 
       {starting && (
-        <Modal title={`Trip to ${starting.name}`} onClose={() => setStarting(null)}>
+        <Modal title={starting.id === "custom" ? "Plan a custom trip" : `Trip to ${starting.name}`} onClose={() => setStarting(null)}>
           <TripForm
-            prefill={{
-              name: `${starting.name} ${new Date().getFullYear()}`,
-              destination: `${starting.name}, ${starting.country}`,
-              icon: starting.icon,
-            }}
+            prefill={
+              starting.id === "custom"
+                ? { name: `${starting.name} ${new Date().getFullYear()}`, destination: starting.name, icon: "globe" }
+                : {
+                    name: `${starting.name} ${new Date().getFullYear()}`,
+                    destination: `${starting.name}, ${starting.country}`,
+                    icon: starting.icon,
+                    lat: starting.lat,
+                    lon: starting.lon,
+                    countryCode: starting.countryCode,
+                  }
+            }
             submitLabel="Start planning"
             onCancel={() => setStarting(null)}
             onSubmit={(draft) => {

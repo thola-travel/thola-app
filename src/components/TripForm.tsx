@@ -6,6 +6,8 @@ import { isValidISODate, toISODate } from "../lib/dates";
 import { parseAmount } from "../lib/money";
 import { TRIP_ICON_CHOICES } from "../lib/icons";
 import { AppIcon } from "./AppIcon";
+import { PlaceSearch } from "./PlaceSearch";
+import type { PlaceResult } from "../lib/places";
 
 interface TripFormProps {
   /** Existing trip to edit; omit to create a new one. */
@@ -29,6 +31,11 @@ export function TripForm({ trip, prefill, submitLabel, onSubmit, onCancel }: Tri
   const defaults = defaultDates();
   const [name, setName] = useState(trip?.name ?? prefill?.name ?? "");
   const [destination, setDestination] = useState(trip?.destination ?? prefill?.destination ?? "");
+  const [coords, setCoords] = useState<{ lat?: number; lon?: number; countryCode?: string }>({
+    lat: trip?.lat ?? prefill?.lat,
+    lon: trip?.lon ?? prefill?.lon,
+    countryCode: trip?.countryCode ?? prefill?.countryCode,
+  });
   const [startDate, setStartDate] = useState(trip?.startDate ?? prefill?.startDate ?? defaults.start);
   const [endDate, setEndDate] = useState(trip?.endDate ?? prefill?.endDate ?? defaults.end);
   const [icon, setIcon] = useState(trip?.icon ?? prefill?.icon ?? "globe");
@@ -62,6 +69,7 @@ export function TripForm({ trip, prefill, submitLabel, onSubmit, onCancel }: Tri
     onSubmit({
       name: trimmedName,
       destination: destination.trim(),
+      ...coords,
       startDate,
       endDate,
       icon,
@@ -86,13 +94,24 @@ export function TripForm({ trip, prefill, submitLabel, onSubmit, onCancel }: Tri
       </div>
       <div className="field">
         <label htmlFor="trip-dest">Destination</label>
-        <input
+        <PlaceSearch
           id="trip-dest"
           value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-          placeholder="City, country…"
-          maxLength={80}
+          onChange={(text) => {
+            setDestination(text);
+            setCoords({});
+          }}
+          onSelect={(place: PlaceResult) => {
+            setDestination(place.displayName.split(",").slice(0, 2).join(",").trim());
+            setCoords({ lat: place.lat, lon: place.lon, countryCode: place.countryCode });
+          }}
+          placeholder="Search a real city or town…"
         />
+        {coords.lat !== undefined && (
+          <span className="muted pinned-note">
+            <AppIcon id="pin" size={12} /> Pinned to a real place — the Guide tab will use it
+          </span>
+        )}
       </div>
       <div className="field-row">
         <div className="field">

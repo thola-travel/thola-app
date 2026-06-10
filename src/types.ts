@@ -51,6 +51,11 @@ export interface Trip {
   endDate: string;
   /** Icon id, see src/lib/icons.ts */
   icon: string;
+  /** Coordinates of the destination, set when picked from place search. */
+  lat?: number;
+  lon?: number;
+  /** ISO 3166-1 alpha-2, lowercase, e.g. "co". */
+  countryCode?: string;
   budget: number;
   currency: string;
   notes: string;

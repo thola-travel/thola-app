@@ -4,6 +4,10 @@ export interface Destination {
   country: string;
   /** Icon id, see src/lib/icons.ts */
   icon: string;
+  lat: number;
+  lon: number;
+  /** ISO 3166-1 alpha-2, lowercase. */
+  countryCode: string;
   region: "Africa" | "Americas" | "Asia" | "Europe" | "Oceania";
   blurb: string;
   bestTime: string;
@@ -17,6 +21,7 @@ export interface Destination {
 export const DESTINATIONS: Destination[] = [
   {
     id: "cape-town",
+    lat: -33.9249, lon: 18.4241, countryCode: "za",
     name: "Cape Town",
     country: "South Africa",
     icon: "mountain",
@@ -31,6 +36,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "zanzibar",
+    lat: -6.1659, lon: 39.1988, countryCode: "tz",
     name: "Zanzibar",
     country: "Tanzania",
     icon: "beach",
@@ -45,6 +51,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "marrakech",
+    lat: 31.6295, lon: -7.9811, countryCode: "ma",
     name: "Marrakech",
     country: "Morocco",
     icon: "landmark",
@@ -59,6 +66,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "san-andres",
+    lat: 12.5847, lon: -81.7006, countryCode: "co",
     name: "San Andrés",
     country: "Colombia",
     icon: "waves",
@@ -73,6 +81,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "mexico-city",
+    lat: 19.4326, lon: -99.1332, countryCode: "mx",
     name: "Mexico City",
     country: "Mexico",
     icon: "food",
@@ -87,6 +96,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "cusco",
+    lat: -13.5319, lon: -71.9675, countryCode: "pe",
     name: "Cusco & Machu Picchu",
     country: "Peru",
     icon: "mountain-snow",
@@ -101,6 +111,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "tokyo",
+    lat: 35.6762, lon: 139.6503, countryCode: "jp",
     name: "Tokyo",
     country: "Japan",
     icon: "city",
@@ -115,6 +126,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "bangkok",
+    lat: 13.7563, lon: 100.5018, countryCode: "th",
     name: "Bangkok",
     country: "Thailand",
     icon: "landmark",
@@ -129,6 +141,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "bali",
+    lat: -8.5069, lon: 115.2625, countryCode: "id",
     name: "Bali",
     country: "Indonesia",
     icon: "flower",
@@ -143,6 +156,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "lisbon",
+    lat: 38.7223, lon: -9.1393, countryCode: "pt",
     name: "Lisbon",
     country: "Portugal",
     icon: "tram",
@@ -157,6 +171,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "rome",
+    lat: 41.9028, lon: 12.4964, countryCode: "it",
     name: "Rome",
     country: "Italy",
     icon: "landmark",
@@ -171,6 +186,7 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     id: "queenstown",
+    lat: -45.0312, lon: 168.6626, countryCode: "nz",
     name: "Queenstown",
     country: "New Zealand",
     icon: "mountain-snow",

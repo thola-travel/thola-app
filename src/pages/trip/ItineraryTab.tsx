@@ -1,10 +1,15 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { AppIcon } from "../../components/AppIcon";
 import type { Activity, ActivityCategory, Trip } from "../../types";
 import { ACTIVITY_CATEGORIES } from "../../types";
 import { useAppDispatch } from "../../store/store";
 import { dateOfDay, formatDayLabel, tripDayCount } from "../../lib/dates";
 import { Modal } from "../../components/Modal";
+import { ActivityForm } from "../../components/ActivityForm";
+import { buildItinerary, type Pace } from "../../lib/planner";
+import { loadCachedGuide } from "../../lib/places";
+import { DESTINATIONS } from "../../data/destinations";
+import { useToast } from "../../components/Toast";
 
 function categoryOf(category: ActivityCategory) {
   return ACTIVITY_CATEGORIES.find((c) => c.value === category);
@@ -19,94 +24,75 @@ function sortActivities(activities: Activity[]): Activity[] {
   });
 }
 
-interface ActivityFormProps {
-  dayCount: number;
-  initial?: Activity;
-  initialDay: number;
-  onSubmit: (data: Omit<Activity, "id">) => void;
-  onCancel: () => void;
-  startDate: string;
-}
+const PACES: { value: Pace; label: string; blurb: string }[] = [
+  { value: "relaxed", label: "Relaxed", blurb: "One thing a day, lots of breathing room" },
+  { value: "balanced", label: "Balanced", blurb: "Mornings out, afternoons flexible" },
+  { value: "full", label: "See it all", blurb: "Packed days, every meal planned" },
+];
 
-function ActivityForm({ dayCount, initial, initialDay, onSubmit, onCancel, startDate }: ActivityFormProps) {
-  const [title, setTitle] = useState(initial?.title ?? "");
-  const [dayIndex, setDayIndex] = useState(initial?.dayIndex ?? initialDay);
-  const [time, setTime] = useState(initial?.time ?? "");
-  const [category, setCategory] = useState<ActivityCategory>(initial?.category ?? "sightseeing");
-  const [notes, setNotes] = useState(initial?.notes ?? "");
-  const [error, setError] = useState<string | null>(null);
+function PlannerModal({ trip, onClose }: { trip: Trip; onClose: () => void }) {
+  const dispatch = useAppDispatch();
+  const toast = useToast();
+  const [pace, setPace] = useState<Pace>("balanced");
+  const dayCount = tripDayCount(trip.startDate, trip.endDate);
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (!title.trim()) {
-      setError("What's the plan? Give it a title.");
-      return;
-    }
-    onSubmit({ title: title.trim(), dayIndex, time, category, notes: notes.trim() });
+  const curated = DESTINATIONS.find(
+    (d) =>
+      trip.destination.toLowerCase().includes(d.name.toLowerCase()) ||
+      d.name.toLowerCase().includes(trip.destination.split(",")[0].trim().toLowerCase())
+  );
+
+  function generate() {
+    const pois = loadCachedGuide(trip.id);
+    const suggestions = buildItinerary({
+      dayCount,
+      pace,
+      pois,
+      highlights: curated?.highlights ?? [],
+      destination: trip.destination,
+    });
+    dispatch({ type: "activity/addMany", tripId: trip.id, activities: suggestions });
+    toast(`Planned ${suggestions.length} things across ${dayCount} ${dayCount === 1 ? "day" : "days"}`);
+    onClose();
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <Modal title="Plan my days" onClose={onClose}>
+      <p className="muted" style={{ marginTop: 0 }}>
+        Builds a full {dayCount}-day plan — arrival, sights, meals, departure — using real nearby
+        places when the Guide tab has loaded them. You can edit or delete anything afterwards.
+      </p>
       <div className="field">
-        <label htmlFor="act-title">Activity</label>
-        <input
-          id="act-title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Snorkeling at Johnny Cay"
-          autoFocus
-          maxLength={100}
-        />
-      </div>
-      <div className="field-row">
-        <div className="field">
-          <label htmlFor="act-day">Day</label>
-          <select id="act-day" value={dayIndex} onChange={(e) => setDayIndex(Number(e.target.value))}>
-            {Array.from({ length: dayCount }, (_, i) => (
-              <option key={i} value={i}>
-                Day {i + 1} · {formatDayLabel(dateOfDay(startDate, i))}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="field">
-          <label htmlFor="act-time">Time (optional)</label>
-          <input id="act-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-        </div>
-      </div>
-      <div className="field">
-        <label htmlFor="act-cat">Category</label>
-        <select
-          id="act-cat"
-          value={category}
-          onChange={(e) => setCategory(e.target.value as ActivityCategory)}
-        >
-          {ACTIVITY_CATEGORIES.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
-            </option>
+        <label>Pace</label>
+        <div className="pace-options">
+          {PACES.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              className={`pace-option ${pace === p.value ? "selected" : ""}`}
+              onClick={() => setPace(p.value)}
+            >
+              <strong>{p.label}</strong>
+              <span>{p.blurb}</span>
+            </button>
           ))}
-        </select>
+        </div>
       </div>
-      <div className="field">
-        <label htmlFor="act-notes">Notes (optional)</label>
-        <textarea
-          id="act-notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Booking refs, addresses, what to bring…"
-        />
-      </div>
-      {error && <p className="field-error">{error}</p>}
+      {!loadCachedGuide(trip.id) && (
+        <p className="muted">
+          Tip: open the <strong>Guide</strong> tab first and I'll use real restaurants and sights
+          near {trip.destination || "your destination"} in the plan.
+        </p>
+      )}
       <div className="form-actions">
-        <button type="button" className="btn ghost" onClick={onCancel}>
+        <button className="btn ghost" onClick={onClose}>
           Cancel
         </button>
-        <button type="submit" className="btn">
-          {initial ? "Save changes" : "Add to itinerary"}
+        <button className="btn" onClick={generate}>
+          <AppIcon id="sparkles" size={15} /> Build my plan
         </button>
       </div>
-    </form>
+    </Modal>
   );
 }
 
@@ -114,6 +100,7 @@ export function ItineraryTab({ trip }: { trip: Trip }) {
   const dispatch = useAppDispatch();
   const [adding, setAdding] = useState<number | null>(null);
   const [editing, setEditing] = useState<Activity | null>(null);
+  const [planning, setPlanning] = useState(false);
 
   const dayCount = tripDayCount(trip.startDate, trip.endDate);
   const byDay = new Map<number, Activity[]>();
@@ -123,6 +110,29 @@ export function ItineraryTab({ trip }: { trip: Trip }) {
 
   return (
     <>
+      {trip.activities.length === 0 && (
+        <div className="card planner-banner">
+          <div>
+            <strong>Want a head start?</strong>
+            <p className="muted" style={{ margin: 0 }}>
+              Get a full day-by-day plan suggested for you — then tweak it.
+            </p>
+          </div>
+          <button className="btn" onClick={() => setPlanning(true)}>
+            <AppIcon id="sparkles" size={15} /> Plan my days
+          </button>
+        </div>
+      )}
+
+      {trip.activities.length > 0 && (
+        <div className="itinerary-toolbar">
+          <span className="spacer" />
+          <button className="btn secondary small" onClick={() => setPlanning(true)}>
+            <AppIcon id="sparkles" size={14} /> Suggest more
+          </button>
+        </div>
+      )}
+
       {Array.from({ length: dayCount }, (_, day) => {
         const activities = sortActivities(byDay.get(day) ?? []);
         return (
@@ -136,7 +146,7 @@ export function ItineraryTab({ trip }: { trip: Trip }) {
               return (
                 <div key={a.id} className="activity">
                   <span className="act-icon" aria-hidden>
-                    <AppIcon id={cat?.icon ?? "pin"} size={22} />
+                    <AppIcon id={cat?.icon ?? "pin"} size={19} />
                   </span>
                   <div className="act-body">
                     <div className="act-title">{a.title}</div>
@@ -170,8 +180,9 @@ export function ItineraryTab({ trip }: { trip: Trip }) {
         <Modal title="Add to itinerary" onClose={() => setAdding(null)}>
           <ActivityForm
             dayCount={dayCount}
-            initialDay={adding}
             startDate={trip.startDate}
+            initial={{ dayIndex: adding }}
+            submitLabel="Add to itinerary"
             onCancel={() => setAdding(null)}
             onSubmit={(data) => {
               dispatch({ type: "activity/add", tripId: trip.id, activity: data });
@@ -185,9 +196,9 @@ export function ItineraryTab({ trip }: { trip: Trip }) {
         <Modal title="Edit plan" onClose={() => setEditing(null)}>
           <ActivityForm
             dayCount={dayCount}
-            initial={editing}
-            initialDay={editing.dayIndex}
             startDate={trip.startDate}
+            initial={editing}
+            submitLabel="Save changes"
             onCancel={() => setEditing(null)}
             onSubmit={(data) => {
               dispatch({ type: "activity/update", tripId: trip.id, id: editing.id, patch: data });
@@ -196,6 +207,8 @@ export function ItineraryTab({ trip }: { trip: Trip }) {
           />
         </Modal>
       )}
+
+      {planning && <PlannerModal trip={trip} onClose={() => setPlanning(false)} />}
     </>
   );
 }

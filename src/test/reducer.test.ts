@@ -89,6 +89,23 @@ describe("activity actions", () => {
   });
 });
 
+describe("activity/addMany", () => {
+  it("adds a batch of activities with fresh ids", () => {
+    let { state, id } = withTrip();
+    state = reducer(state, {
+      type: "activity/addMany",
+      tripId: id,
+      activities: [
+        { dayIndex: 0, time: "15:00", title: "Arrive", category: "lodging", notes: "" },
+        { dayIndex: 1, time: "10:00", title: "Beach", category: "outdoors", notes: "" },
+      ],
+    });
+    expect(state.trips[0].activities).toHaveLength(2);
+    const ids = state.trips[0].activities.map((a) => a.id);
+    expect(new Set(ids).size).toBe(2);
+  });
+});
+
 describe("expense actions", () => {
   it("adds and deletes expenses", () => {
     let { state, id } = withTrip();
@@ -145,6 +162,18 @@ describe("sanitizeState", () => {
     expect(state!.trips.map((t) => t.name)).toEqual(["A", "B"]);
     expect(state!.trips[0].currency).toBe("USD");
     expect(state!.trips[0].icon).toBe("globe");
+  });
+
+  it("keeps real-place coordinates and drops invalid ones", () => {
+    const state = sanitizeState({
+      trips: [
+        { name: "A", startDate: "2026-02-01", endDate: "2026-02-03", lat: 12.58, lon: -81.7, countryCode: "co" },
+        { name: "B", startDate: "2026-08-01", endDate: "2026-08-05", lat: "junk" },
+      ],
+    });
+    expect(state!.trips[0].lat).toBeCloseTo(12.58);
+    expect(state!.trips[0].countryCode).toBe("co");
+    expect(state!.trips[1].lat).toBeUndefined();
     expect(state!.trips[0].activities).toEqual([]);
   });
 

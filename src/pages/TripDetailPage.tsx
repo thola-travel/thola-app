@@ -6,6 +6,7 @@ import { Modal } from "../components/Modal";
 import { TripForm } from "../components/TripForm";
 import { EmptyState } from "../components/EmptyState";
 import { ItineraryTab } from "./trip/ItineraryTab";
+import { GuideTab } from "./trip/GuideTab";
 import { BudgetTab } from "./trip/BudgetTab";
 import { PackingTab } from "./trip/PackingTab";
 import { navigate, type TripTab } from "../lib/router";
@@ -85,6 +86,9 @@ export function TripDetailPage({ tripId, tab }: { tripId: string; tab: TripTab }
         <a href={`#/trip/${trip.id}/itinerary`} className={tab === "itinerary" ? "active" : ""}>
           <AppIcon id="calendar" size={16} /> Itinerary
         </a>
+        <a href={`#/trip/${trip.id}/guide`} className={tab === "guide" ? "active" : ""}>
+          <AppIcon id="compass" size={16} /> Guide
+        </a>
         <a href={`#/trip/${trip.id}/budget`} className={tab === "budget" ? "active" : ""}>
           <AppIcon id="moneybag" size={16} /> Budget
         </a>
@@ -94,6 +98,7 @@ export function TripDetailPage({ tripId, tab }: { tripId: string; tab: TripTab }
       </nav>
 
       {tab === "itinerary" && <ItineraryTab trip={trip} />}
+      {tab === "guide" && <GuideTab trip={trip} />}
       {tab === "budget" && <BudgetTab trip={trip} />}
       {tab === "packing" && <PackingTab trip={trip} />}
 

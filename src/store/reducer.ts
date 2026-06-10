@@ -19,6 +19,7 @@ export type Action =
   | { type: "trip/update"; id: string; patch: Partial<TripDraft> }
   | { type: "trip/delete"; id: string }
   | { type: "activity/add"; tripId: string; activity: Omit<Activity, "id"> }
+  | { type: "activity/addMany"; tripId: string; activities: Omit<Activity, "id">[] }
   | { type: "activity/update"; tripId: string; id: string; patch: Partial<Omit<Activity, "id">> }
   | { type: "activity/delete"; tripId: string; id: string }
   | { type: "expense/add"; tripId: string; expense: Omit<Expense, "id"> }
@@ -73,6 +74,11 @@ export function reducer(state: AppState, action: Action): AppState {
       return updateTrip(state, action.tripId, (t) => ({
         ...t,
         activities: [...t.activities, { ...action.activity, id: uid() }],
+      }));
+    case "activity/addMany":
+      return updateTrip(state, action.tripId, (t) => ({
+        ...t,
+        activities: [...t.activities, ...action.activities.map((a) => ({ ...a, id: uid() }))],
       }));
     case "activity/update":
       return updateTrip(state, action.tripId, (t) => ({
@@ -159,6 +165,9 @@ export function sanitizeState(raw: unknown): AppState | null {
       startDate: trip.startDate,
       endDate: trip.endDate,
       icon: tripIcon,
+      lat: typeof trip.lat === "number" ? trip.lat : undefined,
+      lon: typeof trip.lon === "number" ? trip.lon : undefined,
+      countryCode: typeof trip.countryCode === "string" ? trip.countryCode : undefined,
       budget: typeof trip.budget === "number" && trip.budget >= 0 ? trip.budget : 0,
       currency: typeof trip.currency === "string" ? trip.currency : "USD",
       notes: typeof trip.notes === "string" ? trip.notes : "",

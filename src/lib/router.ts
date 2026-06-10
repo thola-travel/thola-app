@@ -6,9 +6,9 @@ export type Route =
   | { page: "explore" }
   | { page: "settings" };
 
-export type TripTab = "itinerary" | "budget" | "packing";
+export type TripTab = "itinerary" | "guide" | "budget" | "packing";
 
-const TRIP_TABS: TripTab[] = ["itinerary", "budget", "packing"];
+const TRIP_TABS: TripTab[] = ["itinerary", "guide", "budget", "packing"];
 
 export function parseHash(hash: string): Route {
   const parts = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
