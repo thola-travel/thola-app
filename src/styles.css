@@ -1,4 +1,7 @@
 :root {
+  --icon-ink: #4d7263;
+  --badge-bg: radial-gradient(circle at 35% 30%, #fbfaf3, #efecdf 70%, #e6e2d2);
+
   --teal-900: #134e4a;
   --teal-700: #0f766e;
   --teal-600: #0d9488;
@@ -342,7 +345,22 @@ textarea {
 }
 
 .chip-btn.icon-chip {
-  padding: 8px 11px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--badge-bg);
+  border-color: rgba(77, 114, 99, 0.2);
+}
+
+.chip-btn.icon-chip.selected {
+  background: var(--teal-700);
+  border-color: var(--teal-700);
+}
+
+.chip-btn.icon-chip.selected .wicon {
+  color: #f3eedb;
 }
 
 .chip-btn:hover {
@@ -516,10 +534,12 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--teal-700);
-  background: var(--teal-50);
-  border-radius: 12px;
-  padding: 12px;
+  background: var(--badge-bg);
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(77, 114, 99, 0.12), 0 1px 3px rgba(17, 24, 39, 0.08);
 }
 
 .trip-card h3 {
@@ -572,7 +592,14 @@ textarea {
 .empty .empty-icon {
   display: flex;
   justify-content: center;
-  color: var(--teal-600);
+}
+
+.empty .empty-icon .wicon {
+  background: var(--badge-bg);
+  border-radius: 50%;
+  padding: 22px;
+  box-sizing: content-box;
+  box-shadow: inset 0 0 0 1px rgba(77, 114, 99, 0.12), 0 2px 6px rgba(17, 24, 39, 0.08);
 }
 
 .empty h3 {
@@ -724,8 +751,14 @@ textarea {
 
 .activity .act-icon {
   display: flex;
-  padding-top: 2px;
-  color: var(--teal-700);
+  align-items: center;
+  justify-content: center;
+  background: var(--badge-bg);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(77, 114, 99, 0.12);
 }
 
 .activity .act-body {
@@ -849,7 +882,14 @@ textarea {
 
 .expense-row .exp-icon {
   display: flex;
-  color: var(--teal-700);
+  align-items: center;
+  justify-content: center;
+  background: var(--badge-bg);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(77, 114, 99, 0.12);
 }
 
 .expense-row .exp-label {
@@ -1038,10 +1078,12 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--teal-700);
-  background: var(--teal-50);
-  border-radius: 11px;
-  padding: 10px;
+  background: var(--badge-bg);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(77, 114, 99, 0.12), 0 1px 3px rgba(17, 24, 39, 0.08);
 }
 
 .dest-head h3 {
@@ -1141,4 +1183,38 @@ textarea {
   .toast {
     bottom: 28px;
   }
+}
+
+
+/* ---------- Watercolor icon treatment ---------- */
+
+.wicon {
+  color: var(--icon-ink);
+  filter: url(#watercolor);
+  flex-shrink: 0;
+}
+
+/* Glyphs on dark teal surfaces read in warm cream */
+.topbar .wicon,
+.trip-hero .wicon {
+  color: #f3eedb;
+}
+
+.btn .wicon {
+  color: inherit;
+}
+
+.bottomnav a .wicon {
+  color: #7d8a80;
+}
+
+.bottomnav a.active .wicon {
+  color: var(--icon-ink);
+}
+
+.chip .wicon,
+.tabs .wicon,
+.cat-name .wicon,
+.settings-section h3 .wicon {
+  color: var(--icon-ink);
 }

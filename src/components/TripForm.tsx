@@ -5,7 +5,7 @@ import type { TripDraft } from "../store/reducer";
 import { isValidISODate, toISODate } from "../lib/dates";
 import { parseAmount } from "../lib/money";
 import { TRIP_ICON_CHOICES } from "../lib/icons";
-import { Icon3D } from "./Icon3D";
+import { AppIcon } from "./AppIcon";
 
 interface TripFormProps {
   /** Existing trip to edit; omit to create a new one. */
@@ -151,7 +151,7 @@ export function TripForm({ trip, prefill, submitLabel, onSubmit, onCancel }: Tri
               className={`chip-btn icon-chip ${icon === choice.id ? "selected" : ""}`}
               onClick={() => setIcon(choice.id)}
             >
-              <Icon3D id={choice.id} size={22} />
+              <AppIcon id={choice.id} size={22} />
             </button>
           ))}
         </div>

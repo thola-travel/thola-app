@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Plus } from "lucide-react";
-import { Icon3D } from "../../components/Icon3D";
+import { AppIcon } from "../../components/AppIcon";
 import type { ExpenseCategory, Trip } from "../../types";
 import { EXPENSE_CATEGORIES } from "../../types";
 import { useAppDispatch } from "../../store/store";
@@ -146,7 +146,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
 
       {trip.expenses.length === 0 ? (
         <EmptyState
-          icon={<Icon3D id="moneybag" size={52} />}
+          icon={<AppIcon id="moneybag" size={52} />}
           title="Nothing logged yet"
           body="Track bookings and on-the-ground spending to stay inside your budget."
         />
@@ -157,7 +157,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
             return (
               <div key={e.id} className="expense-row">
                 <span className="exp-icon" aria-hidden>
-                  <Icon3D id={cat?.icon ?? "creditcard"} size={22} />
+                  <AppIcon id={cat?.icon ?? "creditcard"} size={22} />
                 </span>
                 <div className="exp-label">
                   {e.label}
@@ -169,7 +169,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
                   aria-label={`Delete ${e.label}`}
                   onClick={() => dispatch({ type: "expense/delete", tripId: trip.id, id: e.id })}
                 >
-                  <Icon3D id="trash" size={16} />
+                  <AppIcon id="trash" size={16} />
                 </button>
               </div>
             );
@@ -182,7 +182,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
                 {byCategory.map((c) => (
                   <div key={c.value} className="cat-line">
                     <span className="cat-name">
-                      <Icon3D id={c.icon} size={15} /> {c.label}
+                      <AppIcon id={c.icon} size={15} /> {c.label}
                     </span>
                     <div className="cat-bar">
                       <div className="cat-bar-fill" style={{ width: `${(c.total / maxCat) * 100}%` }} />

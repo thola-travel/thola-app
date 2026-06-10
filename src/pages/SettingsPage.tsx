@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Icon3D } from "../components/Icon3D";
+import { AppIcon } from "../components/AppIcon";
 import { useAppDispatch, useAppState } from "../store/store";
 import { sanitizeState } from "../store/reducer";
 import { Modal } from "../components/Modal";
@@ -48,7 +48,7 @@ export function SettingsPage() {
       </div>
 
       <div className="card settings-section">
-        <h3><Icon3D id="floppy" size={19} /> Back up</h3>
+        <h3><AppIcon id="floppy" size={19} /> Back up</h3>
         <p>Download all trips as a JSON file you can keep anywhere.</p>
         <button className="btn secondary" onClick={exportData}>
           Export data
@@ -56,7 +56,7 @@ export function SettingsPage() {
       </div>
 
       <div className="card settings-section">
-        <h3><Icon3D id="inbox" size={19} /> Restore</h3>
+        <h3><AppIcon id="inbox" size={19} /> Restore</h3>
         <p>Import a MIzDon Travels backup file. This replaces what's currently on this device.</p>
         <button className="btn secondary" onClick={() => fileInput.current?.click()}>
           Import backup
@@ -75,7 +75,7 @@ export function SettingsPage() {
       </div>
 
       <div className="card settings-section">
-        <h3><Icon3D id="broom" size={19} /> Start fresh</h3>
+        <h3><AppIcon id="broom" size={19} /> Start fresh</h3>
         <p>Delete all trips and data from this device.</p>
         <button className="btn danger" onClick={() => setConfirmingReset(true)}>
           Erase everything

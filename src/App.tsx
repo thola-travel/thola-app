@@ -1,4 +1,4 @@
-import { Icon3D } from "./components/Icon3D";
+import { AppIcon } from "./components/AppIcon";
 import { StoreProvider } from "./store/store";
 import { ToastProvider } from "./components/Toast";
 import { useRoute, type Route } from "./lib/router";
@@ -37,11 +37,17 @@ export default function App() {
   return (
     <StoreProvider>
       <ToastProvider>
+        <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden focusable="false">
+          <filter id="watercolor" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.12" numOctaves="2" seed="7" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.4" />
+          </filter>
+        </svg>
         <div className="app">
           <header className="topbar">
             <div className="topbar-inner">
               <a className="brand" href="#/">
-                <Icon3D id="compass" size={24} className="brand-mark" />
+                <AppIcon id="compass" size={24} className="brand-mark" />
                 <span className="brand-name">MIzDon Travels</span>
                 <span className="brand-tag">discover · plan · go</span>
               </a>
@@ -62,7 +68,7 @@ export default function App() {
           <nav className="bottomnav" aria-label="Primary mobile">
             {NAV_ITEMS.map((item) => (
               <a key={item.hash} href={item.hash} className={isActive(route, item.page) ? "active" : ""}>
-                <Icon3D id={item.icon} size={22} />
+                <AppIcon id={item.icon} size={22} />
                 {item.label}
               </a>
             ))}

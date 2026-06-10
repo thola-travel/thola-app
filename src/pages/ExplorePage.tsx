@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Icon3D } from "../components/Icon3D";
+import { AppIcon } from "../components/AppIcon";
 import { COST_LABELS, DESTINATIONS, type Destination } from "../data/destinations";
 import { useAppDispatch } from "../store/store";
 import { Modal } from "../components/Modal";
@@ -17,7 +17,7 @@ function DestinationCard({ dest, onStart }: { dest: Destination; onStart: () => 
     <article className="dest-card">
       <div className="dest-head">
         <span className="dest-emoji" aria-hidden>
-          <Icon3D id={dest.icon} size={28} />
+          <AppIcon id={dest.icon} size={28} />
         </span>
         <div>
           <h3>{dest.name}</h3>
@@ -27,7 +27,7 @@ function DestinationCard({ dest, onStart }: { dest: Destination; onStart: () => 
       <p className="dest-blurb">{dest.blurb}</p>
       <div className="dest-facts">
         <span className="chip teal">
-          <Icon3D id="calendar" size={13} /> Best: {dest.bestTime}
+          <AppIcon id="calendar" size={13} /> Best: {dest.bestTime}
         </span>
         <span className="chip">{COST_LABELS[dest.costLevel]}</span>
         <span className="chip">~{dest.suggestedDays} days</span>
@@ -94,7 +94,7 @@ export function ExplorePage() {
 
       {filtered.length === 0 ? (
         <EmptyState
-          icon={<Icon3D id="search" size={52} />}
+          icon={<AppIcon id="search" size={52} />}
           title="Nothing matches"
           body="Try a different search or region — or plan a custom trip from the Trips page."
         />

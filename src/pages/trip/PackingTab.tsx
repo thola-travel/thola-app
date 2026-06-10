@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Icon3D } from "../../components/Icon3D";
+import { AppIcon } from "../../components/AppIcon";
 import type { Trip } from "../../types";
 import { useAppDispatch } from "../../store/store";
 import { PACKING_TEMPLATES } from "../../data/packing";
@@ -61,14 +61,14 @@ export function PackingTab({ trip }: { trip: Trip }) {
               toast(`${tpl.label} items added`);
             }}
           >
-            <Icon3D id={tpl.icon} size={15} /> {tpl.label}
+            <AppIcon id={tpl.icon} size={15} /> {tpl.label}
           </button>
         ))}
       </div>
 
       {total === 0 ? (
         <EmptyState
-          icon={<Icon3D id="backpack" size={52} />}
+          icon={<AppIcon id="backpack" size={52} />}
           title="Pack light, pack right"
           body="Add items one by one, or tap a template above to start from a smart list."
         />
@@ -89,7 +89,7 @@ export function PackingTab({ trip }: { trip: Trip }) {
                 aria-label={`Remove ${item.label}`}
                 onClick={() => dispatch({ type: "packing/delete", tripId: trip.id, id: item.id })}
               >
-                <Icon3D id="trash" size={16} />
+                <AppIcon id="trash" size={16} />
               </button>
             </div>
           ))}

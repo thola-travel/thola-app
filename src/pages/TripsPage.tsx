@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Icon3D } from "../components/Icon3D";
+import { AppIcon } from "../components/AppIcon";
 import type { Trip } from "../types";
 import { useAppDispatch, useAppState } from "../store/store";
 import { daysUntil, formatRange, tripDayCount, tripPhase } from "../lib/dates";
@@ -18,7 +18,7 @@ function countdownChip(trip: Trip) {
   if (phase === "active")
     return (
       <span className="chip amber">
-        <Icon3D id="plane" size={14} /> Happening now
+        <AppIcon id="plane" size={14} /> Happening now
       </span>
     );
   if (phase === "past") return <span className="chip">Done & dusted</span>;
@@ -33,13 +33,13 @@ function TripCard({ trip }: { trip: Trip }) {
     <a className="trip-card" href={`#/trip/${trip.id}/itinerary`}>
       <div className="trip-card-top">
         <span className="trip-emoji" aria-hidden>
-          <Icon3D id={trip.icon} size={30} />
+          <AppIcon id={trip.icon} size={30} />
         </span>
         <div>
           <h3>{trip.name}</h3>
           {trip.destination && (
             <p className="dest">
-              <Icon3D id="pin" size={13} /> {trip.destination}
+              <AppIcon id="pin" size={13} /> {trip.destination}
             </p>
           )}
           <p className="dest">
@@ -51,13 +51,13 @@ function TripCard({ trip }: { trip: Trip }) {
         {countdownChip(trip)}
         {trip.activities.length > 0 && (
           <span className="chip">
-            <Icon3D id="calendar" size={13} /> {trip.activities.length}{" "}
+            <AppIcon id="calendar" size={13} /> {trip.activities.length}{" "}
             {trip.activities.length === 1 ? "plan" : "plans"}
           </span>
         )}
         {spent > 0 && (
           <span className="chip">
-            <Icon3D id="creditcard" size={13} /> {formatMoney(spent, trip.currency)} spent
+            <AppIcon id="creditcard" size={13} /> {formatMoney(spent, trip.currency)} spent
           </span>
         )}
       </div>
@@ -89,7 +89,7 @@ export function TripsPage() {
 
       {trips.length === 0 && (
         <EmptyState
-          icon={<Icon3D id="compass" size={52} />}
+          icon={<AppIcon id="compass" size={52} />}
           title="No trips yet"
           body="Start planning your first adventure with MIzDon Travels."
           action={
