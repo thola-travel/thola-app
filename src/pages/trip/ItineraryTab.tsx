@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { MapPin, Pencil, Trash2 } from "lucide-react";
+import { Icon3D } from "../../components/Icon3D";
 import type { Activity, ActivityCategory, Trip } from "../../types";
 import { ACTIVITY_CATEGORIES } from "../../types";
 import { useAppDispatch } from "../../store/store";
@@ -133,11 +133,10 @@ export function ItineraryTab({ trip }: { trip: Trip }) {
             </div>
             {activities.map((a) => {
               const cat = categoryOf(a.category);
-              const CatIcon = cat?.Icon ?? MapPin;
               return (
                 <div key={a.id} className="activity">
                   <span className="act-icon" aria-hidden>
-                    <CatIcon size={19} />
+                    <Icon3D id={cat?.icon ?? "pin"} size={22} />
                   </span>
                   <div className="act-body">
                     <div className="act-title">{a.title}</div>
@@ -148,14 +147,14 @@ export function ItineraryTab({ trip }: { trip: Trip }) {
                     {a.notes && <div className="act-notes">{a.notes}</div>}
                   </div>
                   <button className="icon-btn" aria-label={`Edit ${a.title}`} onClick={() => setEditing(a)}>
-                    <Pencil size={16} />
+                    <Icon3D id="pencil" size={16} />
                   </button>
                   <button
                     className="icon-btn"
                     aria-label={`Delete ${a.title}`}
                     onClick={() => dispatch({ type: "activity/delete", tripId: trip.id, id: a.id })}
                   >
-                    <Trash2 size={16} />
+                    <Icon3D id="trash" size={16} />
                   </button>
                 </div>
               );

@@ -4,7 +4,8 @@ import { CURRENCIES } from "../types";
 import type { TripDraft } from "../store/reducer";
 import { isValidISODate, toISODate } from "../lib/dates";
 import { parseAmount } from "../lib/money";
-import { getIcon, TRIP_ICON_CHOICES } from "../lib/icons";
+import { TRIP_ICON_CHOICES } from "../lib/icons";
+import { Icon3D } from "./Icon3D";
 
 interface TripFormProps {
   /** Existing trip to edit; omit to create a new one. */
@@ -139,23 +140,20 @@ export function TripForm({ trip, prefill, submitLabel, onSubmit, onCancel }: Tri
       <div className="field">
         <label>Icon</label>
         <div className="chip-row" role="radiogroup" aria-label="Trip icon">
-          {TRIP_ICON_CHOICES.map((choice) => {
-            const Icon = getIcon(choice.id);
-            return (
-              <button
-                key={choice.id}
-                type="button"
-                role="radio"
-                aria-checked={icon === choice.id}
-                aria-label={choice.label}
-                title={choice.label}
-                className={`chip-btn icon-chip ${icon === choice.id ? "selected" : ""}`}
-                onClick={() => setIcon(choice.id)}
-              >
-                <Icon size={18} aria-hidden />
-              </button>
-            );
-          })}
+          {TRIP_ICON_CHOICES.map((choice) => (
+            <button
+              key={choice.id}
+              type="button"
+              role="radio"
+              aria-checked={icon === choice.id}
+              aria-label={choice.label}
+              title={choice.label}
+              className={`chip-btn icon-chip ${icon === choice.id ? "selected" : ""}`}
+              onClick={() => setIcon(choice.id)}
+            >
+              <Icon3D id={choice.id} size={22} />
+            </button>
+          ))}
         </div>
       </div>
       <div className="field">

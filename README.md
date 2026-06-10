@@ -59,6 +59,10 @@ routing, so it deploys to any static host with zero configuration:
 - **Tests** — Vitest + Testing Library covering date math, money formatting, every reducer
   action, import sanitization, and end-to-end UI flows.
 
+## Credits
+
+Icons are [Fluent Emoji 3D](https://github.com/microsoft/fluentui-emoji) by Microsoft (MIT license).
+
 ## License
 
 MIT

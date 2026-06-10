@@ -1,4 +1,4 @@
-import { Compass, Luggage, Settings } from "lucide-react";
+import { Icon3D } from "./components/Icon3D";
 import { StoreProvider } from "./store/store";
 import { ToastProvider } from "./components/Toast";
 import { useRoute, type Route } from "./lib/router";
@@ -8,9 +8,9 @@ import { ExplorePage } from "./pages/ExplorePage";
 import { SettingsPage } from "./pages/SettingsPage";
 
 const NAV_ITEMS = [
-  { hash: "#/", label: "Trips", Icon: Luggage, page: "trips" },
-  { hash: "#/explore", label: "Explore", Icon: Compass, page: "explore" },
-  { hash: "#/settings", label: "Settings", Icon: Settings, page: "settings" },
+  { hash: "#/", label: "Trips", icon: "luggage", page: "trips" },
+  { hash: "#/explore", label: "Explore", icon: "compass", page: "explore" },
+  { hash: "#/settings", label: "Settings", icon: "gear", page: "settings" },
 ] as const;
 
 function isActive(route: Route, page: string): boolean {
@@ -41,7 +41,7 @@ export default function App() {
           <header className="topbar">
             <div className="topbar-inner">
               <a className="brand" href="#/">
-                <Compass size={21} aria-hidden className="brand-mark" />
+                <Icon3D id="compass" size={24} className="brand-mark" />
                 <span className="brand-name">Thola</span>
                 <span className="brand-tag">discover · plan · go</span>
               </a>
@@ -62,7 +62,7 @@ export default function App() {
           <nav className="bottomnav" aria-label="Primary mobile">
             {NAV_ITEMS.map((item) => (
               <a key={item.hash} href={item.hash} className={isActive(route, item.page) ? "active" : ""}>
-                <item.Icon size={21} aria-hidden />
+                <Icon3D id={item.icon} size={22} />
                 {item.label}
               </a>
             ))}

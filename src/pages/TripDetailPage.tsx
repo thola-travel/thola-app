@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Backpack, CalendarDays, Luggage, MapPin, StickyNote, Wallet } from "lucide-react";
+import { Icon3D } from "../components/Icon3D";
 import { useAppDispatch, useAppState } from "../store/store";
 import { daysUntil, formatRange, tripDayCount, tripPhase } from "../lib/dates";
 import { Modal } from "../components/Modal";
@@ -10,7 +10,6 @@ import { BudgetTab } from "./trip/BudgetTab";
 import { PackingTab } from "./trip/PackingTab";
 import { navigate, type TripTab } from "../lib/router";
 import { useToast } from "../components/Toast";
-import { getIcon } from "../lib/icons";
 
 export function TripDetailPage({ tripId, tab }: { tripId: string; tab: TripTab }) {
   const { trips } = useAppState();
@@ -24,7 +23,7 @@ export function TripDetailPage({ tripId, tab }: { tripId: string; tab: TripTab }
   if (!trip) {
     return (
       <EmptyState
-        icon={<Luggage size={44} strokeWidth={1.5} />}
+        icon={<Icon3D id="luggage" size={52} />}
         title="Trip not found"
         body="It may have been deleted on this device."
         action={
@@ -39,7 +38,6 @@ export function TripDetailPage({ tripId, tab }: { tripId: string; tab: TripTab }
   const phase = tripPhase(trip.startDate, trip.endDate);
   const days = tripDayCount(trip.startDate, trip.endDate);
   const until = daysUntil(trip.startDate);
-  const TripIcon = getIcon(trip.icon);
 
   return (
     <>
@@ -57,12 +55,12 @@ export function TripDetailPage({ tripId, tab }: { tripId: string; tab: TripTab }
           </button>
         </div>
         <h1>
-          <TripIcon size={22} aria-hidden className="hero-icon" /> {trip.name}
+          <Icon3D id={trip.icon} size={26} className="hero-icon" /> {trip.name}
         </h1>
         <p className="hero-sub">
           {trip.destination && (
             <>
-              <MapPin size={13} aria-hidden /> {trip.destination} ·{" "}
+              <Icon3D id="pin" size={13} /> {trip.destination} ·{" "}
             </>
           )}
           {formatRange(trip.startDate, trip.endDate)} · {days} {days === 1 ? "day" : "days"}
@@ -77,7 +75,7 @@ export function TripDetailPage({ tripId, tab }: { tripId: string; tab: TripTab }
           {phase === "past" && <span className="hero-badge">Trip complete</span>}
           {trip.notes && (
             <span className="hero-badge">
-              <StickyNote size={12} aria-hidden /> {trip.notes}
+              <Icon3D id="memo" size={13} /> {trip.notes}
             </span>
           )}
         </div>
@@ -85,13 +83,13 @@ export function TripDetailPage({ tripId, tab }: { tripId: string; tab: TripTab }
 
       <nav className="tabs" aria-label="Trip sections">
         <a href={`#/trip/${trip.id}/itinerary`} className={tab === "itinerary" ? "active" : ""}>
-          <CalendarDays size={15} aria-hidden /> Itinerary
+          <Icon3D id="calendar" size={16} /> Itinerary
         </a>
         <a href={`#/trip/${trip.id}/budget`} className={tab === "budget" ? "active" : ""}>
-          <Wallet size={15} aria-hidden /> Budget
+          <Icon3D id="moneybag" size={16} /> Budget
         </a>
         <a href={`#/trip/${trip.id}/packing`} className={tab === "packing" ? "active" : ""}>
-          <Backpack size={15} aria-hidden /> Packing
+          <Icon3D id="backpack" size={16} /> Packing
         </a>
       </nav>
 

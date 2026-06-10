@@ -1,20 +1,3 @@
-import {
-  BedDouble,
-  CarTaxiFront,
-  CreditCard,
-  Hotel,
-  Landmark,
-  MapPin,
-  Mountain,
-  Music,
-  Plane,
-  ShoppingBag,
-  Ticket,
-  TrainFront,
-  Utensils,
-  type LucideIcon,
-} from "lucide-react";
-
 export type ActivityCategory =
   | "food"
   | "sightseeing"
@@ -82,25 +65,25 @@ export interface AppState {
   trips: Trip[];
 }
 
-export const ACTIVITY_CATEGORIES: { value: ActivityCategory; label: string; Icon: LucideIcon }[] = [
-  { value: "food", label: "Food & drink", Icon: Utensils },
-  { value: "sightseeing", label: "Sightseeing", Icon: Landmark },
-  { value: "transport", label: "Transport", Icon: TrainFront },
-  { value: "lodging", label: "Lodging", Icon: BedDouble },
-  { value: "outdoors", label: "Outdoors", Icon: Mountain },
-  { value: "nightlife", label: "Nightlife", Icon: Music },
-  { value: "shopping", label: "Shopping", Icon: ShoppingBag },
-  { value: "other", label: "Other", Icon: MapPin },
+export const ACTIVITY_CATEGORIES: { value: ActivityCategory; label: string; icon: string }[] = [
+  { value: "food", label: "Food & drink", icon: "food" },
+  { value: "sightseeing", label: "Sightseeing", icon: "landmark" },
+  { value: "transport", label: "Transport", icon: "train" },
+  { value: "lodging", label: "Lodging", icon: "bed" },
+  { value: "outdoors", label: "Outdoors", icon: "hiking" },
+  { value: "nightlife", label: "Nightlife", icon: "music" },
+  { value: "shopping", label: "Shopping", icon: "shopping" },
+  { value: "other", label: "Other", icon: "pin" },
 ];
 
-export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string; Icon: LucideIcon }[] = [
-  { value: "flights", label: "Flights", Icon: Plane },
-  { value: "lodging", label: "Lodging", Icon: Hotel },
-  { value: "food", label: "Food & drink", Icon: Utensils },
-  { value: "transport", label: "Transport", Icon: CarTaxiFront },
-  { value: "activities", label: "Activities", Icon: Ticket },
-  { value: "shopping", label: "Shopping", Icon: ShoppingBag },
-  { value: "other", label: "Other", Icon: CreditCard },
+export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string; icon: string }[] = [
+  { value: "flights", label: "Flights", icon: "plane" },
+  { value: "lodging", label: "Lodging", icon: "hotel" },
+  { value: "food", label: "Food & drink", icon: "food" },
+  { value: "transport", label: "Transport", icon: "taxi" },
+  { value: "activities", label: "Activities", icon: "ticket" },
+  { value: "shopping", label: "Shopping", icon: "shopping" },
+  { value: "other", label: "Other", icon: "creditcard" },
 ];
 
 export const CURRENCIES = ["USD", "EUR", "GBP", "ZAR", "JPY", "AUD", "CAD", "COP", "MXN", "THB"];

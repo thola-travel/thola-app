@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { CreditCard, Plus, Trash2, Wallet } from "lucide-react";
+import { Plus } from "lucide-react";
+import { Icon3D } from "../../components/Icon3D";
 import type { ExpenseCategory, Trip } from "../../types";
 import { EXPENSE_CATEGORIES } from "../../types";
 import { useAppDispatch } from "../../store/store";
@@ -145,7 +146,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
 
       {trip.expenses.length === 0 ? (
         <EmptyState
-          icon={<Wallet size={44} strokeWidth={1.5} />}
+          icon={<Icon3D id="moneybag" size={52} />}
           title="Nothing logged yet"
           body="Track bookings and on-the-ground spending to stay inside your budget."
         />
@@ -153,11 +154,10 @@ export function BudgetTab({ trip }: { trip: Trip }) {
         <>
           {trip.expenses.map((e) => {
             const cat = EXPENSE_CATEGORIES.find((c) => c.value === e.category);
-            const CatIcon = cat?.Icon ?? CreditCard;
             return (
               <div key={e.id} className="expense-row">
                 <span className="exp-icon" aria-hidden>
-                  <CatIcon size={18} />
+                  <Icon3D id={cat?.icon ?? "creditcard"} size={22} />
                 </span>
                 <div className="exp-label">
                   {e.label}
@@ -169,7 +169,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
                   aria-label={`Delete ${e.label}`}
                   onClick={() => dispatch({ type: "expense/delete", tripId: trip.id, id: e.id })}
                 >
-                  <Trash2 size={16} />
+                  <Icon3D id="trash" size={16} />
                 </button>
               </div>
             );
@@ -182,7 +182,7 @@ export function BudgetTab({ trip }: { trip: Trip }) {
                 {byCategory.map((c) => (
                   <div key={c.value} className="cat-line">
                     <span className="cat-name">
-                      <c.Icon size={14} aria-hidden /> {c.label}
+                      <Icon3D id={c.icon} size={15} /> {c.label}
                     </span>
                     <div className="cat-bar">
                       <div className="cat-bar-fill" style={{ width: `${(c.total / maxCat) * 100}%` }} />
