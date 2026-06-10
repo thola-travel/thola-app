@@ -1,0 +1,47 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Keep previous build assets
+        # A CDN-cached index.html may reference the previous bundle for a few
+        # minutes after a deploy; keeping old hashed assets prevents blank pages.
+        run: |
+          if git fetch origin gh-pages --depth 1; then
+            git checkout origin/gh-pages -- assets 2>/dev/null || true
+            if [ -d assets ]; then
+              cp -r --update=none assets/. dist/assets/ || true
+              rm -rf assets
+              git rm -r --cached -q assets || true
+            fi
+          fi
+      - name: Publish dist to gh-pages
+        run: |
+          cd dist
+          git init -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages

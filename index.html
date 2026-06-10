@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f766e" />
+    <meta
+      name="description"
+      content="MIzDon Travels — plan, budget, and pack for every trip. An offline-first travel planner."
+    />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <title>MIzDon Travels — Travel Planner</title>
+  </head>
+  <body>
+    <div id="root">
+      <div id="boot">
+        <p class="boot-title">MIzDon Travels</p>
+        <p id="boot-msg">Loading your travel planner…</p>
+      </div>
+    </div>
+    <style>
+      #boot {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #134e4a;
+        background: #f6f8f7;
+        text-align: center;
+        padding: 24px;
+      }
+      #boot .boot-title {
+        font-size: 30px;
+        font-weight: 800;
+        margin: 0;
+      }
+      #boot p {
+        margin: 0;
+      }
+      #boot button {
+        margin-top: 14px;
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 22px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        background: #0f766e;
+        cursor: pointer;
+      }
+    </style>
+    <script>
+      // If the app bundle fails to load or crashes before React mounts
+      // (stale cache, flaky connection), show a reload prompt instead of
+      // a blank page.
+      (function () {
+        function showRetry() {
+          const msg = document.getElementById("boot-msg");
+          if (!msg) return; // app already mounted
+          msg.innerHTML = "That didn't load right. Usually a refresh fixes it.";
+          if (!document.getElementById("boot-retry")) {
+            const btn = document.createElement("button");
+            btn.id = "boot-retry";
+            btn.textContent = "Reload";
+            btn.onclick = function () {
+              location.reload();
+            };
+            msg.parentNode.appendChild(btn);
+          }
+        }
+        window.addEventListener("error", showRetry, true);
+        setTimeout(function () {
+          if (document.getElementById("boot-msg")) showRetry();
+        }, 12000);
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
