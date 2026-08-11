@@ -22,6 +22,7 @@
       question: cat.sparkPrompt,
       options: SPARK_SCALE.map((s) => ({ label: s.label, value: s.value })),
     })),
+    ...PERSONAL_QUESTIONS.map((q) => ({ ...q, type: 'personal' })),
     ...KINSEY_QUESTIONS.map((q) => ({ ...q, type: 'kinsey' })),
   ];
 
@@ -32,10 +33,11 @@
     selections: new Array(allQuestions.length).fill(null),
   };
 
-  // Max possible Part 1 score per broad category, for normalization.
+  // Max possible weighted score per broad category (Parts 1 and 3), for
+  // normalizing totals to percentages.
   const broadMax = {};
   Object.keys(CATEGORIES).forEach((key) => {
-    broadMax[key] = QUESTIONS.reduce((sum, q) => {
+    broadMax[key] = QUESTIONS.concat(PERSONAL_QUESTIONS).reduce((sum, q) => {
       const best = Math.max(...q.options.map((o) => (o.scores && o.scores[key]) || 0));
       return sum + best;
     }, 0);
@@ -100,8 +102,8 @@
     state.selections.forEach((sel, i) => {
       const q = allQuestions[i];
       if (sel === null) return;
-      if (q.type === 'kink') {
-        Object.entries(q.options[sel].scores).forEach(([k, pts]) => {
+      if (q.type === 'kink' || q.type === 'personal') {
+        Object.entries(q.options[sel].scores || {}).forEach(([k, pts]) => {
           totals[k] = (totals[k] || 0) + pts;
         });
       } else if (q.type === 'spark') {
@@ -171,11 +173,13 @@
   const PART_TAGS = {
     kink: 'Part 1 · Your Play Style',
     spark: 'Part 2 · Spark Round',
-    kinsey: 'Part 3 · Attraction & the Kinsey Scale',
+    personal: 'Part 3 · Desire & Solo Life',
+    kinsey: 'Part 4 · Attraction & the Kinsey Scale',
   };
   const PART_HINTS = {
     kink: 'Pick the answer that feels most true',
     spark: 'Gut reaction. Your first instinct is the honest one',
+    personal: 'Just between you and you. Honest beats impressive',
     kinsey: 'Attraction, not behavior. Answer from your inner experience',
   };
 
@@ -298,9 +302,20 @@
     }
     const kinsey = { key: String(kinseyKey), ...KINSEY_RESULTS[kinseyKey] };
 
+    // Reflections for the turn-on / turn-off / solo-life questions.
+    const aboutYou = [];
+    allQuestions.forEach((q, i) => {
+      const sel = state.selections[i];
+      if (q.type !== 'personal' || sel === null) return;
+      const opt = q.options[sel];
+      if (opt.reflection) {
+        aboutYou.push({ question: q.question, answer: opt.label, reflection: opt.reflection });
+      }
+    });
+
     const suggestions = buildSuggestions(kinkProfile);
     const summaryText = buildSummary(kinkProfile, kinsey);
-    return { kinkProfile, kinsey, summaryText, suggestions };
+    return { kinkProfile, kinsey, aboutYou, summaryText, suggestions };
   }
 
   function buildSuggestions(kinkProfile) {
@@ -371,9 +386,16 @@
   }
 
   // ---------- Submission flow ----------
+  const SECTION_NAMES = {
+    kink: 'Play Style',
+    spark: 'Spark Round',
+    personal: 'Desire & Solo Life',
+    kinsey: 'Kinsey Scale',
+  };
+
   function collectAnswers() {
     return allQuestions.map((q, i) => ({
-      section: q.type === 'kink' ? 'Play Style' : q.type === 'spark' ? 'Spark Round' : 'Kinsey Scale',
+      section: SECTION_NAMES[q.type],
       question: q.type === 'spark' ? CATEGORIES[q.categoryKey].name + ': ' + q.question : q.question,
       answer: state.selections[i] !== null ? q.options[state.selections[i]].label : '(skipped)',
     }));
@@ -462,6 +484,24 @@
     });
     $('kinsey-label').textContent = results.kinsey.label;
     $('kinsey-description').textContent = results.kinsey.description;
+
+    // Desire map: reflections on turn-ons, turn-offs, and solo life.
+    const desireHost = $('desire-map');
+    desireHost.innerHTML = '';
+    (results.aboutYou || []).forEach((item) => {
+      const row = document.createElement('div');
+      row.className = 'desire-item';
+      const answerEl = document.createElement('p');
+      answerEl.className = 'desire-answer';
+      answerEl.textContent = item.answer;
+      const reflectionEl = document.createElement('p');
+      reflectionEl.className = 'desire-reflection';
+      reflectionEl.textContent = item.reflection;
+      row.appendChild(answerEl);
+      row.appendChild(reflectionEl);
+      desireHost.appendChild(row);
+    });
+    $('desire-card').style.display = (results.aboutYou || []).length > 0 ? '' : 'none';
 
     // Featured cards: strong in full, curious compact.
     const host = $('kink-results');

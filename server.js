@@ -87,6 +87,16 @@ function buildParticipantEmailHtml(submission) {
     .map((s) => `<li style="margin:6px 0;">${escapeHtml(s)}</li>`)
     .join('');
 
+  const desireMap = (results.aboutYou || [])
+    .map(
+      (item) => `
+      <div style="background:#faf7ff;border-radius:10px;padding:12px 16px;margin:10px 0;">
+        <p style="margin:0 0 4px;font-weight:bold;color:#6d28d9;">&ldquo;${escapeHtml(item.answer)}&rdquo;</p>
+        <p style="margin:0;">${escapeHtml(item.reflection)}</p>
+      </div>`
+    )
+    .join('');
+
   return `
   <div style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;max-width:640px;margin:0 auto;color:#2b2140;line-height:1.6;">
     <div style="background:linear-gradient(120deg,#7c3aed,#ec4899);border-radius:16px;padding:28px;color:#fff;text-align:center;">
@@ -102,6 +112,11 @@ function buildParticipantEmailHtml(submission) {
       <h3 style="margin:0 0 6px;color:#6d28d9;">${escapeHtml(results.kinsey.label)}</h3>
       <p style="margin:0;">${escapeHtml(results.kinsey.description)}</p>
     </div>
+
+    ${desireMap ? `
+    <h2 style="color:#6d28d9;margin-top:28px;">🧭 Your desire map</h2>
+    <p style="color:#7c6f92;margin:4px 0 10px;">What speeds you up, what slows you down, and how your solo life fits in.</p>
+    ${desireMap}` : ''}
 
     <h2 style="color:#6d28d9;margin-top:28px;">💜 What lit up for you, and what it means</h2>
     ${featured.length > 0 ? featured.map(categoryCardHtml).join('') : `

@@ -1124,6 +1124,279 @@ const KINSEY_RESULTS = {
   },
 };
 
+/* ==================== PART 3: turn-ons, turn-offs, solo life ==================== */
+/*
+ * Each option can carry `scores` (added to the broad category totals) and a
+ * `reflection`: the supportive read-back shown in the results and the email.
+ */
+
+const PERSONAL_QUESTIONS = [
+  {
+    id: 'turnon_primary',
+    question: 'Your biggest turn-on. What gets you there fastest?',
+    options: [
+      {
+        label: 'Confident, take-charge energy from a partner',
+        scores: { submission: 2, praise: 1 },
+        reflection:
+          'Confidence reads as safety and desire at the same time, which is why it works so fast on you. It also fits neatly with the power-exchange threads in your profile.',
+      },
+      {
+        label: 'Being wanted. Compliments, adoration, obvious desire',
+        scores: { praise: 2, exhibition: 1 },
+        reflection:
+          'Feeling desired is your accelerator. That makes you easy to please and easy to lose: partners who go quiet with their appreciation will read as distant to you. Ask for the words. You\'re allowed to.',
+      },
+      {
+        label: 'Touch. Hands, warmth, skin, pressure',
+        scores: { sensation: 2, sensual: 1 },
+        reflection:
+          'Your desire lives in your body and wakes up through skin. Slow, generous touch will get you further than any script, and partners should know that about you.',
+      },
+      {
+        label: 'A great mind. Banter, teasing, the right words',
+        scores: { roleplay: 1, praise: 1 },
+        reflection:
+          'You get turned on through the brain first. Wit, tension, and well-chosen words do the heavy lifting, which means great flirting is basically foreplay for you.',
+      },
+      {
+        label: 'What I can see. Watching, being watched, visuals',
+        scores: { voyeurism: 2, exhibition: 1 },
+        reflection:
+          'Your desire is visual. Lighting, mirrors, eye contact, and the sight of a partner enjoying themselves are your native language, and building around that is easy once you name it.',
+      },
+      {
+        label: 'A story in my head. Fantasy and imagination',
+        scores: { roleplay: 2 },
+        reflection:
+          'Your richest arousal starts in your imagination. That inner world is an asset: people with vivid fantasy lives have an endless private library, and sharing even one page of it with a partner can transform things.',
+      },
+    ],
+  },
+  {
+    id: 'desire_style',
+    question: 'When does desire usually show up for you?',
+    options: [
+      {
+        label: 'Out of nowhere. It just arrives, and often',
+        reflection:
+          'Researchers call this spontaneous desire. It shows up uninvited and often. Handy to know: many partners run on the other pattern, responsive desire, which needs a warm-up. Neither of you is broken. You just start from different places.',
+      },
+      {
+        label: 'Once things get going. It builds in response to touch and closeness',
+        reflection:
+          'Emily Nagoski calls this responsive desire, and it\'s one of the most common patterns there is, especially in long-term relationships. Your desire likes a running start. Plan for the warm-up instead of waiting to be struck by lightning, and everything works better.',
+      },
+      {
+        label: 'Only when the setting is right. Low stress, privacy, the right mood',
+        reflection:
+          'Your arousal is context-sensitive. Scientists who study this describe an accelerator and a brake, and your brake is attentive. That\'s not a flaw. It means the setting is part of your foreplay, so treat it that way.',
+      },
+      {
+        label: 'Honestly, not that often',
+        reflection:
+          'Desire that shows up rarely is still a normal pattern, and it varies hugely across people and across seasons of life. If it ever bothers you, that\'s worth a conversation with a doctor or therapist. If it doesn\'t, there\'s nothing to fix.',
+      },
+    ],
+  },
+  {
+    id: 'turnoff_main',
+    question: 'Now the other side. What kills the mood fastest for you?',
+    options: [
+      {
+        label: 'Feeling rushed or pressured',
+        reflection:
+          'Pressure is your hardest brake. Arousal researchers describe desire as a gas pedal plus a brake, and knowing your brake matters as much as knowing the gas. For you, patience isn\'t a nicety. It\'s a requirement worth saying out loud.',
+      },
+      {
+        label: 'Stress and a busy head. I can\'t switch off',
+        reflection:
+          'Stress is the most common brake there is. Arousal needs the nervous system to feel safe, and a racing mind reads as danger. A slow transition ritual, whatever form it takes for you, will do more for your sex life than any technique.',
+      },
+      {
+        label: 'Feeling criticized or self-conscious',
+        reflection:
+          'Your brake is judgment, including your own. Reassurance and explicit appreciation aren\'t optional extras for you. They\'re the conditions that let you show up. Partners who understand that get the best of you.',
+      },
+      {
+        label: 'No emotional connection. It feels mechanical without it',
+        reflection:
+          'Connection is your on-switch, and its absence is your off-switch. That\'s a coherent, common way to be wired, and it means investment in the relationship pays out directly in desire.',
+      },
+      {
+        label: 'The details. Hygiene, environment, timing',
+        reflection:
+          'Your senses keep score, and small wrong details pull the alarm. That sensitivity has an upside: when the details are right, they work just as hard in your favor. Curate ruthlessly and without apology.',
+      },
+    ],
+  },
+  {
+    id: 'turnoff_moment',
+    question: 'During intimacy, what most pulls you out of the moment?',
+    options: [
+      {
+        label: 'Worrying about how I look',
+        reflection:
+          'Watching yourself from the outside instead of feeling from the inside has a name: researchers call it spectatoring, and it\'s extremely common. The practical fix is redirecting attention to physical sensation, one sense at a time. It\'s a skill, and it trains up fast.',
+      },
+      {
+        label: 'Worrying about whether my partner is enjoying it',
+        reflection:
+          'Generous, and also a trap: you can\'t feel your own pleasure while auditing someone else\'s. A partner who gives you clear, vocal feedback frees you from guessing. Ask for that. It changes everything.',
+      },
+      {
+        label: 'My to-do list. Intrusive everyday thoughts',
+        reflection:
+          'A mind that won\'t clock out is a stress response, not a desire problem. Transition time between daily life and intimacy isn\'t indulgent. For brains like yours it\'s the whole ballgame.',
+      },
+      {
+        label: 'Fear of doing something wrong',
+        reflection:
+          'Performance worry usually comes from treating intimacy as a test. It isn\'t one. The partners worth having grade on communication, not technique, and saying the fear out loud usually shrinks it to a fraction of its size.',
+      },
+      {
+        label: 'Nothing much. I stay present pretty easily',
+        reflection:
+          'Staying present during intimacy is a genuine strength. Plenty of people work hard to get where you already are. Enjoy it, and be patient with partners who need more help getting out of their heads.',
+      },
+    ],
+  },
+  {
+    id: 'solo_frequency',
+    question: 'How often do you masturbate, honestly?',
+    options: [
+      {
+        label: 'Most days, sometimes more than once',
+        reflection:
+          'A daily rhythm is common and healthy. Frequency only becomes a problem if it crowds out things you care about, and for most people it never does. You know your own drive well, which is worth something.',
+      },
+      {
+        label: 'A few times a week',
+        reflection:
+          'A few times a week matches what large surveys, like the National Survey of Sexual Health and Behavior, find for a big share of adults. Regular solo time also keeps you fluent in your own body, which partners benefit from.',
+      },
+      {
+        label: 'A few times a month',
+        reflection:
+          'A monthly-ish rhythm is completely normal. There\'s no target number to hit. What matters is that the frequency feels like yours, and it sounds like it does.',
+      },
+      {
+        label: 'Rarely',
+        reflection:
+          'Rare is a normal frequency too. Solo drive varies enormously between people, and it isn\'t a report card on your sexuality. The only question that matters is whether it suits you.',
+      },
+      {
+        label: 'Never, or almost never',
+        reflection:
+          'Not masturbating is as valid as any other answer here. Some people have little solo drive, some prefer partnered intimacy only, and some are simply not interested. None of those need fixing.',
+      },
+    ],
+  },
+  {
+    id: 'solo_method',
+    question: 'When you do, what\'s your usual approach?',
+    options: [
+      {
+        label: 'Hands, nothing fancy',
+        reflection:
+          'The classic, and the most common answer by far. Simple doesn\'t mean unskilled. Knowing exactly what works for you by hand is core knowledge no toy replaces.',
+      },
+      {
+        label: 'Toys are part of the routine',
+        reflection:
+          'You\'re in good company. In a large US study, about half of women and nearly half of men reported having used a vibrator. Toys are mainstream, and knowing which tools work for you is practical self-knowledge.',
+      },
+      {
+        label: 'Pressure or grinding works best for me',
+        reflection:
+          'Pressure-based technique is common and completely normal, just less talked about. Bodies find their own best route to pleasure. Yours found one that works, and that\'s the entire assignment.',
+      },
+      {
+        label: 'I take my time. Edging, building slowly',
+        reflection:
+          'You\'ve independently discovered what the orgasm-control crowd builds a whole practice around: anticipation intensifies the payoff. Your patience is a technique, and it transfers beautifully to partnered play.',
+      },
+      {
+        label: 'It varies with my mood',
+        reflection:
+          'Variety means you listen to your body instead of running a routine, and that responsiveness is exactly the skill that makes people good partners too.',
+      },
+      {
+        label: 'This one doesn\'t apply to me',
+        reflection:
+          'Skipping solo play is a valid way to be. Your sexuality is defined by what does work for you, not by which boxes you tick.',
+      },
+    ],
+  },
+  {
+    id: 'solo_fuel',
+    question: 'What do you usually turn to for solo inspiration?',
+    options: [
+      {
+        label: 'My imagination. I write the whole script',
+        reflection:
+          'Running on pure imagination means your fantasy life is strong, and fantasies are useful data. The scenarios you return to are a map of what you want. Worth paying attention to, maybe even writing down.',
+      },
+      {
+        label: 'Videos',
+        reflection:
+          'Video is the most common choice for a reason: it\'s immediate and it works. One tip from the research: notice which themes you pick, not just that you watch. The pattern in your choices says more about your desires than the habit itself.',
+      },
+      {
+        label: 'Written erotica or audio',
+        reflection:
+          'Preferring story and voice over visuals means your arousal is narrative-driven. Context, buildup, and interiority do it for you. That preference is common, especially among people whose biggest erogenous zone is the brain.',
+      },
+      {
+        label: 'Memories of real moments',
+        reflection:
+          'Replaying real experiences means your desire is anchored in connection and lived sensation. It also means you know exactly which moments worked. That\'s information a partner would love to have.',
+      },
+      {
+        label: 'Whatever I find in the moment. No pattern',
+        reflection:
+          'No fixed pattern usually means your arousal is flexible and novelty-friendly. That openness is an asset. It also means this quiz\'s spark round probably surprised you in a few good ways.',
+      },
+      {
+        label: 'Nothing. It\'s purely physical for me',
+        reflection:
+          'For some people solo pleasure is simply a body process, no mental content required. That\'s a real and common pattern, not a lack of imagination. It\'s just efficiency.',
+      },
+    ],
+  },
+  {
+    id: 'solo_after',
+    question: 'How do you usually feel afterward?',
+    options: [
+      {
+        label: 'Relaxed and clear-headed',
+        reflection:
+          'That post-release calm is your parasympathetic nervous system doing its job. Using it for sleep, stress, or focus is one of the oldest self-care tools humans have.',
+      },
+      {
+        label: 'Satisfied, but a little guilty',
+        reflection:
+          'Here\'s the thing about that guilt: it\'s learned, not built in. Every major medical organization treats masturbation as a normal part of human sexuality. The guilt usually traces back to messages you absorbed, not anything you\'re doing. It can be unlearned, and naming it is the first step.',
+      },
+      {
+        label: 'Neutral. It\'s like scratching an itch',
+        reflection:
+          'Purely functional is a fine relationship to have with solo pleasure. Not everything needs to be profound. Sometimes maintenance is just maintenance.',
+      },
+      {
+        label: 'Sometimes a little lonely',
+        reflection:
+          'That ache afterward is telling you something real: solo release and human connection are different needs, and one can\'t fully substitute for the other. The loneliness isn\'t shameful. It\'s a signal about what you want more of.',
+      },
+      {
+        label: 'Energized and in a better mood',
+        reflection:
+          'The mood lift is real chemistry: dopamine, endorphins, and oxytocin all show up. Using that boost on purpose is a perfectly good life strategy.',
+      },
+    ],
+  },
+];
+
 /* General self-discovery suggestions appended to everyone's results. */
 const GENERAL_SUGGESTIONS = [
   'Keep a private desire journal. Noting what sparked a "yes," a "curious," or a "no" teaches you your own patterns faster than anything else.',
@@ -1135,5 +1408,5 @@ const GENERAL_SUGGESTIONS = [
 
 /* Make the database available to the server for building result emails. */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { GROUPS, SPARK_SCALE, CATEGORIES, QUESTIONS, KINSEY_QUESTIONS, KINSEY_RESULTS, GENERAL_SUGGESTIONS };
+  module.exports = { GROUPS, SPARK_SCALE, CATEGORIES, QUESTIONS, PERSONAL_QUESTIONS, KINSEY_QUESTIONS, KINSEY_RESULTS, GENERAL_SUGGESTIONS };
 }

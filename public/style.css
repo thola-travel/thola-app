@@ -520,6 +520,25 @@ input[type="text"]:focus, input[type="email"]:focus {
   transition: width 0.9s var(--spring);
 }
 
+/* ---------- Desire map ---------- */
+.desire-item {
+  background: rgba(124, 58, 237, 0.06);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  transition: transform 0.2s var(--spring), background 0.2s;
+}
+.desire-item:hover { transform: translateX(4px); background: rgba(124, 58, 237, 0.1); }
+.desire-answer {
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+}
+.desire-answer::before { content: '“'; }
+.desire-answer::after { content: '”'; }
+.desire-reflection { font-size: 0.93rem; }
+
 .suggestions-card ul { padding-left: 20px; }
 .suggestions-card li { margin: 8px 0; }
 

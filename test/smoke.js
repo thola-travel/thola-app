@@ -46,16 +46,18 @@ const { chromium } = require('playwright-core');
   const kinkCards = await page.locator('.kink-card').count();
   const spectrumItems = await page.locator('.spectrum-item').count();
   const suggestions = await page.locator('#suggestions-list li').count();
+  const desireItems = await page.locator('.desire-item').count();
 
   console.log('TITLE:', title.trim());
   console.log('KINSEY:', kinsey.trim());
   console.log('KINK CARDS:', kinkCards);
   console.log('SPECTRUM ITEMS:', spectrumItems);
   console.log('SUGGESTIONS:', suggestions);
+  console.log('DESIRE MAP ITEMS:', desireItems);
   console.log('JS ERRORS:', errors.length ? errors : 'none');
 
   await browser.close();
-  if (errors.length || kinkCards === 0 || spectrumItems === 0) {
+  if (errors.length || kinkCards === 0 || spectrumItems === 0 || desireItems === 0) {
     console.error('SMOKE FAIL');
     process.exit(1);
   }
