@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Desire Discovery Quiz</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c3aed' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M12 4.5c2 2.4 3 4.6 3 6.6a3 3 0 0 1-6 0c0-2 1-4.2 3-6.6z'/><path d='M5 9.5c2.7.5 4.7 1.7 5.8 3.8'/><path d='M19 9.5c-2.7.5-4.7 1.7-5.8 3.8'/><path d='M4 14.8C6.5 17.6 9.2 19 12 19s5.5-1.4 8-4.2'/></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,17 +19,19 @@
     <!-- ============ INTRO ============ -->
     <section id="screen-intro" class="screen active">
       <div class="card glass intro-card">
-        <div class="intro-emoji float">🌸</div>
+        <div class="logo-mark float" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5c2 2.4 3 4.6 3 6.6a3 3 0 0 1-6 0c0-2 1-4.2 3-6.6z"/><path d="M5 9.5c2.7.5 4.7 1.7 5.8 3.8"/><path d="M19 9.5c-2.7.5-4.7 1.7-5.8 3.8"/><path d="M4 14.8C6.5 17.6 9.2 19 12 19s5.5-1.4 8-4.2"/></svg>
+        </div>
         <h1 class="gradient-text">The Desire Discovery Quiz</h1>
         <p class="lede">
           A warm, judgment-free way to learn what actually excites you, from the
           well-known to the wonderfully niche, plus where you fall on the Kinsey scale.
         </p>
         <ul class="intro-points">
-          <li><span>💜</span><div><strong>Every result is valid.</strong> Nothing here is weird. This covers the whole spectrum of desire, and all of it is human.</div></li>
-          <li><span>⚡</span><div><strong>Four quick parts.</strong> Play-style questions, a rapid-fire spark round covering dozens of kinks, a section on your turn-ons, turn-offs, and solo life, and the Kinsey scale.</div></li>
-          <li><span>🔮</span><div><strong>Live analysis.</strong> Watch your profile take shape as you answer, then get a full breakdown with meanings, examples, and suggestions.</div></li>
-          <li><span>📬</span><div><strong>A copy to keep.</strong> Your summary and what it all means, sent to your email.</div></li>
+          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19C6.5 14.8 4 11.9 4 9.1 4 7 5.6 5.4 7.7 5.4c1.7 0 3.2 1 4.3 2.6 1.1-1.6 2.6-2.6 4.3-2.6 2.1 0 3.7 1.6 3.7 3.7 0 2.8-2.5 5.7-8 9.9z"/></svg></span><div><strong>Every result is valid.</strong> Nothing here is weird. This covers the whole spectrum of desire, and all of it is human.</div></li>
+          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4.2" cy="6" r=".9" fill="currentColor"/><circle cx="4.2" cy="12" r=".9" fill="currentColor"/><circle cx="4.2" cy="18" r=".9" fill="currentColor"/></svg></span><div><strong>Four quick parts.</strong> Play-style questions, a rapid-fire spark round covering dozens of kinks, a section on your turn-ons, turn-offs, and solo life, and the Kinsey scale.</div></li>
+          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg></span><div><strong>Live analysis.</strong> Watch your profile take shape as you answer, then get a full breakdown with meanings, examples, and suggestions.</div></li>
+          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4.5 7 7.5 6 7.5-6"/></svg></span><div><strong>A copy to keep.</strong> Your summary and what it all means, sent to your email.</div></li>
         </ul>
 
         <div class="field-grid">
@@ -48,7 +50,7 @@
           <span id="consent-text">My summary and results will be emailed to the address I entered above.</span>
         </label>
 
-        <button id="btn-start" class="btn primary" disabled><span>Begin the journey</span> ✨</button>
+        <button id="btn-start" class="btn primary" disabled><span>Begin the journey</span></button>
         <p class="fine-print">For adults 18+. Everything explored here assumes enthusiastic consent between adults.</p>
       </div>
     </section>
@@ -67,7 +69,7 @@
 
           <div id="question-body">
             <div id="spark-header" class="spark-header" hidden>
-              <span id="spark-emoji" class="spark-emoji"></span>
+              <span id="spark-icon" class="spark-icon"></span>
               <span class="spark-kicker">How does this sound?</span>
             </div>
             <h2 id="question-text"></h2>
@@ -81,7 +83,7 @@
         </div>
 
         <aside class="card glass insight-card">
-          <h3>🔮 Live reading</h3>
+          <h3><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg> Live reading</h3>
           <p id="live-blurb" class="live-blurb">Answer a few questions and your profile will start to appear…</p>
           <div id="live-bars" class="live-bars"></div>
         </aside>
@@ -93,7 +95,7 @@
       <div class="card glass analyzing-card">
         <div class="orbit">
           <span class="orbit-dot"></span>
-          <span class="orbit-core">💫</span>
+          <span class="orbit-core"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.6 6.4L20 12l-6.4 1.6L12 20l-1.6-6.4L4 12l6.4-1.6z"/></svg></span>
         </div>
         <h2>Reading your answers…</h2>
         <p id="analyzing-step">Compiling your responses</p>
@@ -109,34 +111,34 @@
         </div>
 
         <div class="card glass kinsey-card reveal">
-          <h2>🌈 Where you fall on the Kinsey scale</h2>
+          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h16"/><path d="M4 12.5v5M9.3 13.5v3M14.6 13.5v3M20 12.5v5"/></svg> Where you fall on the Kinsey scale</h2>
           <div class="kinsey-scale" id="kinsey-scale"></div>
           <h3 id="kinsey-label"></h3>
           <p id="kinsey-description"></p>
         </div>
 
         <div id="desire-card" class="card glass desire-card reveal">
-          <h2>🧭 Your desire map</h2>
+          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="m14.8 9.2-1.7 4-4 1.7 1.7-4z"/></svg> Your desire map</h2>
           <p class="spectrum-note">What speeds you up, what slows you down, and how your solo life fits in. Your answers, read back with care.</p>
           <div id="desire-map"></div>
         </div>
 
-        <h2 class="profile-heading reveal">💜 What lit up for you</h2>
+        <h2 class="profile-heading reveal">What lit up for you</h2>
         <div id="kink-results"></div>
 
         <div class="card glass spectrum-card reveal">
-          <h2>🗺️ Your full spectrum map</h2>
-          <p class="spectrum-note">Every territory the quiz explored, and how brightly each one glowed for you.</p>
+          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 9 4.5l6 2 5-2v13l-5 2-6-2-5 2z"/><path d="M9 4.5v13M15 6.5v13"/></svg> Your full spectrum map</h2>
+          <p class="spectrum-note">Every territory the quiz explored, how brightly each one glowed for you, and which side of it you chose where that applies.</p>
           <div id="spectrum-map"></div>
         </div>
 
         <div class="card glass suggestions-card reveal">
-          <h2>🌱 Gentle suggestions for the road</h2>
+          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-7"/><path d="M12 13c0-3.3-2.4-5.5-6-5.5 0 3.3 2.4 5.5 6 5.5z"/><path d="M12 11c0-2.9 2.1-4.8 5.5-4.8 0 2.9-2.1 4.8-5.5 4.8z"/></svg> Gentle suggestions for the road</h2>
           <ul id="suggestions-list"></ul>
         </div>
 
         <div class="card glass closing-card reveal">
-          <h2>One last thing 🌷</h2>
+          <h2>One last thing</h2>
           <p id="closing-note"></p>
           <p id="email-note" class="fine-print"></p>
           <button id="btn-restart" class="btn ghost">Take it again</button>
@@ -145,6 +147,7 @@
     </section>
 
   </main>
+  <script src="icons.js"></script>
   <script src="quiz-data.js"></script>
   <script src="app.js"></script>
 </body>

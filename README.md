@@ -1,6 +1,6 @@
 # Desire Discovery Quiz 🌸
 
-An interactive, sex-positive quiz that helps people figure out two things:
+An interactive, sex-positive quiz with a custom SVG line-icon set (no emoji) that helps people figure out two things:
 
 - **Their kink profile across 46 categories.** The broad strokes (dominance, submission, bondage, sensation, roleplay, exhibitionism, voyeurism, praise, sensual connection) and the niche stuff too: primal play, consensual non-consent, pet play, rope and shibari, e-stim, medical play, breeding fantasy, erotic hypnosis, compersion, material fetishes, feet, watersports, messy play, and more. Each category comes with a plain-language meaning, real examples, a supportive note, and a gentle first step.
 - **Where they land on the Kinsey scale** (0 to 6, plus X for the asexual spectrum), with an affirming description of what that placement means.
@@ -9,7 +9,7 @@ An interactive, sex-positive quiz that helps people figure out two things:
 
 1. The participant enters a **first name and email**, checks a consent notice, and answers **61 multiple-choice questions** in four parts:
    - *Part 1, Play Style*: 12 weighted scenario questions.
-   - *Part 2, Spark Round*: 37 rapid-fire questions, one per niche kink, answered on a gut-reaction scale (🔥 Yes please / 👀 Curious / 😐 Take it or leave it / 🙅 Not for me). One direct question per kink keeps even the niche scores accurate.
+   - *Part 2, Spark Round*: 37 rapid-fire questions, one per niche kink, answered on a gut-reaction scale (Yes please / Curious / Take it or leave it / Not for me). For the 32 kinks where giving and receiving are different experiences, the "yes" answer splits into sides with tailored labels ("Yes, tying" / "Yes, being tied" / "Yes, both sides"), so someone who loves doing a thing but not receiving it gets an accurate profile. The chosen side appears on their result cards, the spectrum map, the summary, and the email.
    - *Part 3, Desire & Solo Life*: 8 questions about turn-ons, turn-offs, what pulls them out of the moment, and their solo life (how often they masturbate, how, what they turn to, and how they feel after). Each answer gets a supportive, research-grounded reflection in the results.
    - *Part 4, Kinsey Scale*: 4 attraction questions.
 2. A **live reading sidebar** analyzes answers as they come in, with animated category bars and a running read on where the profile is leaning.

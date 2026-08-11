@@ -1,8 +1,9 @@
 /**
  * Desire Discovery Quiz: interactive logic.
  *
- * Three parts: weighted play-style questions, a rapid-fire spark round
- * (one question per niche kink), and the Kinsey scale. Answers are analyzed
+ * Four parts: weighted play-style questions, a rapid-fire spark round (one
+ * question per niche kink, with giving/receiving sides where they apply),
+ * desire and solo-life questions, and the Kinsey scale. Answers are analyzed
  * in real time in the sidebar; the full analysis runs on submission and the
  * packet is POSTed to the backend, which emails the participant their
  * summary, meanings, and suggestions.
@@ -20,7 +21,18 @@
       type: 'spark',
       categoryKey: key,
       question: cat.sparkPrompt,
-      options: SPARK_SCALE.map((s) => ({ label: s.label, value: s.value })),
+      // Where giving/receiving are distinct sides, the "yes" answer splits
+      // into doing it, receiving it, or both, so the profile records which.
+      options: cat.roles
+        ? [
+            { label: cat.roles[0][0], value: 1, roleNote: cat.roles[0][1] },
+            { label: cat.roles[1][0], value: 1, roleNote: cat.roles[1][1] },
+            { label: 'Yes, both sides', value: 1, roleNote: 'Both sides of this appeal to you, depending on the day and the partner.' },
+            { label: 'Curious', value: 0.55 },
+            { label: 'Take it or leave it', value: 0.15 },
+            { label: 'Not for me', value: 0 },
+          ]
+        : SPARK_SCALE.map((s) => ({ label: s.label, value: s.value })),
     })),
     ...PERSONAL_QUESTIONS.map((q) => ({ ...q, type: 'personal' })),
     ...KINSEY_QUESTIONS.map((q) => ({ ...q, type: 'kinsey' })),
@@ -42,6 +54,19 @@
       return sum + best;
     }, 0);
   });
+
+  // ---------- Icons ----------
+  function icon(key, cls) {
+    const inner = (typeof ICONS !== 'undefined' && ICONS[key]) || '';
+    return '<svg class="icon' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
+  }
+
+  function sparkValueIcon(v) {
+    if (v >= 1) return icon('ui-flame');
+    if (v >= 0.5) return icon('ui-eye');
+    if (v > 0) return icon('ui-dash');
+    return icon('ui-x');
+  }
 
   // ---------- Elements ----------
   const $ = (id) => document.getElementById(id);
@@ -140,7 +165,7 @@
       const row = document.createElement('div');
       row.className = 'live-bar-row';
       row.innerHTML =
-        '<div class="bar-label"><span>' + cat.emoji + ' ' + cat.name + '</span><span>' + e.pct + '%</span></div>' +
+        '<div class="bar-label"><span>' + icon(e.key) + ' ' + cat.name + '</span><span>' + e.pct + '%</span></div>' +
         '<div class="live-bar-track"><div class="live-bar-fill"></div></div>';
       barsHost.appendChild(row);
       requestAnimationFrame(() => {
@@ -165,7 +190,7 @@
         'Interesting. A blend of ' + top.name.toLowerCase() + ' and ' + second.name.toLowerCase() +
         ' is taking shape. Versatile so far.';
     } else {
-      blurb.textContent = top.emoji + ' ' + top.name + ' is emerging as a strong thread. ' + top.tagline;
+      blurb.textContent = top.name + ' is emerging as a strong thread. ' + top.tagline;
     }
   }
 
@@ -195,7 +220,7 @@
       const sparkHeader = $('spark-header');
       if (q.type === 'spark') {
         sparkHeader.hidden = false;
-        $('spark-emoji').textContent = CATEGORIES[q.categoryKey].emoji;
+        $('spark-icon').innerHTML = icon(q.categoryKey, 'icon-xl');
       } else {
         sparkHeader.hidden = true;
       }
@@ -209,7 +234,11 @@
         const btn = document.createElement('button');
         btn.className = 'option' + (state.selections[state.index] === i ? ' selected' : '');
         btn.type = 'button';
-        btn.textContent = opt.label;
+        if (q.type === 'spark') {
+          btn.innerHTML = sparkValueIcon(opt.value) + '<span>' + opt.label + '</span>';
+        } else {
+          btn.textContent = opt.label;
+        }
         btn.addEventListener('click', () => selectOption(i));
         host.appendChild(btn);
       });
@@ -273,11 +302,34 @@
   function analyze() {
     const totals = currentScores();
 
+    // Which side of each two-sided kink the participant chose.
+    const roleChoices = {};
+    allQuestions.forEach((q, i) => {
+      const sel = state.selections[i];
+      if (q.type !== 'spark' || sel === null) return;
+      const opt = q.options[sel];
+      if (opt.roleNote) {
+        roleChoices[q.categoryKey] = {
+          side: opt.label.replace(/^Yes, /i, ''),
+          note: opt.roleNote,
+        };
+      }
+    });
+
     const kinkProfile = Object.entries(CATEGORIES)
       .map(([key, cat]) => {
         const percent = percentFor(key, totals) || 0;
         const { level, cls } = levelFor(percent);
-        return { key, name: cat.emoji + ' ' + cat.name, plainName: cat.name, group: cat.group, percent, level, cls };
+        return {
+          key,
+          name: cat.name,
+          plainName: cat.name,
+          group: cat.group,
+          percent,
+          level,
+          cls,
+          role: roleChoices[key] || null,
+        };
       })
       .sort((a, b) => b.percent - a.percent);
 
@@ -322,7 +374,7 @@
     const top = kinkProfile.filter((k) => k.level !== 'Not a focus right now').slice(0, 3);
     const personal = top.map((k) => {
       const cat = CATEGORIES[k.key];
-      return cat.emoji + ' For ' + cat.name.toLowerCase() + ': ' + cat.firstStep;
+      return 'For ' + cat.name.toLowerCase() + ': ' + cat.firstStep;
     });
     return personal.concat(GENERAL_SUGGESTIONS);
   }
@@ -333,8 +385,11 @@
     const name = state.name;
     const lines = [];
 
+    const nameWithSide = (k) =>
+      k.plainName.toLowerCase() + (k.role && k.role.side !== 'both sides' ? ' (' + k.role.side.toLowerCase() + ')' : '');
+
     if (strong.length > 0) {
-      const names = strong.slice(0, 5).map((k) => k.plainName.toLowerCase());
+      const names = strong.slice(0, 5).map(nameWithSide);
       lines.push(
         name + ', here\'s the clear picture from your answers: you\'re most strongly drawn to ' +
         joinNicely(names) +
@@ -442,35 +497,41 @@
   }
 
   // ---------- Results rendering ----------
+  function cardHead(k, cat) {
+    return (
+      '<div class="kink-head"><h3>' + icon(k.key) + ' ' + cat.name + '</h3>' +
+      '<span class="match-chip">' + k.percent + '% · ' + k.level + '</span>' +
+      (k.role ? '<span class="match-chip role-chip">Your side: ' + k.role.side + '</span>' : '') +
+      '</div>' +
+      '<p class="kink-tagline">' + cat.tagline + '</p>' +
+      (k.role ? '<p class="role-note">' + k.role.note + '</p>' : '') +
+      '<div class="kink-meter"><div class="kink-meter-fill" data-w="' + k.percent + '"></div></div>'
+    );
+  }
+
   function fullCardHtml(k) {
     const cat = CATEGORIES[k.key];
     return (
-      '<div class="kink-head"><h3>' + cat.emoji + ' ' + cat.name + '</h3>' +
-      '<span class="match-chip">' + k.percent + '% · ' + k.level + '</span></div>' +
-      '<p class="kink-tagline">' + cat.tagline + '</p>' +
-      '<div class="kink-meter"><div class="kink-meter-fill" data-w="' + k.percent + '"></div></div>' +
+      cardHead(k, cat) +
       '<p>' + cat.description + '</p>' +
       '<h4>What this can look like</h4>' +
       '<ul>' + cat.examples.map((e) => '<li>' + e + '</li>').join('') + '</ul>' +
-      '<div class="support-note">💚 ' + cat.support + '</div>' +
-      '<div class="first-step">🌱 <strong>A gentle first step:</strong> ' + cat.firstStep + '</div>'
+      '<div class="support-note"><span class="note-label">Good to know</span>' + cat.support + '</div>' +
+      '<div class="first-step"><span class="note-label">A gentle first step</span>' + cat.firstStep + '</div>'
     );
   }
 
   function compactCardHtml(k) {
     const cat = CATEGORIES[k.key];
     return (
-      '<div class="kink-head"><h3>' + cat.emoji + ' ' + cat.name + '</h3>' +
-      '<span class="match-chip">' + k.percent + '% · ' + k.level + '</span></div>' +
-      '<p class="kink-tagline">' + cat.tagline + '</p>' +
-      '<div class="kink-meter"><div class="kink-meter-fill" data-w="' + k.percent + '"></div></div>' +
+      cardHead(k, cat) +
       '<p>' + cat.description + '</p>' +
-      '<div class="first-step">🌱 <strong>If curiosity ever calls:</strong> ' + cat.firstStep + '</div>'
+      '<div class="first-step"><span class="note-label">If curiosity ever calls</span>' + cat.firstStep + '</div>'
     );
   }
 
   function renderResults(results, serverResp) {
-    $('results-title').textContent = state.name + ', here\'s your Desire Profile 🌸';
+    $('results-title').textContent = state.name + ', here\'s your Desire Profile';
     $('results-summary').textContent = results.summaryText;
 
     // Kinsey scale strip
@@ -544,8 +605,9 @@
         item.className = 'spectrum-item';
         item.title = cat.tagline;
         item.innerHTML =
-          '<div class="si-label"><span>' + cat.emoji + ' ' + cat.name + '</span>' +
-          '<span class="si-pct">' + k.percent + '%</span></div>' +
+          '<div class="si-label"><span>' + icon(k.key) + ' ' + cat.name +
+          (k.role && k.role.side !== 'both sides' ? '<em class="si-role"> · ' + k.role.side.toLowerCase() + '</em>' : '') +
+          '</span><span class="si-pct">' + k.percent + '%</span></div>' +
           '<div class="si-track"><div class="si-fill" data-w="' + k.percent + '"></div></div>';
         grid.appendChild(item);
       });

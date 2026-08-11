@@ -22,10 +22,10 @@ const GROUPS = {
 };
 
 const SPARK_SCALE = [
-  { label: '🔥 Yes please', value: 1 },
-  { label: '👀 Curious…', value: 0.55 },
-  { label: '😐 Take it or leave it', value: 0.15 },
-  { label: '🙅 Not for me', value: 0 },
+  { label: 'Yes please', value: 1 },
+  { label: 'Curious', value: 0.55 },
+  { label: 'Take it or leave it', value: 0.15 },
+  { label: 'Not for me', value: 0 },
 ];
 
 const CATEGORIES = {
@@ -34,7 +34,6 @@ const CATEGORIES = {
   dominance: {
     group: 'power',
     name: 'Dominance',
-    emoji: '👑',
     tagline: 'You enjoy taking the lead.',
     description:
       'Dominance means guiding the experience. You set the pace, make the calls, and take care of a partner who has chosen to follow your lead. Done well, it\'s a job of attention and care, not bossiness.',
@@ -52,7 +51,6 @@ const CATEGORIES = {
   submission: {
     group: 'power',
     name: 'Submission',
-    emoji: '🕊️',
     tagline: 'You find freedom in letting go.',
     description:
       'Submission is handing the reins to someone you trust. No decisions, no pressure, no steering. Just the experience. A lot of people describe the headspace as deeply relaxing, almost meditative.',
@@ -70,7 +68,6 @@ const CATEGORIES = {
   bondage: {
     group: 'bondage',
     name: 'Bondage & Restraint',
-    emoji: '🪢',
     tagline: 'Restraint heightens sensation and trust.',
     description:
       'Bondage runs from a partner holding your wrists to soft cuffs and scarves. Being restrained, or doing the restraining, builds anticipation and focuses every sensation. It also creates a strong feeling of trust between you.',
@@ -88,7 +85,6 @@ const CATEGORIES = {
   sensation: {
     group: 'bondage',
     name: 'Sensation Play',
-    emoji: '✨',
     tagline: 'Your body loves contrast and intensity.',
     description:
       'Sensation play explores the whole range of touch. Soft to firm, warm to cool, feather-light to intense. The receiver sets the dial, always.',
@@ -106,7 +102,6 @@ const CATEGORIES = {
   roleplay: {
     group: 'imagination',
     name: 'Roleplay & Scenarios',
-    emoji: '🎭',
     tagline: 'Imagination is your playground.',
     description:
       'Roleplay lets you step into a story. New characters, new dynamics, a break from your everyday roles. It can be elaborate, or as simple as "let\'s pretend we just met."',
@@ -124,7 +119,6 @@ const CATEGORIES = {
   exhibition: {
     group: 'seen',
     name: 'Exhibitionism',
-    emoji: '🔥',
     tagline: 'Being seen and desired thrills you.',
     description:
       'Exhibitionism is the charge of being watched and admired, always by people who want to be watching. For some that\'s loving how a partner looks at them while they undress. For others it\'s a full private show.',
@@ -142,7 +136,6 @@ const CATEGORIES = {
   voyeurism: {
     group: 'seen',
     name: 'Voyeurism',
-    emoji: '👁️',
     tagline: 'Watching is its own electricity.',
     description:
       'Voyeurism, in its healthy consensual form, is the thrill of watching a partner who loves being watched. Them undressing, touching, enjoying themselves, fully aware your eyes are on them.',
@@ -160,7 +153,6 @@ const CATEGORIES = {
   praise: {
     group: 'mind',
     name: 'Praise & Worship',
-    emoji: '💖',
     tagline: 'Words and adoration light you up.',
     description:
       'Praise kink is the deep pleasure of hearing it out loud. "You\'re doing so well." "You\'re gorgeous." Or being the one saying it, pouring adoration over a partner. It ties emotional warmth straight into physical intimacy.',
@@ -178,7 +170,6 @@ const CATEGORIES = {
   sensual: {
     group: 'connection',
     name: 'Sensual & Romantic Connection',
-    emoji: '🌹',
     tagline: 'Depth, tenderness, and presence are your language.',
     description:
       'Your strongest pull is toward presence. Eye contact, slow touch, emotional closeness, romance. People call it "vanilla," but vanilla is a real flavor, and it\'s a lot of people\'s favorite.',
@@ -199,7 +190,6 @@ const CATEGORIES = {
   switchplay: {
     group: 'power',
     name: 'Switching',
-    emoji: '🔄',
     tagline: 'You want both sides of the coin.',
     sparkPrompt: 'Trading roles. Confidently leading one night, happily surrendering the next.',
     description:
@@ -218,9 +208,9 @@ const CATEGORIES = {
   bratplay: {
     group: 'power',
     name: 'Brat & Tamer Play',
-    emoji: '😈',
     tagline: 'Playful defiance is your love language.',
     sparkPrompt: 'Playful defiance. Teasing, breaking the "rules" on purpose, and being lovingly put back in line (or doing the taming).',
+    roles: [["Yes, as the brat","The fun for you is being the playful troublemaker: testing, teasing, and being lovingly reined in."],["Yes, as the tamer","You want the tamer's chair. Meeting the sass, keeping a straight face, and winning."]],
     description:
       'Brat play is power exchange with a wink. One partner cheekily resists and provokes. The other rises to the challenge. The misbehavior is the game, and both of you are in on it.',
     examples: [
@@ -237,9 +227,9 @@ const CATEGORIES = {
   discipline: {
     group: 'power',
     name: 'Rules, Rituals & Discipline',
-    emoji: '📜',
     tagline: 'Structure itself is the thrill.',
     sparkPrompt: 'Ongoing structure in a dynamic. Agreed rules, daily tasks, titles, and playful consequences.',
+    roles: [["Yes, following the rules","Structure feels best from the inside: rules set for you, tasks to complete, praise to earn."],["Yes, setting the rules","You want to be the author: writing the rules, assigning the tasks, enforcing them warmly."]],
     description:
       'For some people the charge lives in the structure itself. Rules to follow or set. Rituals that mark the dynamic. Tasks, titles, and consequences you both picked in advance. Related corners of this world include protocol dynamics and financial domination (consensual, budgeted "tributes").',
     examples: [
@@ -256,9 +246,9 @@ const CATEGORIES = {
   primal: {
     group: 'power',
     name: 'Primal Play',
-    emoji: '🐺',
     tagline: 'Instinct over etiquette.',
     sparkPrompt: 'Raw, instinctive energy. Chasing, wrestling, growling, pinning. Less talking, more instinct.',
+    roles: [["Yes, as the prey","Being chased and caught is your side of this: the sprint, the capture, the surrender."],["Yes, as the hunter","Your instinct is to chase, catch, and pin. The pursuit is the point."]],
     description:
       'Primal play strips intimacy down to instinct. Chase and capture. Wrestling for the upper hand. Growls instead of sentences. It\'s athletic, cathartic, and surprisingly freeing.',
     examples: [
@@ -275,9 +265,9 @@ const CATEGORIES = {
   cnc: {
     group: 'power',
     name: 'Consensual Non-Consent',
-    emoji: '🎬',
     tagline: 'Scripted surrender, absolute trust.',
     sparkPrompt: 'Carefully pre-scripted "resistance" scenes. Planned together in detail beforehand, with a safeword that ends everything instantly.',
+    roles: [["Yes, surrendering","The appeal for you is giving up control inside a scene you scripted and can end instantly."],["Yes, in control","You'd hold the reins: running the scripted scene, reading your partner, keeping it safe."]],
     description:
       'CNC is advanced roleplay where partners script a scene of pretend resistance ahead of time. Every boundary gets discussed first. A safeword or signal stops everything instantly. Aftercare follows every scene. The paradox is the point: it only works because consent is total.',
     examples: [
@@ -294,9 +284,9 @@ const CATEGORIES = {
   petplay: {
     group: 'power',
     name: 'Pet Play',
-    emoji: '🐾',
     tagline: 'A collar can be a key to a freer headspace.',
     sparkPrompt: 'Stepping into an animal persona. Kitten, puppy, pony. Collars, headspace, and a doting handler.',
+    roles: [["Yes, as the pet","The wordless headspace is yours: collar on, human worries off."],["Yes, as the handler","You're the doting one: care, training, treats, and running the whole show."]],
     description:
       'Pet play lets one partner slip into an animal persona while the other cares for them, trains them, or dotes on them. The gear matters less than the headspace: simple, wordless, and free of human worries.',
     examples: [
@@ -313,9 +303,9 @@ const CATEGORIES = {
   caregiver: {
     group: 'power',
     name: 'Caregiver & Nurture Dynamics',
-    emoji: '🧸',
     tagline: 'Being cherished is the whole point.',
     sparkPrompt: 'A dynamic built on nurture between adults. One partner protective and guiding, the other cherished and taken care of.',
+    roles: [["Yes, being cared for","Being doted on, guided, and kept safe is your side of this dynamic."],["Yes, as the caregiver","Nurturing is your engine: planning, protecting, and taking every decision off their plate."]],
     description:
       'Caregiver dynamics pair a protective, guiding partner with one who loves being looked after. Tucked in, praised, gently bossed around, completely safe. It\'s an adult dynamic about vulnerability and trust, and it can be as light or as structured as you both want.',
     examples: [
@@ -332,9 +322,9 @@ const CATEGORIES = {
   orgasmcontrol: {
     group: 'power',
     name: 'Orgasm Control & Edging',
-    emoji: '⏳',
     tagline: 'Anticipation is your favorite drug.',
     sparkPrompt: 'Pleasure as a game of timing. Building, pausing, denying, or commanding release. Possibly chastity play.',
+    roles: [["Yes, being controlled","You want your release in someone else's hands: asking, waiting, earning it."],["Yes, holding the keys","You want to be the timekeeper: building, pausing, granting, denying."]],
     description:
       'Orgasm control turns timing into the toy. Edging right up to the brink and pausing. Asking permission. Playful denial that makes the eventual yes overwhelming. For those who love the long game, chastity play with keys and timers.',
     examples: [
@@ -354,9 +344,9 @@ const CATEGORIES = {
   rope: {
     group: 'bondage',
     name: 'Rope & Shibari',
-    emoji: '🎗️',
     tagline: 'Rope as craft, meditation, and embrace.',
     sparkPrompt: 'Rope as an art form. Decorative ties and harnesses, and the slow ritual of tying or being tied.',
+    roles: [["Yes, being tied","The full-body pressure and stillness of being wrapped is what draws you."],["Yes, tying","The rigger's side is yours: the craft, the patterns, the focus of the tie."]],
     description:
       'Rope bondage, including the Japanese-influenced art of shibari, treats tying as craft and connection. Many sessions never go past the tying itself. The slow ritual. Pressure like a full-body hug. The look of the finished tie.',
     examples: [
@@ -373,9 +363,9 @@ const CATEGORIES = {
   sensorydep: {
     group: 'bondage',
     name: 'Sensory Deprivation',
-    emoji: '🎧',
     tagline: 'Less input, more sensation.',
     sparkPrompt: 'Dimming the senses. Blindfolds, headphones, soft mitts. Every remaining touch counts double.',
+    roles: [["Yes, senses dimmed","You want the blindfold side: the world off, every touch a surprise."],["Yes, running the show","You want to control the inputs: choosing what your partner feels next while they float."]],
     description:
       'Sensory deprivation removes a sense or two so the rest light up. A blindfold makes every touch a surprise. Headphones turn the world off. Soft mitts quiet the urge to reach out and control things.',
     examples: [
@@ -392,9 +382,9 @@ const CATEGORIES = {
   impact: {
     group: 'bondage',
     name: 'Impact Play',
-    emoji: '🖐️',
     tagline: 'Rhythm, sting, and glow.',
     sparkPrompt: 'Rhythmic strikes tuned to your taste. From playful spanks to paddles and floggers.',
+    roles: [["Yes, receiving","You're on the receiving side: the rhythm, the sting, the afterglow."],["Yes, delivering","You're the one swinging: reading reactions, building the rhythm, providing the glow."]],
     description:
       'Impact play runs from a playful swat to paddles, floggers, and crops. It\'s always warmed up gradually, aimed at safe padded areas, and tuned to exactly what the receiver wants. Fans describe the afterglow as head-clearing.',
     examples: [
@@ -411,9 +401,9 @@ const CATEGORIES = {
   temperature: {
     group: 'bondage',
     name: 'Temperature & Wax Play',
-    emoji: '🕯️',
     tagline: 'Hot, cold, and everything electric between.',
     sparkPrompt: 'Contrast on the skin. Massage-safe wax candles, ice cubes, warmed oil, chilled glass.',
+    roles: [["Yes, on my skin","You want to feel it: the wax, the ice, the shiver of contrast."],["Yes, wielding it","You'd rather hold the candle and the ice cube, painting the contrast on."]],
     description:
       'Temperature play uses contrast as its instrument. Low-temperature massage candles that pour like warm silk. Ice traced along the spine. Warmed oil, chilled glass. The gap between hot and cold is where the shiver lives.',
     examples: [
@@ -430,9 +420,9 @@ const CATEGORIES = {
   tickling: {
     group: 'bondage',
     name: 'Tickling',
-    emoji: '🪶',
     tagline: 'Laughter and helplessness in one package.',
     sparkPrompt: 'Tickling as play. Feathers, fingertips, helplessness, and laughing until you beg.',
+    roles: [["Yes, being tickled","The helpless laughter is your side of the game."],["Yes, tickling","You want to be the one holding all the cards, feather in hand."]],
     description:
       'Tickling (knismolagnia, if you want the formal term) blends touch, teasing, and playful power. The tickler holds all the cards. The ticklee gets to laugh, squirm, and surrender.',
     examples: [
@@ -449,9 +439,9 @@ const CATEGORIES = {
   electro: {
     group: 'bondage',
     name: 'Electrostimulation',
-    emoji: '⚡',
     tagline: 'Tingles by design.',
     sparkPrompt: 'Tingles and pulses from purpose-built, body-safe toys. From a light buzz to a deep thrum.',
+    roles: [["Yes, feeling it","You want the tingles delivered to you."],["Yes, at the dials","You want to run the device: patterns, waves, and finding what works."]],
     description:
       'E-stim uses purpose-built devices (TENS-style units and specialty toys) to create sensations nothing else can. Champagne-bubble tingles. Deep rhythmic pulses. All of it dialed in precisely.',
     examples: [
@@ -468,9 +458,9 @@ const CATEGORIES = {
   marking: {
     group: 'bondage',
     name: 'Biting, Scratching & Marking',
-    emoji: '💋',
     tagline: 'Souvenirs you can feel tomorrow.',
     sparkPrompt: 'Bites, scratches, and hickeys. Intensity in the moment, and marks as sweet souvenirs after.',
+    roles: [["Yes, being marked","Wearing the souvenir is the appeal: the bite, the scratch, the reminder."],["Yes, leaving marks","You're the one signing your work."]],
     description:
       'Marking blends sensation with meaning. There\'s the bright intensity of a bite or scratch in the moment. Then there\'s the private satisfaction of a mark that keeps whispering about last night for days.',
     examples: [
@@ -487,9 +477,9 @@ const CATEGORIES = {
   edgeplay: {
     group: 'bondage',
     name: 'Thrill & Edge Play',
-    emoji: '🎢',
     tagline: 'The rollercoaster principle, with real safety rails required.',
     sparkPrompt: 'High-trust thrill play. Fear, adrenaline, and intensity at the edges. This category requires real education before practice.',
+    roles: [["Yes, riding the edge","You'd be the one feeling the adrenaline, inside a container someone trusted runs."],["Yes, creating the thrill","You'd run the scene, which carries the bigger share of the safety homework."]],
     description:
       'Edge play is the umbrella term for high-intensity, higher-risk play: fear play, knife-style sensation (often done with harmless props), and similar adrenaline games. Be clear-eyed here. This is the one area of kink where "just try it" is bad advice. It calls for real education, experienced mentors, and conservative choices. Some practices under this umbrella, like anything restricting breathing, have no fully safe version at all.',
     examples: [
@@ -509,9 +499,9 @@ const CATEGORIES = {
   costumes: {
     group: 'imagination',
     name: 'Uniforms & Costumes',
-    emoji: '🧥',
     tagline: 'The right outfit changes everything.',
     sparkPrompt: 'The charge of a uniform or costume. On you or on them.',
+    roles: [["Yes, wearing it","Transformation is for you: the outfit changes how you move and feel."],["Yes, enjoying the view","You're the audience. The right outfit on a partner does the work."]],
     description:
       'For uniform and costume lovers, clothing is transformation. The authority of a uniform. The drama of a costume. The instant character shift the right outfit creates.',
     examples: [
@@ -528,9 +518,9 @@ const CATEGORIES = {
   authority: {
     group: 'imagination',
     name: 'Authority Roleplay',
-    emoji: '🏛️',
     tagline: 'Power dynamics, safely on loan.',
     sparkPrompt: 'Charged authority scenarios between adults. Strict professor, demanding boss, commanding officer. All pretend, all chosen.',
+    roles: [["Yes, as the authority","You want the commanding role: the desk, the title, the script's power side."],["Yes, under authority","You want the other chair: called in, outranked, and loving the pretend stakes."]],
     description:
       'Authority roleplay borrows charged power dynamics and plays them out safely between adults who wrote the script together. Professor and student. Boss and new hire. Officer and civilian. The power gap is the electricity, and it works because it isn\'t real.',
     examples: [
@@ -547,7 +537,6 @@ const CATEGORIES = {
   fantasy: {
     group: 'imagination',
     name: 'Fantasy, Monsters & Cosplay',
-    emoji: '🐉',
     tagline: 'Imagination has no dress code.',
     sparkPrompt: 'The fantastical made flesh. Vampires, monsters, aliens, cosplay, furry personas.',
     description:
@@ -566,7 +555,6 @@ const CATEGORIES = {
   genderplay: {
     group: 'imagination',
     name: 'Gender Play & Cross-Dressing',
-    emoji: '🦋',
     tagline: 'Gender as a playground, not a cage.',
     sparkPrompt: 'Playing with gender expression. Cross-dressing, swapping roles, exploring another side of yourself.',
     description:
@@ -585,9 +573,9 @@ const CATEGORIES = {
   medical: {
     group: 'imagination',
     name: 'Medical Play',
-    emoji: '🩺',
     tagline: 'The ritual of the exam room.',
     sparkPrompt: 'Clinical roleplay. Exams, gloves, instruments, and the particular vulnerability of the doctor\'s office.',
+    roles: [["Yes, being examined","The vulnerable side of the exam table is yours."],["Yes, examining","You want the gloves and the clipboard: methodical, thorough, in charge."]],
     description:
       'Medical play borrows the rituals of the clinic. The exam. The gloves. The clipboard questions. The commanding bedside manner. What draws people is the mix of vulnerability, authority, and complete full-body attention.',
     examples: [
@@ -604,9 +592,9 @@ const CATEGORIES = {
   sizeplay: {
     group: 'imagination',
     name: 'Size & Strength Play',
-    emoji: '🏋️',
     tagline: 'The delicious physics of difference.',
     sparkPrompt: 'The charge of size and strength difference. Being lifted, pinned, enveloped, or doing the lifting.',
+    roles: [["Yes, being overpowered","Being lifted, pinned, and dwarfed is the thrill for you."],["Yes, doing the lifting","Your side is the strength: carrying, pinning, towering."]],
     description:
       'Size and strength play savors physical difference. Being picked up, pinned, or carried. Feeling small and protected, or big and powerful. It runs from real-world lifts all the way to pure giant-and-tiny fantasy.',
     examples: [
@@ -623,9 +611,9 @@ const CATEGORIES = {
   breeding: {
     group: 'imagination',
     name: 'Breeding Fantasy',
-    emoji: '🌾',
     tagline: 'Primal talk, modern precautions.',
     sparkPrompt: 'The primal fantasy of "breeding." Possessive, purposeful talk and energy, while real-life contraception stays firmly in place.',
+    roles: [["Yes, being claimed","Being wanted that completely is your side of the fantasy."],["Yes, claiming","The possessive, purposeful energy runs from you outward."]],
     description:
       'Breeding kink is a fantasy of primal purpose. Possessive language. The charged idea of claiming a partner completely, or being claimed. For nearly everyone it lives strictly in dirty talk and energy. The fantasy gets to thrill precisely because contraception keeps reality safely boring.',
     examples: [
@@ -642,9 +630,9 @@ const CATEGORIES = {
   hypno: {
     group: 'imagination',
     name: 'Mind Play & Erotic Hypnosis',
-    emoji: '🌀',
     tagline: 'The mind is the biggest erogenous zone.',
     sparkPrompt: 'Trance, suggestion, and altered headspace. Guided relaxation that turns the mind itself into the playground.',
+    roles: [["Yes, going under","The floaty, guided headspace is what calls you."],["Yes, guiding","You'd be the voice: steady, careful, and trusted with someone's headspace."]],
     description:
       'Erotic hypnosis and mind play use relaxation, focus, and suggestion to create a floaty, altered headspace. That can mean simple guided relaxation with an erotic glow, or deeper trance play between partners who trust each other completely.',
     examples: [
@@ -664,9 +652,9 @@ const CATEGORIES = {
   filming: {
     group: 'seen',
     name: 'Filming & Photography',
-    emoji: '📸',
     tagline: 'Your own private cinema.',
     sparkPrompt: 'Making private photos or videos together, for an audience of exactly two.',
+    roles: [["Yes, on camera","Performing for the lens is your side."],["Yes, behind the camera","You're the director: framing, lighting, and appreciating."]],
     description:
       'Some couples love the camera. It adds performance energy in the moment and leaves a private archive after. Two things are non-negotiable: enthusiastic consent from everyone on camera, and genuinely secure storage.',
     examples: [
@@ -683,7 +671,6 @@ const CATEGORIES = {
   groupplay: {
     group: 'seen',
     name: 'Group Play & Threesomes',
-    emoji: '👥',
     tagline: 'More people, more logistics, more possibility.',
     sparkPrompt: 'Intimacy with more than two. Threesomes, foursomes, or the social world of swinging.',
     description:
@@ -702,9 +689,9 @@ const CATEGORIES = {
   compersion: {
     group: 'seen',
     name: 'Compersion & Sharing',
-    emoji: '💞',
     tagline: 'Their pleasure is your pleasure.',
     sparkPrompt: 'Heat or joy in a partner\'s pleasure with someone else. Cuckolding, hotwifing, or open dynamics.',
+    roles: [["Yes, as the one watching","The heat for you is in witnessing or hearing about your partner's pleasure."],["Yes, as the one shared","Being desired by more than one, with your partner's delight, is your side."]],
     description:
       'Compersion is finding joy, or heat, in a partner\'s pleasure with someone else. On the erotic side it powers cuckolding and hotwifing. On the emotional side it\'s the engine of many open relationships. It flips jealousy\'s script, which is exactly why it fascinates people.',
     examples: [
@@ -724,9 +711,9 @@ const CATEGORIES = {
   materials: {
     group: 'fetish',
     name: 'Latex, Leather & Materials',
-    emoji: '🖤',
     tagline: 'Texture is a language.',
     sparkPrompt: 'The look, feel, scent, and sound of materials. Latex, leather, PVC, silk, fur.',
+    roles: [["Yes, wearing it","Second-skin materials on your own body are the draw."],["Yes, touching and admiring","Your pull runs outward: the look, feel, and sound of it on someone else."]],
     description:
       'Material fetishes respond to fabric as a full experience. The second-skin gleam of latex. Leather\'s scent and creak. Silk\'s glide. It can be about wearing it, touching it, or just looking at it.',
     examples: [
@@ -743,9 +730,9 @@ const CATEGORIES = {
   lingerie: {
     group: 'fetish',
     name: 'Lingerie & Clothing',
-    emoji: '🎀',
     tagline: 'What\'s almost hidden is most seen.',
     sparkPrompt: 'The charge of special clothing. Lingerie, stockings, a particular garment that transforms the wearer.',
+    roles: [["Yes, wearing it","The transformation and the reveal are yours to perform."],["Yes, enjoying the view","You're the appreciative audience for the reveal."]],
     description:
       'Lingerie love is about transformation and reveal. The garment changes how the wearer carries themselves. The slow unveiling becomes its own act. And there\'s the quiet thrill of something special hidden under ordinary clothes.',
     examples: [
@@ -762,9 +749,9 @@ const CATEGORIES = {
   feet: {
     group: 'fetish',
     name: 'Feet & Footwear',
-    emoji: '🦶',
     tagline: 'The most common fetish on the planet.',
     sparkPrompt: 'Feet and footwear as a source of attraction. Massaging, admiring, adoring, or beautiful shoes.',
+    roles: [["Yes, adoring them","You're the admirer: the massage, the attention, the devotion."],["Yes, being adored","Receiving that devotion is your side of it."]],
     description:
       'Foot attraction is the world\'s most common body-focused kink. It covers foot massages, pedicure aesthetics, and heels or boots as objects of devotion. There\'s even a neuroscience theory for why: in the brain\'s body map, the region for feet sits right next to the one for genitals.',
     examples: [
@@ -781,9 +768,9 @@ const CATEGORIES = {
   bodyworship: {
     group: 'fetish',
     name: 'Body Worship',
-    emoji: '🏛️',
     tagline: 'Reverence as an erotic act.',
     sparkPrompt: 'Devoted, unhurried adoration of a partner\'s body. Or being the one adored.',
+    roles: [["Yes, adoring","Reverence flows from you: slow, devoted attention to someone else."],["Yes, being adored","Receiving unhurried adoration is your side, and it takes real openness."]],
     description:
       'Body worship makes reverence the entire event. Slow, devoted attention to a partner\'s body, treating every inch as worthy of adoration. Or the vulnerable glory of being on the receiving end.',
     examples: [
@@ -800,9 +787,9 @@ const CATEGORIES = {
   nichebody: {
     group: 'fetish',
     name: 'Hands, Hair & Specific Features',
-    emoji: '🤲',
     tagline: 'Your eye knows exactly what it loves.',
     sparkPrompt: 'A particular pull toward a specific feature. Hands, forearms, hair, necks, shoulders, voices.',
+    roles: [["Yes, as the admirer","Your specific eye does the loving here."],["Yes, being admired","Having your particular features adored is the appeal."]],
     description:
       'Some attraction is precise. Hands and forearms (the formal term is quirofilia). Hair to touch or be touched by (trichophilia). Necks, shoulders, voices. A specific eye is a connoisseur\'s eye.',
     examples: [
@@ -819,9 +806,9 @@ const CATEGORIES = {
   wetmessy: {
     group: 'fetish',
     name: 'Food & Messy Play',
-    emoji: '🍰',
     tagline: 'Permission to make a glorious mess.',
     sparkPrompt: 'Playful mess. Whipped cream, chocolate sauce, cake, or the general joy of getting gloriously messy.',
+    roles: [["Yes, getting messy","You want to be the canvas."],["Yes, making the mess","You're the artist with the whipped cream."]],
     description:
       'Wet-and-messy play, known as sploshing, is the giddy sensory joy of food and mess. Whipped cream. Chocolate sauce. An entire cake met with enthusiasm. It\'s texture, taste, absurdity, and childlike permission rolled together.',
     examples: [
@@ -838,9 +825,9 @@ const CATEGORIES = {
   watersports: {
     group: 'fetish',
     name: 'Watersports',
-    emoji: '💧',
     tagline: 'More common than anyone admits at dinner.',
     sparkPrompt: 'Erotic play involving pee. A taboo-tinged interest that\'s far more common than polite company admits.',
+    roles: [["Yes, on the giving side","Your interest runs toward giving."],["Yes, on the receiving side","Your interest runs toward receiving, which asks for the deeper trust."]],
     description:
       'Watersports (urolagnia, formally) is erotic interest in pee. For most people it\'s less about the substance than the intimacy, the taboo, and the total-trust vulnerability of sharing something normally private. Like all body-fluid play it comes with common-sense hygiene practices, which the community discusses openly.',
     examples: [
@@ -860,9 +847,9 @@ const CATEGORIES = {
   dirtytalk: {
     group: 'mind',
     name: 'Dirty Talk',
-    emoji: '🎙️',
     tagline: 'Language is your favorite toy.',
     sparkPrompt: 'Explicit, charged language. Hearing it, saying it, or trading it by text all day.',
+    roles: [["Yes, hearing it","Words work on you. You want to be talked to."],["Yes, saying it","You're the narrator: the one whose voice does the damage."]],
     description:
       'For dirty-talk lovers, words do the heaviest lifting. Narration. Commands. Confessions. The right filth in the right tone. Which words work is intensely personal, and finding out together is part of the fun.',
     examples: [
@@ -879,9 +866,9 @@ const CATEGORIES = {
   degradation: {
     group: 'mind',
     name: 'Degradation & Objectification',
-    emoji: '🎭',
     tagline: 'Sharp words in a soft container.',
     sparkPrompt: 'Consensual humiliation. Chosen harsh words, or being treated as a beautiful object, thrilling precisely because you\'re safe.',
+    roles: [["Yes, receiving the words","The sharp words land on you, and that contrast is the charge."],["Yes, saying the words","You'd deliver the script: sharp in the scene, warm underneath."]],
     description:
       'Degradation play uses deliberately harsh words or objectifying dynamics, chosen together, inside a container of real affection. For some people that contrast is electric. The golden rules: vocabulary negotiated in advance, off-limits topics listed, and warm aftercare that says what\'s actually true.',
     examples: [
@@ -901,7 +888,6 @@ const CATEGORIES = {
   tantric: {
     group: 'connection',
     name: 'Slow & Mindful Intimacy',
-    emoji: '🧘',
     tagline: 'Presence as practice.',
     sparkPrompt: 'Slow, meditative intimacy. Breathwork, extended eye contact, unhurried touch, tantra-inspired presence.',
     description:
