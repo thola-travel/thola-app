@@ -1,6 +1,6 @@
 /**
- * Browser smoke test: runs the whole quiz as a user would — name + email +
- * consent, all questions across the three parts, submission — and asserts
+ * Browser smoke test: runs the whole quiz as a user would: name + email +
+ * consent, all questions across the three parts, then submission. Asserts
  * the results screen renders with no JS errors.
  *
  * Usage: start the server (`npm start`), then:

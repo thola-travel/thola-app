@@ -1,5 +1,5 @@
 /**
- * Desire Discovery Quiz — interactive logic.
+ * Desire Discovery Quiz: interactive logic.
  *
  * Three parts: weighted play-style questions, a rapid-fire spark round
  * (one question per niche kink), and the Kinsey scale. Answers are analyzed
@@ -160,8 +160,8 @@
       blurb.textContent = 'Early signs point toward ' + top.name.toLowerCase() + '… keep going, the picture is still forming.';
     } else if (second && ranked[0].pct - ranked[1].pct <= 8 && ranked[1].pct > 0) {
       blurb.textContent =
-        'Interesting — a blend of ' + top.name.toLowerCase() + ' and ' + second.name.toLowerCase() +
-        ' is taking shape. Versatile profile so far.';
+        'Interesting. A blend of ' + top.name.toLowerCase() + ' and ' + second.name.toLowerCase() +
+        ' is taking shape. Versatile so far.';
     } else {
       blurb.textContent = top.emoji + ' ' + top.name + ' is emerging as a strong thread. ' + top.tagline;
     }
@@ -175,8 +175,8 @@
   };
   const PART_HINTS = {
     kink: 'Pick the answer that feels most true',
-    spark: 'Gut reaction — first instinct is the honest one',
-    kinsey: 'Attraction, not behavior — answer with your inner experience',
+    spark: 'Gut reaction. Your first instinct is the honest one',
+    kinsey: 'Attraction, not behavior. Answer from your inner experience',
   };
 
   function renderQuestion(animated) {
@@ -261,7 +261,7 @@
 
   // ---------- Full analysis ----------
   function levelFor(percent) {
-    if (percent >= 60) return { level: 'Strong resonance', cls: '' };
+    if (percent >= 60) return { level: 'Strong match', cls: '' };
     if (percent >= 35) return { level: 'Curious spark', cls: 'curious' };
     return { level: 'Not a focus right now', cls: 'low' };
   }
@@ -313,7 +313,7 @@
   }
 
   function buildSummary(kinkProfile, kinsey) {
-    const strong = kinkProfile.filter((k) => k.level === 'Strong resonance');
+    const strong = kinkProfile.filter((k) => k.level === 'Strong match');
     const curious = kinkProfile.filter((k) => k.level === 'Curious spark');
     const name = state.name;
     const lines = [];
@@ -321,23 +321,23 @@
     if (strong.length > 0) {
       const names = strong.slice(0, 5).map((k) => k.plainName.toLowerCase());
       lines.push(
-        name + ', your answers paint a clear and wonderful picture: you\'re most strongly drawn to ' +
+        name + ', here\'s the clear picture from your answers: you\'re most strongly drawn to ' +
         joinNicely(names) +
         (strong.length > 5 ? ' (and ' + (strong.length - 5) + ' more)' : '') + '. ' +
         (strong.length > 1
-          ? 'These threads weave together naturally — they\'re not separate "kinks" so much as one coherent way you love to connect.'
-          : 'That focus is a gift — knowing exactly what lights you up makes it far easier to ask for.')
+          ? 'These interests tend to travel together. Think of them less as separate kinks and more as one coherent way you like to connect.'
+          : 'A focused profile is genuinely useful. When you know exactly what lights you up, it gets much easier to ask for.')
       );
     } else if (curious.length > 0) {
       lines.push(
-        name + ', your profile is beautifully open — no single kink dominates, but you carry genuine sparks of curiosity toward ' +
+        name + ', no single kink dominates your profile, but you carry real sparks of curiosity toward ' +
         joinNicely(curious.slice(0, 5).map((k) => k.plainName.toLowerCase())) +
-        '. Curiosity is exactly where every good discovery starts, and there\'s no rush.'
+        '. Curiosity is where every good discovery starts. There\'s no rush.'
       );
     } else {
       lines.push(
-        name + ', your answers point somewhere lovely: connection itself is your erotic language. ' +
-        'The kink spectrum is wide, and "deep presence with a partner I trust" is a full and complete answer to what excites you.'
+        name + ', your answers point somewhere simple and real: connection itself is what excites you. ' +
+        'The kink spectrum is wide, and "deep presence with a partner I trust" is a complete answer on it.'
       );
     }
 
@@ -345,20 +345,20 @@
       lines.push(
         'Alongside your core profile, you showed a curious spark toward ' +
         joinNicely(curious.slice(0, 6).map((k) => k.plainName.toLowerCase())) +
-        (curious.length > 6 ? ' and a few more' : '') +
-        ' — worth exploring gently, at your own pace, if and when it appeals.'
+        (curious.length > 6 ? ', plus a few more' : '') +
+        '. Worth exploring gently, at your own pace, if and when it appeals.'
       );
     }
 
     lines.push(
-      'On attraction: you land at ' + kinsey.label.replace('Kinsey ', 'point ').split(' — ')[0].toLowerCase() +
+      'On attraction: you land at ' + kinsey.label.split(':')[0].replace('Kinsey', 'point') +
       ' on the Kinsey scale. ' + kinsey.description
     );
 
     lines.push(
-      'One thing to hold onto, ' + name + ': nothing in your profile is unusual, broken, or "too much." ' +
-      'Every interest here is shared by millions of people and is completely healthy when explored with enthusiastic consent, ' +
-      'honest communication, and partners you trust. Your desires are a feature of who you are — never a flaw.'
+      'One thing to hold onto, ' + name + ': nothing in your profile is unusual, broken, or too much. ' +
+      'Every interest here is shared by millions of people, and every one is healthy when explored with consent, ' +
+      'honest communication, and partners you trust. Your desires are part of who you are. Not a flaw to manage.'
     );
 
     return lines.join('\n\n');
@@ -374,7 +374,7 @@
   function collectAnswers() {
     return allQuestions.map((q, i) => ({
       section: q.type === 'kink' ? 'Play Style' : q.type === 'spark' ? 'Spark Round' : 'Kinsey Scale',
-      question: q.type === 'spark' ? CATEGORIES[q.categoryKey].name + ' — ' + q.question : q.question,
+      question: q.type === 'spark' ? CATEGORIES[q.categoryKey].name + ': ' + q.question : q.question,
       answer: state.selections[i] !== null ? q.options[state.selections[i]].label : '(skipped)',
     }));
   }
@@ -466,7 +466,7 @@
     // Featured cards: strong in full, curious compact.
     const host = $('kink-results');
     host.innerHTML = '';
-    const strong = results.kinkProfile.filter((k) => k.level === 'Strong resonance');
+    const strong = results.kinkProfile.filter((k) => k.level === 'Strong match');
     const curious = results.kinkProfile.filter((k) => k.level === 'Curious spark');
     const featured = strong.length + curious.length > 0
       ? { strong, curious }
@@ -523,11 +523,11 @@
     });
 
     $('closing-note').textContent =
-      'Discovery is a lifelong conversation with yourself, ' + state.name +
-      '. Revisit this whenever you like — answers change as you grow, and every version of your profile is worth celebrating.';
+      'Getting to know yourself is a long conversation, ' + state.name +
+      '. Come back whenever you like. Answers shift as you grow, and every version of your profile is worth having.';
     $('email-note').textContent = serverResp && serverResp.participantEmailSent
-      ? 'A keepsake copy of your summary and results is on its way to ' + state.email + '.'
-      : 'Your results are shown above — email delivery isn\'t available right now, so consider saving this page.';
+      ? 'A copy of your summary and results is on its way to ' + state.email + '.'
+      : 'Your results are shown above. Email delivery isn\'t available right now, so consider saving this page.';
 
     showScreen('results');
 

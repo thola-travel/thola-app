@@ -1,9 +1,9 @@
 /**
- * Desire Discovery Quiz — backend
+ * Desire Discovery Quiz: backend
  *
  * Serves the quiz frontend and receives submissions at POST /api/submit.
  * Each participant receives their own results email (summary, meanings,
- * examples, and suggestions — never their raw answers). If ADMIN_EMAIL is
+ * examples, and suggestions, never their raw answers). If ADMIN_EMAIL is
  * set, a full copy (including answers) also goes there and the frontend
  * discloses that in the consent notice via GET /api/config. Every
  * submission is written to ./submissions/ as a JSON backup so a mail
@@ -79,7 +79,7 @@ function categoryCardHtml(entry) {
 
 function buildParticipantEmailHtml(submission) {
   const { name, results } = submission;
-  const strong = results.kinkProfile.filter((k) => k.level === 'Strong resonance');
+  const strong = results.kinkProfile.filter((k) => k.level === 'Strong match');
   const curious = results.kinkProfile.filter((k) => k.level === 'Curious spark');
   const featured = strong.concat(curious);
 
@@ -91,7 +91,7 @@ function buildParticipantEmailHtml(submission) {
   <div style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;max-width:640px;margin:0 auto;color:#2b2140;line-height:1.6;">
     <div style="background:linear-gradient(120deg,#7c3aed,#ec4899);border-radius:16px;padding:28px;color:#fff;text-align:center;">
       <h1 style="margin:0;">🌸 Your Desire Profile</h1>
-      <p style="margin:8px 0 0;opacity:.9;">A keepsake of what you discovered — made just for you, ${escapeHtml(name)}.</p>
+      <p style="margin:8px 0 0;opacity:.9;">Everything you discovered, ${escapeHtml(name)}. Made for you to keep.</p>
     </div>
 
     <h2 style="color:#6d28d9;margin-top:28px;">Your summary</h2>
@@ -103,18 +103,18 @@ function buildParticipantEmailHtml(submission) {
       <p style="margin:0;">${escapeHtml(results.kinsey.description)}</p>
     </div>
 
-    <h2 style="color:#6d28d9;margin-top:28px;">💜 What lit up for you — and what it means</h2>
+    <h2 style="color:#6d28d9;margin-top:28px;">💜 What lit up for you, and what it means</h2>
     ${featured.length > 0 ? featured.map(categoryCardHtml).join('') : `
       <div style="${CARD_STYLE}">
-        <p style="margin:0;">No single category dominated — your profile leans toward presence, connection, and taking things at your own pace. That is a complete and beautiful answer in itself.</p>
+        <p style="margin:0;">No single category dominated. Your profile leans toward presence, connection, and moving at your own pace. That's a complete answer in itself.</p>
       </div>`}
 
     <h2 style="color:#6d28d9;margin-top:28px;">🌱 Gentle suggestions for the road</h2>
     <ul style="padding-left:20px;">${suggestions}</ul>
 
     <div style="background:#faf7ff;border-radius:12px;padding:18px 20px;margin-top:24px;text-align:center;">
-      <p style="margin:0;">Nothing in this profile is unusual, broken, or "too much." Desire is a living thing —
-      revisit it kindly, explore at your own pace, and let every discovery be a way of loving yourself better. 💜</p>
+      <p style="margin:0;">Nothing in this profile is unusual, broken, or too much. Desire changes as you do,
+      so come back to this kindly, explore at your own pace, and let each discovery help you know yourself a little better. 💜</p>
     </div>
   </div>`;
 }
@@ -182,7 +182,7 @@ app.post('/api/submit', async (req, res) => {
       results,
     };
 
-    // Local backup first — a mail outage should never lose a submission.
+    // Local backup first; a mail outage should never lose a submission.
     fs.mkdirSync(SUBMISSIONS_DIR, { recursive: true });
     const safeName = submission.name.replace(/[^a-z0-9-]/gi, '_').toLowerCase();
     const backupFile = path.join(
@@ -213,7 +213,7 @@ app.post('/api/submit', async (req, res) => {
           await transporter.sendMail({
             from,
             to: ADMIN_EMAIL,
-            subject: `Quiz submission — ${submission.name}`,
+            subject: `Quiz submission: ${submission.name}`,
             html: buildAdminEmailHtml(submission),
           });
         } catch (mailErr) {
@@ -221,7 +221,7 @@ app.post('/api/submit', async (req, res) => {
         }
       }
     } else {
-      console.warn('SMTP is not configured — submission saved to', backupFile);
+      console.warn('SMTP is not configured, submission saved to', backupFile);
     }
 
     return res.json({ ok: true, participantEmailSent });
@@ -234,7 +234,7 @@ app.post('/api/submit', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Desire Discovery Quiz running at http://localhost:${PORT}`);
   if (!smtpConfigured()) {
-    console.log('Note: SMTP env vars not set — submissions are saved to ./submissions/ but no emails are sent.');
+    console.log('Note: SMTP env vars not set. Submissions are saved to ./submissions/ but no emails are sent.');
     console.log('See .env.example for setup.');
   }
 });
