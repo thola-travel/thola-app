@@ -1,11 +1,10 @@
 /**
- * Browser smoke test: runs the whole quiz as a user would — name + consent,
- * all 20 questions, submission — and asserts the results screen renders with
- * no JS errors.
+ * Browser smoke test: runs the whole quiz as a user would — name + email +
+ * consent, all questions across the three parts, submission — and asserts
+ * the results screen renders with no JS errors.
  *
  * Usage: start the server (`npm start`), then:
  *   CHROMIUM_PATH=/path/to/chrome node test/smoke.js
- * (CHROMIUM_PATH defaults to the Playwright-managed Chromium if installed.)
  */
 
 const { chromium } = require('playwright-core');
@@ -21,29 +20,42 @@ const { chromium } = require('playwright-core');
 
   await page.goto(process.env.QUIZ_URL || 'http://localhost:3000/');
   await page.fill('#first-name', 'SmokeTest');
+  await page.fill('#email', 'smoketest@example.com');
   await page.check('#consent-check');
   await page.click('#btn-start');
 
-  for (let i = 0; i < 20; i++) {
+  // Answer questions until the results screen appears (question count may evolve).
+  for (let i = 0; i < 80; i++) {
+    const done = await page.locator('#screen-results.active').count();
+    if (done > 0) break;
+    const analyzing = await page.locator('#screen-analyzing.active').count();
+    if (analyzing > 0) {
+      await page.waitForSelector('#screen-results.active', { timeout: 20000 });
+      break;
+    }
     await page.waitForSelector('.option', { state: 'visible' });
     const options = page.locator('.option');
     const n = await options.count();
     await options.nth(i % n).click();
-    await page.waitForTimeout(450);
+    await page.waitForTimeout(500);
   }
 
-  await page.waitForSelector('#screen-results.active', { timeout: 15000 });
+  await page.waitForSelector('#screen-results.active', { timeout: 20000 });
   const title = await page.textContent('#results-title');
   const kinsey = await page.textContent('#kinsey-label');
   const kinkCards = await page.locator('.kink-card').count();
+  const spectrumItems = await page.locator('.spectrum-item').count();
+  const suggestions = await page.locator('#suggestions-list li').count();
 
   console.log('TITLE:', title.trim());
   console.log('KINSEY:', kinsey.trim());
   console.log('KINK CARDS:', kinkCards);
+  console.log('SPECTRUM ITEMS:', spectrumItems);
+  console.log('SUGGESTIONS:', suggestions);
   console.log('JS ERRORS:', errors.length ? errors : 'none');
 
   await browser.close();
-  if (errors.length || kinkCards === 0) {
+  if (errors.length || kinkCards === 0 || spectrumItems === 0) {
     console.error('SMOKE FAIL');
     process.exit(1);
   }

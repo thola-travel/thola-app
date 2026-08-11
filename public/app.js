@@ -1,33 +1,42 @@
 /**
  * Desire Discovery Quiz — interactive logic.
  *
- * Answers are analyzed in real time (the "live reading" sidebar updates
- * category scores after every answer), then a complete analysis runs on
- * submission: kink profile with match levels, Kinsey scale placement, and
- * a plain-language summary. The full packet (name, Q&A, results, summary)
- * is POSTed to the backend, which emails it to the facilitator.
+ * Three parts: weighted play-style questions, a rapid-fire spark round
+ * (one question per niche kink), and the Kinsey scale. Answers are analyzed
+ * in real time in the sidebar; the full analysis runs on submission and the
+ * packet is POSTed to the backend, which emails the participant their
+ * summary, meanings, and suggestions.
  */
 
 (function () {
   'use strict';
 
-  // ---------- State ----------
+  // ---------- Build the question list ----------
+  const sparkCategories = Object.entries(CATEGORIES).filter(([, c]) => c.sparkPrompt);
+
   const allQuestions = [
     ...QUESTIONS.map((q) => ({ ...q, type: 'kink' })),
+    ...sparkCategories.map(([key, cat]) => ({
+      type: 'spark',
+      categoryKey: key,
+      question: cat.sparkPrompt,
+      options: SPARK_SCALE.map((s) => ({ label: s.label, value: s.value })),
+    })),
     ...KINSEY_QUESTIONS.map((q) => ({ ...q, type: 'kinsey' })),
   ];
 
   const state = {
     name: '',
+    email: '',
     index: 0,
-    selections: new Array(allQuestions.length).fill(null), // option index per question
+    selections: new Array(allQuestions.length).fill(null),
   };
 
-  // Max possible score per category (for normalizing to percentages).
-  const categoryMax = {};
+  // Max possible Part 1 score per broad category, for normalization.
+  const broadMax = {};
   Object.keys(CATEGORIES).forEach((key) => {
-    categoryMax[key] = QUESTIONS.reduce((sum, q) => {
-      const best = Math.max(...q.options.map((o) => o.scores[key] || 0));
+    broadMax[key] = QUESTIONS.reduce((sum, q) => {
+      const best = Math.max(...q.options.map((o) => (o.scores && o.scores[key]) || 0));
       return sum + best;
     }, 0);
   });
@@ -49,130 +58,204 @@
 
   // ---------- Intro ----------
   const nameInput = $('first-name');
+  const emailInput = $('email');
   const consentCheck = $('consent-check');
   const btnStart = $('btn-start');
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   function refreshStartButton() {
-    btnStart.disabled = !(nameInput.value.trim().length > 0 && consentCheck.checked);
+    btnStart.disabled = !(
+      nameInput.value.trim().length > 0 &&
+      EMAIL_RE.test(emailInput.value.trim()) &&
+      consentCheck.checked
+    );
   }
   nameInput.addEventListener('input', refreshStartButton);
+  emailInput.addEventListener('input', refreshStartButton);
   consentCheck.addEventListener('change', refreshStartButton);
+
+  // If the server is configured to keep an admin copy, say so honestly.
+  fetch('/api/config')
+    .then((r) => r.json())
+    .then((cfg) => {
+      if (cfg && cfg.adminCopy) {
+        $('consent-text').textContent =
+          'My summary and results will be emailed to the address I entered above, and a copy of my responses is kept by the quiz administrator.';
+      }
+    })
+    .catch(() => {});
 
   btnStart.addEventListener('click', () => {
     state.name = nameInput.value.trim();
+    state.email = emailInput.value.trim();
     state.index = 0;
-    renderQuestion();
+    renderQuestion(false);
     showScreen('quiz');
   });
 
-  // ---------- Live (real-time) analysis ----------
+  // ---------- Real-time analysis ----------
   function currentScores() {
     const totals = {};
-    Object.keys(CATEGORIES).forEach((k) => (totals[k] = 0));
+    Object.keys(CATEGORIES).forEach((k) => (totals[k] = null)); // null = no signal yet
     state.selections.forEach((sel, i) => {
       const q = allQuestions[i];
-      if (sel === null || q.type !== 'kink') return;
-      const scores = q.options[sel].scores;
-      Object.entries(scores).forEach(([k, pts]) => (totals[k] += pts));
+      if (sel === null) return;
+      if (q.type === 'kink') {
+        Object.entries(q.options[sel].scores).forEach(([k, pts]) => {
+          totals[k] = (totals[k] || 0) + pts;
+        });
+      } else if (q.type === 'spark') {
+        totals[q.categoryKey] = q.options[sel].value; // 0..1 interest scale
+      }
     });
     return totals;
   }
 
-  function answeredKinkCount() {
-    return state.selections.filter((sel, i) => sel !== null && allQuestions[i].type === 'kink').length;
+  function percentFor(key, totals) {
+    const cat = CATEGORIES[key];
+    if (cat.sparkPrompt) {
+      return totals[key] === null ? null : Math.round(totals[key] * 100);
+    }
+    if (totals[key] === null) return null;
+    return Math.round((totals[key] / (broadMax[key] || 1)) * 100);
+  }
+
+  function answeredCount() {
+    return state.selections.filter((s) => s !== null).length;
   }
 
   function updateLivePanel() {
     const totals = currentScores();
-    const answered = answeredKinkCount();
+    const ranked = Object.keys(CATEGORIES)
+      .map((key) => ({ key, pct: percentFor(key, totals) }))
+      .filter((e) => e.pct !== null)
+      .sort((a, b) => b.pct - a.pct);
 
-    // Bars: show all categories, scaled to the current leader so movement is visible early.
-    const leader = Math.max(1, ...Object.values(totals));
     const barsHost = $('live-bars');
     barsHost.innerHTML = '';
-    Object.entries(CATEGORIES)
-      .sort((a, b) => (totals[b[0]] || 0) - (totals[a[0]] || 0))
-      .forEach(([key, cat]) => {
-        const pct = Math.round(((totals[key] || 0) / leader) * 100);
-        const row = document.createElement('div');
-        row.className = 'live-bar-row';
-        row.innerHTML =
-          '<div class="bar-label"><span>' + cat.emoji + ' ' + cat.name + '</span></div>' +
-          '<div class="live-bar-track"><div class="live-bar-fill" style="width:' + pct + '%"></div></div>';
-        barsHost.appendChild(row);
+    ranked.slice(0, 8).forEach((e) => {
+      const cat = CATEGORIES[e.key];
+      const row = document.createElement('div');
+      row.className = 'live-bar-row';
+      row.innerHTML =
+        '<div class="bar-label"><span>' + cat.emoji + ' ' + cat.name + '</span><span>' + e.pct + '%</span></div>' +
+        '<div class="live-bar-track"><div class="live-bar-fill"></div></div>';
+      barsHost.appendChild(row);
+      requestAnimationFrame(() => {
+        row.querySelector('.live-bar-fill').style.width = e.pct + '%';
       });
+    });
 
-    // Blurb: an evolving read on where they're leaning.
     const blurb = $('live-blurb');
+    const answered = answeredCount();
     if (answered === 0) {
       blurb.textContent = 'Answer a few questions and your profile will start to appear…';
       return;
     }
-    const ranked = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-    const [topKey, topVal] = ranked[0];
-    const [secondKey, secondVal] = ranked[1];
-    const top = CATEGORIES[topKey];
-
-    if (answered < 4) {
+    const top = ranked[0] && CATEGORIES[ranked[0].key];
+    const second = ranked[1] && CATEGORIES[ranked[1].key];
+    if (!top || ranked[0].pct === 0) {
+      blurb.textContent = 'Still listening… your profile is warming up.';
+    } else if (answered < 4) {
       blurb.textContent = 'Early signs point toward ' + top.name.toLowerCase() + '… keep going, the picture is still forming.';
-    } else if (topVal > 0 && secondVal > 0 && topVal - secondVal <= 2) {
+    } else if (second && ranked[0].pct - ranked[1].pct <= 8 && ranked[1].pct > 0) {
       blurb.textContent =
-        'Interesting — you\'re showing a blend of ' + top.name.toLowerCase() + ' and ' +
-        CATEGORIES[secondKey].name.toLowerCase() + '. A versatile profile is taking shape.';
+        'Interesting — a blend of ' + top.name.toLowerCase() + ' and ' + second.name.toLowerCase() +
+        ' is taking shape. Versatile profile so far.';
     } else {
-      blurb.textContent =
-        top.emoji + ' ' + top.name + ' is emerging as a strong thread for you. ' + top.tagline;
+      blurb.textContent = top.emoji + ' ' + top.name + ' is emerging as a strong thread. ' + top.tagline;
     }
   }
 
   // ---------- Quiz rendering ----------
-  function renderQuestion() {
-    const q = allQuestions[state.index];
-    const kinkTotal = QUESTIONS.length;
+  const PART_TAGS = {
+    kink: 'Part 1 · Your Play Style',
+    spark: 'Part 2 · Spark Round',
+    kinsey: 'Part 3 · Attraction & the Kinsey Scale',
+  };
+  const PART_HINTS = {
+    kink: 'Pick the answer that feels most true',
+    spark: 'Gut reaction — first instinct is the honest one',
+    kinsey: 'Attraction, not behavior — answer with your inner experience',
+  };
 
-    $('section-tag').textContent =
-      q.type === 'kink' ? 'Part 1 · Your Play Style' : 'Part 2 · Attraction & the Kinsey Scale';
-    $('progress-count').textContent = 'Question ' + (state.index + 1) + ' of ' + allQuestions.length;
-    $('progress-fill').style.width = ((state.index / allQuestions.length) * 100) + '%';
-    $('question-text').textContent = q.question;
+  function renderQuestion(animated) {
+    const body = $('question-body');
+    const paint = () => {
+      const q = allQuestions[state.index];
 
-    const host = $('options');
-    host.innerHTML = '';
-    q.options.forEach((opt, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'option' + (state.selections[state.index] === i ? ' selected' : '');
-      btn.type = 'button';
-      btn.textContent = opt.label;
-      btn.addEventListener('click', () => selectOption(i));
-      host.appendChild(btn);
-    });
+      $('section-tag').textContent = PART_TAGS[q.type];
+      $('progress-count').textContent = (state.index + 1) + ' / ' + allQuestions.length;
+      $('progress-fill').style.width = ((state.index / allQuestions.length) * 100) + '%';
 
-    $('btn-back').style.visibility = state.index === 0 ? 'hidden' : 'visible';
-    $('nav-hint').textContent =
-      q.type === 'kinsey'
-        ? 'Attraction, not behavior — answer with your inner experience'
-        : 'Pick the answer that feels most true';
+      const sparkHeader = $('spark-header');
+      if (q.type === 'spark') {
+        sparkHeader.hidden = false;
+        $('spark-emoji').textContent = CATEGORIES[q.categoryKey].emoji;
+      } else {
+        sparkHeader.hidden = true;
+      }
 
-    updateLivePanel();
+      $('question-text').textContent = q.question;
+
+      const host = $('options');
+      host.className = 'options' + (q.type === 'spark' ? ' spark-grid' : '');
+      host.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option' + (state.selections[state.index] === i ? ' selected' : '');
+        btn.type = 'button';
+        btn.textContent = opt.label;
+        btn.addEventListener('click', () => selectOption(i));
+        host.appendChild(btn);
+      });
+
+      $('btn-back').style.visibility = state.index === 0 ? 'hidden' : 'visible';
+      $('nav-hint').textContent = PART_HINTS[q.type];
+      updateLivePanel();
+    };
+
+    if (animated) {
+      body.classList.remove('q-in');
+      body.classList.add('q-out');
+      setTimeout(() => {
+        paint();
+        body.classList.remove('q-out');
+        body.classList.add('q-in');
+      }, 200);
+    } else {
+      body.classList.remove('q-out');
+      body.classList.add('q-in');
+      paint();
+    }
   }
 
+  let advancing = false;
   function selectOption(optionIndex) {
+    if (advancing) return;
     state.selections[state.index] = optionIndex;
-    renderQuestion(); // repaint selection + live panel
+
+    // Repaint just the selection highlight, then advance with animation.
+    const host = $('options');
+    Array.from(host.children).forEach((b, i) => b.classList.toggle('selected', i === optionIndex));
+    updateLivePanel();
+
+    advancing = true;
     setTimeout(() => {
+      advancing = false;
       if (state.index < allQuestions.length - 1) {
         state.index += 1;
-        renderQuestion();
+        renderQuestion(true);
       } else {
         beginAnalysis();
       }
-    }, 350);
+    }, 340);
   }
 
   $('btn-back').addEventListener('click', () => {
     if (state.index > 0) {
       state.index -= 1;
-      renderQuestion();
+      renderQuestion(true);
     }
   });
 
@@ -188,17 +271,18 @@
 
     const kinkProfile = Object.entries(CATEGORIES)
       .map(([key, cat]) => {
-        const percent = Math.round(((totals[key] || 0) / (categoryMax[key] || 1)) * 100);
+        const percent = percentFor(key, totals) || 0;
         const { level, cls } = levelFor(percent);
-        return { key, name: cat.emoji + ' ' + cat.name, plainName: cat.name, percent, level, cls };
+        return { key, name: cat.emoji + ' ' + cat.name, plainName: cat.name, group: cat.group, percent, level, cls };
       })
       .sort((a, b) => b.percent - a.percent);
 
     // Kinsey: average the numeric answers; X wins if it's the majority.
+    const kinseyStart = allQuestions.findIndex((q) => q.type === 'kinsey');
     const kinseyValues = [];
     let xCount = 0;
     KINSEY_QUESTIONS.forEach((q, i) => {
-      const sel = state.selections[QUESTIONS.length + i];
+      const sel = state.selections[kinseyStart + i];
       if (sel === null) return;
       const v = q.options[sel].value;
       if (v === 'X') xCount += 1;
@@ -214,22 +298,32 @@
     }
     const kinsey = { key: String(kinseyKey), ...KINSEY_RESULTS[kinseyKey] };
 
+    const suggestions = buildSuggestions(kinkProfile);
     const summaryText = buildSummary(kinkProfile, kinsey);
-    return { kinkProfile, kinsey, summaryText };
+    return { kinkProfile, kinsey, summaryText, suggestions };
+  }
+
+  function buildSuggestions(kinkProfile) {
+    const top = kinkProfile.filter((k) => k.level !== 'Not a focus right now').slice(0, 3);
+    const personal = top.map((k) => {
+      const cat = CATEGORIES[k.key];
+      return cat.emoji + ' For ' + cat.name.toLowerCase() + ': ' + cat.firstStep;
+    });
+    return personal.concat(GENERAL_SUGGESTIONS);
   }
 
   function buildSummary(kinkProfile, kinsey) {
     const strong = kinkProfile.filter((k) => k.level === 'Strong resonance');
     const curious = kinkProfile.filter((k) => k.level === 'Curious spark');
     const name = state.name;
-
     const lines = [];
 
     if (strong.length > 0) {
-      const names = strong.map((k) => k.plainName.toLowerCase());
+      const names = strong.slice(0, 5).map((k) => k.plainName.toLowerCase());
       lines.push(
         name + ', your answers paint a clear and wonderful picture: you\'re most strongly drawn to ' +
-        joinNicely(names) + '. ' +
+        joinNicely(names) +
+        (strong.length > 5 ? ' (and ' + (strong.length - 5) + ' more)' : '') + '. ' +
         (strong.length > 1
           ? 'These threads weave together naturally — they\'re not separate "kinks" so much as one coherent way you love to connect.'
           : 'That focus is a gift — knowing exactly what lights you up makes it far easier to ask for.')
@@ -237,7 +331,7 @@
     } else if (curious.length > 0) {
       lines.push(
         name + ', your profile is beautifully open — no single kink dominates, but you carry genuine sparks of curiosity toward ' +
-        joinNicely(curious.map((k) => k.plainName.toLowerCase())) +
+        joinNicely(curious.slice(0, 5).map((k) => k.plainName.toLowerCase())) +
         '. Curiosity is exactly where every good discovery starts, and there\'s no rush.'
       );
     } else {
@@ -250,7 +344,8 @@
     if (curious.length > 0 && strong.length > 0) {
       lines.push(
         'Alongside your core profile, you showed a curious spark toward ' +
-        joinNicely(curious.map((k) => k.plainName.toLowerCase())) +
+        joinNicely(curious.slice(0, 6).map((k) => k.plainName.toLowerCase())) +
+        (curious.length > 6 ? ' and a few more' : '') +
         ' — worth exploring gently, at your own pace, if and when it appeals.'
       );
     }
@@ -278,8 +373,8 @@
   // ---------- Submission flow ----------
   function collectAnswers() {
     return allQuestions.map((q, i) => ({
-      section: q.type === 'kink' ? 'Play Style' : 'Kinsey Scale',
-      question: q.question,
+      section: q.type === 'kink' ? 'Play Style' : q.type === 'spark' ? 'Spark Round' : 'Kinsey Scale',
+      question: q.type === 'spark' ? CATEGORIES[q.categoryKey].name + ' — ' + q.question : q.question,
       answer: state.selections[i] !== null ? q.options[state.selections[i]].label : '(skipped)',
     }));
   }
@@ -289,6 +384,7 @@
     const steps = [
       'Compiling your responses…',
       'Mapping your play-style profile…',
+      'Charting every spark across the spectrum…',
       'Placing you on the Kinsey scale…',
       'Writing your summary…',
     ];
@@ -297,15 +393,20 @@
     stepEl.textContent = steps[0];
     const ticker = setInterval(() => {
       s += 1;
-      if (s < steps.length) stepEl.textContent = steps[s];
-      else clearInterval(ticker);
-    }, 650);
+      if (s < steps.length) {
+        stepEl.style.opacity = 0;
+        setTimeout(() => {
+          stepEl.textContent = steps[s] || steps[steps.length - 1];
+          stepEl.style.opacity = 1;
+        }, 250);
+      } else {
+        clearInterval(ticker);
+      }
+    }, 620);
 
     const results = analyze();
-    const payload = { name: state.name, answers: collectAnswers(), results };
+    const payload = { name: state.name, email: state.email, answers: collectAnswers(), results };
 
-    // Send to the backend for email delivery; results show regardless so the
-    // participant is never blocked by a delivery hiccup.
     fetch('/api/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -314,11 +415,38 @@
       .then((r) => r.json())
       .catch(() => ({ ok: false }))
       .then((resp) => {
-        setTimeout(() => renderResults(results, resp), 2800);
+        setTimeout(() => renderResults(results, resp), 3200);
       });
   }
 
   // ---------- Results rendering ----------
+  function fullCardHtml(k) {
+    const cat = CATEGORIES[k.key];
+    return (
+      '<div class="kink-head"><h3>' + cat.emoji + ' ' + cat.name + '</h3>' +
+      '<span class="match-chip">' + k.percent + '% · ' + k.level + '</span></div>' +
+      '<p class="kink-tagline">' + cat.tagline + '</p>' +
+      '<div class="kink-meter"><div class="kink-meter-fill" data-w="' + k.percent + '"></div></div>' +
+      '<p>' + cat.description + '</p>' +
+      '<h4>What this can look like</h4>' +
+      '<ul>' + cat.examples.map((e) => '<li>' + e + '</li>').join('') + '</ul>' +
+      '<div class="support-note">💚 ' + cat.support + '</div>' +
+      '<div class="first-step">🌱 <strong>A gentle first step:</strong> ' + cat.firstStep + '</div>'
+    );
+  }
+
+  function compactCardHtml(k) {
+    const cat = CATEGORIES[k.key];
+    return (
+      '<div class="kink-head"><h3>' + cat.emoji + ' ' + cat.name + '</h3>' +
+      '<span class="match-chip">' + k.percent + '% · ' + k.level + '</span></div>' +
+      '<p class="kink-tagline">' + cat.tagline + '</p>' +
+      '<div class="kink-meter"><div class="kink-meter-fill" data-w="' + k.percent + '"></div></div>' +
+      '<p>' + cat.description + '</p>' +
+      '<div class="first-step">🌱 <strong>If curiosity ever calls:</strong> ' + cat.firstStep + '</div>'
+    );
+  }
+
   function renderResults(results, serverResp) {
     $('results-title').textContent = state.name + ', here\'s your Desire Profile 🌸';
     $('results-summary').textContent = results.summaryText;
@@ -335,53 +463,89 @@
     $('kinsey-label').textContent = results.kinsey.label;
     $('kinsey-description').textContent = results.kinsey.description;
 
-    // Kink cards (strong + curious in full; others summarized in a low card)
+    // Featured cards: strong in full, curious compact.
     const host = $('kink-results');
     host.innerHTML = '';
-    const featured = results.kinkProfile.filter((k) => k.level !== 'Not a focus right now');
-    const rest = results.kinkProfile.filter((k) => k.level === 'Not a focus right now');
+    const strong = results.kinkProfile.filter((k) => k.level === 'Strong resonance');
+    const curious = results.kinkProfile.filter((k) => k.level === 'Curious spark');
+    const featured = strong.length + curious.length > 0
+      ? { strong, curious }
+      : { strong: results.kinkProfile.slice(0, 3), curious: [] };
 
-    (featured.length > 0 ? featured : results.kinkProfile.slice(0, 3)).forEach((k) => {
-      const cat = CATEGORIES[k.key];
+    featured.strong.forEach((k, i) => {
       const card = document.createElement('div');
-      card.className = 'card kink-card ' + k.cls;
-      card.innerHTML =
-        '<div class="kink-head"><h3>' + cat.emoji + ' ' + cat.name + '</h3>' +
-        '<span class="match-chip">' + k.percent + '% · ' + k.level + '</span></div>' +
-        '<p class="kink-tagline">' + cat.tagline + '</p>' +
-        '<div class="kink-meter"><div class="kink-meter-fill" style="width:' + k.percent + '%"></div></div>' +
-        '<p>' + cat.description + '</p>' +
-        '<h4>What this can look like</h4>' +
-        '<ul>' + cat.examples.map((e) => '<li>' + e + '</li>').join('') + '</ul>' +
-        '<div class="support-note">💚 ' + cat.support + '</div>';
+      card.className = 'card glass kink-card reveal ' + k.cls;
+      card.style.animationDelay = (0.1 + i * 0.08) + 's';
+      card.innerHTML = fullCardHtml(k);
+      host.appendChild(card);
+    });
+    featured.curious.forEach((k, i) => {
+      const card = document.createElement('div');
+      card.className = 'card glass kink-card reveal ' + k.cls;
+      card.style.animationDelay = (0.1 + (featured.strong.length + i) * 0.08) + 's';
+      card.innerHTML = compactCardHtml(k);
       host.appendChild(card);
     });
 
-    if (rest.length > 0 && featured.length > 0) {
-      const card = document.createElement('div');
-      card.className = 'card kink-card low';
-      card.innerHTML =
-        '<div class="kink-head"><h3>🌱 Quieter for now</h3></div>' +
-        '<p>These areas didn\'t light up strongly this time: <strong>' +
-        rest.map((k) => k.name).join(', ') +
-        '</strong>. That\'s not a "no" — interests shift across a lifetime, and quiet today can become curiosity tomorrow. Nothing is closed off unless you want it to be.</p>';
-      host.appendChild(card);
-    }
+    // Full spectrum map, grouped.
+    const mapHost = $('spectrum-map');
+    mapHost.innerHTML = '';
+    Object.entries(GROUPS).forEach(([groupKey, groupName]) => {
+      const entries = results.kinkProfile.filter((k) => k.group === groupKey);
+      if (entries.length === 0) return;
+      const section = document.createElement('div');
+      section.className = 'spectrum-group';
+      section.innerHTML = '<h4>' + groupName + '</h4>';
+      const grid = document.createElement('div');
+      grid.className = 'spectrum-grid';
+      entries.forEach((k) => {
+        const cat = CATEGORIES[k.key];
+        const item = document.createElement('div');
+        item.className = 'spectrum-item';
+        item.title = cat.tagline;
+        item.innerHTML =
+          '<div class="si-label"><span>' + cat.emoji + ' ' + cat.name + '</span>' +
+          '<span class="si-pct">' + k.percent + '%</span></div>' +
+          '<div class="si-track"><div class="si-fill" data-w="' + k.percent + '"></div></div>';
+        grid.appendChild(item);
+      });
+      section.appendChild(grid);
+      mapHost.appendChild(section);
+    });
+
+    // Suggestions
+    const sugHost = $('suggestions-list');
+    sugHost.innerHTML = '';
+    results.suggestions.forEach((s) => {
+      const li = document.createElement('li');
+      li.textContent = s;
+      sugHost.appendChild(li);
+    });
 
     $('closing-note').textContent =
       'Discovery is a lifelong conversation with yourself, ' + state.name +
       '. Revisit this whenever you like — answers change as you grow, and every version of your profile is worth celebrating.';
-    $('email-note').textContent = serverResp && serverResp.ok
-      ? 'Your results have been sent to the facilitator, who can share a copy with you for your records.'
-      : 'Your results were saved. If you\'d like a copy, just ask the facilitator.';
+    $('email-note').textContent = serverResp && serverResp.participantEmailSent
+      ? 'A keepsake copy of your summary and results is on its way to ' + state.email + '.'
+      : 'Your results are shown above — email delivery isn\'t available right now, so consider saving this page.';
 
     showScreen('results');
+
+    // Animate all meters after first paint.
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        document.querySelectorAll('[data-w]').forEach((el) => {
+          el.style.width = el.getAttribute('data-w') + '%';
+        });
+      }, 120);
+    });
   }
 
   $('btn-restart').addEventListener('click', () => {
     state.index = 0;
     state.selections = new Array(allQuestions.length).fill(null);
     nameInput.value = state.name;
+    emailInput.value = state.email;
     refreshStartButton();
     showScreen('intro');
   });

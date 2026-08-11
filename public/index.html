@@ -8,33 +8,47 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
   <main class="shell">
 
     <!-- ============ INTRO ============ -->
     <section id="screen-intro" class="screen active">
-      <div class="card intro-card">
-        <div class="intro-emoji">🌸</div>
-        <h1>The Desire Discovery Quiz</h1>
+      <div class="card glass intro-card">
+        <div class="intro-emoji float">🌸</div>
+        <h1 class="gradient-text">The Desire Discovery Quiz</h1>
         <p class="lede">
-          A warm, judgment-free space to learn what excites you — the kinds of play
-          you're drawn to, and where you fall on the Kinsey scale of attraction.
+          A warm, judgment-free space to learn what excites you — from the well-known
+          to the wonderfully niche — plus where you fall on the Kinsey scale.
         </p>
         <ul class="intro-points">
-          <li>💜 <strong>Every result is valid.</strong> There are no weird answers here — only honest ones.</li>
-          <li>🔍 <strong>20 quick questions.</strong> Watch your profile take shape live as you answer.</li>
-          <li>📖 <strong>Clear results.</strong> You'll get a friendly summary with real examples of everything in your profile.</li>
+          <li><span>💜</span><div><strong>Every result is valid.</strong> Nothing here is weird — the whole spectrum of desire is covered, and all of it is human.</div></li>
+          <li><span>⚡</span><div><strong>Three quick parts.</strong> Play-style questions, a rapid-fire spark round covering dozens of kinks, and the Kinsey scale.</div></li>
+          <li><span>🔮</span><div><strong>Live analysis.</strong> Watch your profile take shape in real time, then get a full breakdown with meanings, examples, and gentle suggestions.</div></li>
+          <li><span>📬</span><div><strong>A keepsake copy.</strong> Your summary and what it all means, emailed to you to keep.</div></li>
         </ul>
 
-        <label class="field-label" for="first-name">First name</label>
-        <input type="text" id="first-name" maxlength="50" placeholder="What should we call you?" autocomplete="given-name">
+        <div class="field-grid">
+          <div>
+            <label class="field-label" for="first-name">First name</label>
+            <input type="text" id="first-name" maxlength="50" placeholder="What should we call you?" autocomplete="given-name">
+          </div>
+          <div>
+            <label class="field-label" for="email">Email</label>
+            <input type="email" id="email" maxlength="200" placeholder="Where should we send your results?" autocomplete="email">
+          </div>
+        </div>
 
         <label class="consent">
           <input type="checkbox" id="consent-check">
-          <span>I understand my answers and results will be securely sent to the quiz
-          facilitator (Mizdon Studios) so they can share a copy of my results with me.</span>
+          <span id="consent-text">My summary and results will be emailed to the address I entered above.</span>
         </label>
 
-        <button id="btn-start" class="btn primary" disabled>Begin the journey ✨</button>
+        <button id="btn-start" class="btn primary" disabled><span>Begin the journey</span> ✨</button>
         <p class="fine-print">For adults 18+. Everything explored here assumes enthusiastic consent between adults.</p>
       </div>
     </section>
@@ -42,25 +56,31 @@
     <!-- ============ QUIZ ============ -->
     <section id="screen-quiz" class="screen">
       <div class="quiz-layout">
-        <div class="card question-card">
+        <div class="card glass question-card">
           <div class="progress-wrap">
             <div class="progress-label">
-              <span id="section-tag" class="section-tag">Part 1 · Your Play Style</span>
+              <span id="section-tag" class="section-tag"></span>
               <span id="progress-count"></span>
             </div>
             <div class="progress-bar"><div id="progress-fill"></div></div>
           </div>
 
-          <h2 id="question-text"></h2>
-          <div id="options" class="options"></div>
+          <div id="question-body">
+            <div id="spark-header" class="spark-header" hidden>
+              <span id="spark-emoji" class="spark-emoji"></span>
+              <span class="spark-kicker">How does this sound?</span>
+            </div>
+            <h2 id="question-text"></h2>
+            <div id="options" class="options"></div>
+          </div>
 
           <div class="nav-row">
             <button id="btn-back" class="btn ghost">← Back</button>
-            <span id="nav-hint" class="nav-hint">Pick the answer that feels most true</span>
+            <span id="nav-hint" class="nav-hint"></span>
           </div>
         </div>
 
-        <aside class="card insight-card">
+        <aside class="card glass insight-card">
           <h3>🔮 Live reading</h3>
           <p id="live-blurb" class="live-blurb">Answer a few questions and your profile will start to appear…</p>
           <div id="live-bars" class="live-bars"></div>
@@ -70,8 +90,11 @@
 
     <!-- ============ ANALYZING ============ -->
     <section id="screen-analyzing" class="screen">
-      <div class="card analyzing-card">
-        <div class="pulse">💫</div>
+      <div class="card glass analyzing-card">
+        <div class="orbit">
+          <span class="orbit-dot"></span>
+          <span class="orbit-core">💫</span>
+        </div>
         <h2>Reading your answers…</h2>
         <p id="analyzing-step">Compiling your responses</p>
       </div>
@@ -80,22 +103,33 @@
     <!-- ============ RESULTS ============ -->
     <section id="screen-results" class="screen">
       <div class="results-wrap">
-        <div class="card summary-card">
-          <h1 id="results-title"></h1>
+        <div class="card glass summary-card reveal">
+          <h1 id="results-title" class="gradient-text"></h1>
           <p id="results-summary" class="results-summary"></p>
         </div>
 
-        <div class="card kinsey-card">
+        <div class="card glass kinsey-card reveal">
           <h2>🌈 Where you fall on the Kinsey scale</h2>
           <div class="kinsey-scale" id="kinsey-scale"></div>
           <h3 id="kinsey-label"></h3>
           <p id="kinsey-description"></p>
         </div>
 
-        <h2 class="profile-heading">💜 Your kink profile</h2>
+        <h2 class="profile-heading reveal">💜 What lit up for you</h2>
         <div id="kink-results"></div>
 
-        <div class="card closing-card">
+        <div class="card glass spectrum-card reveal">
+          <h2>🗺️ Your full spectrum map</h2>
+          <p class="spectrum-note">Every territory the quiz explored, and how brightly each one glowed for you.</p>
+          <div id="spectrum-map"></div>
+        </div>
+
+        <div class="card glass suggestions-card reveal">
+          <h2>🌱 Gentle suggestions for the road</h2>
+          <ul id="suggestions-list"></ul>
+        </div>
+
+        <div class="card glass closing-card reveal">
           <h2>One last thing 🌷</h2>
           <p id="closing-note"></p>
           <p id="email-note" class="fine-print"></p>
