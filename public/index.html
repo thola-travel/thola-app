@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desire Discovery Quiz</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+
+    <!-- ============ INTRO ============ -->
+    <section id="screen-intro" class="screen active">
+      <div class="card intro-card">
+        <div class="intro-emoji">🌸</div>
+        <h1>The Desire Discovery Quiz</h1>
+        <p class="lede">
+          A warm, judgment-free space to learn what excites you — the kinds of play
+          you're drawn to, and where you fall on the Kinsey scale of attraction.
+        </p>
+        <ul class="intro-points">
+          <li>💜 <strong>Every result is valid.</strong> There are no weird answers here — only honest ones.</li>
+          <li>🔍 <strong>20 quick questions.</strong> Watch your profile take shape live as you answer.</li>
+          <li>📖 <strong>Clear results.</strong> You'll get a friendly summary with real examples of everything in your profile.</li>
+        </ul>
+
+        <label class="field-label" for="first-name">First name</label>
+        <input type="text" id="first-name" maxlength="50" placeholder="What should we call you?" autocomplete="given-name">
+
+        <label class="consent">
+          <input type="checkbox" id="consent-check">
+          <span>I understand my answers and results will be securely sent to the quiz
+          facilitator (Mizdon Studios) so they can share a copy of my results with me.</span>
+        </label>
+
+        <button id="btn-start" class="btn primary" disabled>Begin the journey ✨</button>
+        <p class="fine-print">For adults 18+. Everything explored here assumes enthusiastic consent between adults.</p>
+      </div>
+    </section>
+
+    <!-- ============ QUIZ ============ -->
+    <section id="screen-quiz" class="screen">
+      <div class="quiz-layout">
+        <div class="card question-card">
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span id="section-tag" class="section-tag">Part 1 · Your Play Style</span>
+              <span id="progress-count"></span>
+            </div>
+            <div class="progress-bar"><div id="progress-fill"></div></div>
+          </div>
+
+          <h2 id="question-text"></h2>
+          <div id="options" class="options"></div>
+
+          <div class="nav-row">
+            <button id="btn-back" class="btn ghost">← Back</button>
+            <span id="nav-hint" class="nav-hint">Pick the answer that feels most true</span>
+          </div>
+        </div>
+
+        <aside class="card insight-card">
+          <h3>🔮 Live reading</h3>
+          <p id="live-blurb" class="live-blurb">Answer a few questions and your profile will start to appear…</p>
+          <div id="live-bars" class="live-bars"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ ANALYZING ============ -->
+    <section id="screen-analyzing" class="screen">
+      <div class="card analyzing-card">
+        <div class="pulse">💫</div>
+        <h2>Reading your answers…</h2>
+        <p id="analyzing-step">Compiling your responses</p>
+      </div>
+    </section>
+
+    <!-- ============ RESULTS ============ -->
+    <section id="screen-results" class="screen">
+      <div class="results-wrap">
+        <div class="card summary-card">
+          <h1 id="results-title"></h1>
+          <p id="results-summary" class="results-summary"></p>
+        </div>
+
+        <div class="card kinsey-card">
+          <h2>🌈 Where you fall on the Kinsey scale</h2>
+          <div class="kinsey-scale" id="kinsey-scale"></div>
+          <h3 id="kinsey-label"></h3>
+          <p id="kinsey-description"></p>
+        </div>
+
+        <h2 class="profile-heading">💜 Your kink profile</h2>
+        <div id="kink-results"></div>
+
+        <div class="card closing-card">
+          <h2>One last thing 🌷</h2>
+          <p id="closing-note"></p>
+          <p id="email-note" class="fine-print"></p>
+          <button id="btn-restart" class="btn ghost">Take it again</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <script src="quiz-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
