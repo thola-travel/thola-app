@@ -36,13 +36,66 @@ function smtpConfigured() {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
+// Generous but finite: a slow mail server must never hold up a submission.
+const MAIL_TIMEOUTS = { connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 };
+const SEND_DEADLINE_MS = 20000;
+
 function buildTransporter() {
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 465),
     secure: String(process.env.SMTP_SECURE || 'true') === 'true',
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    ...MAIL_TIMEOUTS,
   });
+}
+
+function sendWithDeadline(transporter, message) {
+  return Promise.race([
+    transporter.sendMail(message),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('mail send timed out after ' + SEND_DEADLINE_MS + 'ms')), SEND_DEADLINE_MS)
+    ),
+  ]);
+}
+
+/*
+ * Email modes:
+ *  - Real SMTP when SMTP_HOST/USER/PASS are set: mail goes to the address
+ *    the participant entered.
+ *  - Test mode otherwise (unless EMAIL_MODE=off): a throwaway Ethereal
+ *    inbox is created on first use. The email is genuinely sent over SMTP,
+ *    Ethereal captures it instead of delivering, and the API response
+ *    carries a preview URL so the exact email can be inspected.
+ */
+let testTransportPromise = null;
+
+async function getMailer() {
+  if (smtpConfigured()) {
+    return { transporter: buildTransporter(), testMode: false, from: process.env.SMTP_FROM || process.env.SMTP_USER };
+  }
+  if (String(process.env.EMAIL_MODE || '').toLowerCase() === 'off') return null;
+  if (!testTransportPromise) {
+    testTransportPromise = nodemailer
+      .createTestAccount()
+      .then((acct) =>
+        nodemailer.createTransport({
+          host: acct.smtp.host,
+          port: acct.smtp.port,
+          secure: acct.smtp.secure,
+          auth: { user: acct.user, pass: acct.pass },
+          ...MAIL_TIMEOUTS,
+        })
+      )
+      .catch((err) => {
+        console.warn('Test inbox unavailable (' + err.message + '); emails are skipped until SMTP is configured.');
+        testTransportPromise = null;
+        return null;
+      });
+  }
+  const transporter = await testTransportPromise;
+  if (!transporter) return null;
+  return { transporter, testMode: true, from: '"Desire Discovery Quiz" <quiz@example.com>' };
 }
 
 function escapeHtml(value) {
@@ -236,39 +289,50 @@ app.post('/api/submit', async (req, res) => {
     fs.writeFileSync(backupFile, JSON.stringify(submission, null, 2));
 
     let participantEmailSent = false;
-    if (smtpConfigured()) {
-      const transporter = buildTransporter();
-      const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+    let testMode = false;
+    let previewUrl = null;
 
+    const mailer = await getMailer();
+    if (mailer) {
+      testMode = mailer.testMode;
       try {
-        await transporter.sendMail({
-          from,
+        const info = await sendWithDeadline(mailer.transporter, {
+          from: mailer.from,
           to: submission.email,
           subject: `${submission.name}, your Desire Profile is ready`,
           html: buildParticipantEmailHtml(submission),
         });
         participantEmailSent = true;
+        if (testMode) {
+          previewUrl = nodemailer.getTestMessageUrl(info) || null;
+          console.log('Test mode: participant email captured. Preview:', previewUrl);
+        } else {
+          console.log('Participant email sent to', submission.email);
+        }
       } catch (mailErr) {
         console.error('Participant email failed (submission saved locally):', mailErr.message);
       }
 
       if (ADMIN_EMAIL) {
         try {
-          await transporter.sendMail({
-            from,
+          const adminInfo = await sendWithDeadline(mailer.transporter, {
+            from: mailer.from,
             to: ADMIN_EMAIL,
             subject: `Quiz submission: ${submission.name}`,
             html: buildAdminEmailHtml(submission),
           });
+          if (testMode) {
+            console.log('Test mode: admin copy captured. Preview:', nodemailer.getTestMessageUrl(adminInfo));
+          }
         } catch (mailErr) {
           console.error('Admin copy failed (submission saved locally):', mailErr.message);
         }
       }
     } else {
-      console.warn('SMTP is not configured, submission saved to', backupFile);
+      console.warn('Email is off, submission saved to', backupFile);
     }
 
-    return res.json({ ok: true, participantEmailSent });
+    return res.json({ ok: true, participantEmailSent, testMode, previewUrl });
   } catch (err) {
     console.error('Submission error:', err);
     return res.status(500).json({ ok: false, error: 'Server error.' });
@@ -277,8 +341,13 @@ app.post('/api/submit', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Desire Discovery Quiz running at http://localhost:${PORT}`);
-  if (!smtpConfigured()) {
-    console.log('Note: SMTP env vars not set. Submissions are saved to ./submissions/ but no emails are sent.');
-    console.log('See .env.example for setup.');
+  if (smtpConfigured()) {
+    console.log('Email: real delivery via', process.env.SMTP_HOST);
+  } else if (String(process.env.EMAIL_MODE || '').toLowerCase() === 'off') {
+    console.log('Email: off (EMAIL_MODE=off). Submissions are saved to ./submissions/ only.');
+  } else {
+    console.log('Email: TEST MODE. No SMTP credentials set, so emails are captured by a throwaway');
+    console.log('Ethereal inbox and each submission response includes a preview link to inspect');
+    console.log('the exact email. Set SMTP_* in .env for real delivery (see .env.example).');
   }
 });

@@ -31,7 +31,13 @@ npm start              # http://localhost:3000
 
 Any SMTP provider works. With Gmail: enable 2-Step Verification, create an App password at https://myaccount.google.com/apppasswords, and use it as `SMTP_PASS`. If you want the quiz fully untraceable to a personal account, send from a dedicated address created just for this.
 
-Without SMTP configured the app still works. Results display in the browser and submissions are saved to `./submissions/`.
+**Testing without credentials:** with no SMTP settings, the app starts in test mode. Every submission's email is genuinely composed and sent over SMTP, a throwaway Ethereal inbox captures it instead of delivering, and the results page shows an "open the exact email" link so you can inspect precisely what the participant would have received. Set `EMAIL_MODE=off` to disable email entirely. Either way, results always display and submissions are saved to `./submissions/`; a slow or unreachable mail server can never delay someone's results (hard 20-second send deadline).
+
+There's also an automated delivery test that runs a real SMTP server locally and asserts the participant email arrives at the address entered (ranked list, percentages, and side included; raw answers excluded) and that the admin copy carries the answers:
+
+```bash
+node test/email-delivery.js
+```
 
 ### Optional admin copy
 

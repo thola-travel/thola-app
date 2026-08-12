@@ -484,14 +484,20 @@
     const results = analyze();
     const payload = { name: state.name, email: state.email, answers: collectAnswers(), results };
 
+    // Results must never wait on a slow mail server: give the request a
+    // hard deadline and fall back to showing results without the email.
+    const abort = new AbortController();
+    const deadline = setTimeout(() => abort.abort(), 30000);
     fetch('/api/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: abort.signal,
     })
       .then((r) => r.json())
       .catch(() => ({ ok: false }))
       .then((resp) => {
+        clearTimeout(deadline);
         setTimeout(() => renderResults(results, resp), 3200);
       });
   }
@@ -646,9 +652,16 @@
     $('closing-note').textContent =
       'Getting to know yourself is a long conversation, ' + state.name +
       '. Come back whenever you like. Answers shift as you grow, and every version of your profile is worth having.';
-    $('email-note').textContent = serverResp && serverResp.participantEmailSent
-      ? 'A copy of your summary and results is on its way to ' + state.email + '.'
-      : 'Your results are shown above. Email delivery isn\'t available right now, so consider saving this page.';
+    const emailNote = $('email-note');
+    if (serverResp && serverResp.participantEmailSent && serverResp.testMode && serverResp.previewUrl) {
+      emailNote.innerHTML =
+        'Test mode: the email was captured instead of delivered. ' +
+        '<a href="' + serverResp.previewUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">Open the exact email here</a>.';
+    } else if (serverResp && serverResp.participantEmailSent) {
+      emailNote.textContent = 'A copy of your summary and results is on its way to ' + state.email + '.';
+    } else {
+      emailNote.textContent = 'Your results are shown above. Email delivery isn\'t available right now, so consider saving this page.';
+    }
 
     showScreen('results');
 
