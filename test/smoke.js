@@ -25,7 +25,7 @@ const { chromium } = require('playwright-core');
   await page.click('#btn-start');
 
   // Answer questions until the results screen appears (question count may evolve).
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 120; i++) {
     const done = await page.locator('#screen-results.active').count();
     if (done > 0) break;
     const analyzing = await page.locator('#screen-analyzing.active').count();
@@ -34,10 +34,24 @@ const { chromium } = require('playwright-core');
       break;
     }
     await page.waitForSelector('.option', { state: 'visible' });
+    const before = await page.textContent('#progress-count');
     const options = page.locator('.option');
     const n = await options.count();
-    await options.nth(i % n).click();
-    await page.waitForTimeout(500);
+    try {
+      await options.nth(i % n).click({ timeout: 3000 });
+    } catch (e) {
+      continue; // question advanced mid-click; re-enter the loop
+    }
+    // Wait until the quiz advances (progress text changes) or leaves the quiz screen.
+    await page
+      .waitForFunction(
+        (prev) =>
+          !document.querySelector('#screen-quiz.active') ||
+          document.querySelector('#progress-count').textContent !== prev,
+        before,
+        { timeout: 5000 }
+      )
+      .catch(() => {});
   }
 
   await page.waitForSelector('#screen-results.active', { timeout: 20000 });
@@ -47,7 +61,9 @@ const { chromium } = require('playwright-core');
   const spectrumItems = await page.locator('.spectrum-item').count();
   const suggestions = await page.locator('#suggestions-list li').count();
   const desireItems = await page.locator('.desire-item').count();
+  const rankedItems = await page.locator('.ranked-item').count();
 
+  console.log('RANKED ITEMS:', rankedItems);
   console.log('TITLE:', title.trim());
   console.log('KINSEY:', kinsey.trim());
   console.log('KINK CARDS:', kinkCards);
@@ -57,7 +73,7 @@ const { chromium } = require('playwright-core');
   console.log('JS ERRORS:', errors.length ? errors : 'none');
 
   await browser.close();
-  if (errors.length || kinkCards === 0 || spectrumItems === 0 || desireItems === 0) {
+  if (errors.length || kinkCards === 0 || spectrumItems === 0 || desireItems === 0 || rankedItems === 0) {
     console.error('SMOKE FAIL');
     process.exit(1);
   }

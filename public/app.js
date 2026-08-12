@@ -534,6 +534,25 @@
     $('results-title').textContent = state.name + ', here\'s your Desire Profile';
     $('results-summary').textContent = results.summaryText;
 
+    // Ranked list: top kinks first, straight down the line.
+    const rankedHost = $('ranked-list');
+    rankedHost.innerHTML = '';
+    const ranked = results.kinkProfile.filter((k) => k.level !== 'Not a focus right now');
+    const list = ranked.length > 0 ? ranked : results.kinkProfile.slice(0, 5);
+    list.forEach((k, i) => {
+      const li = document.createElement('li');
+      li.className = 'ranked-item';
+      li.innerHTML =
+        '<span class="rank-num">' + (i + 1) + '</span>' +
+        '<span class="rank-icon">' + icon(k.key) + '</span>' +
+        '<span class="rank-name">' + k.plainName +
+        (k.role && k.role.side !== 'both sides' ? '<em class="rank-side">' + k.role.side.toLowerCase() + '</em>' : '') +
+        '</span>' +
+        '<span class="rank-track"><span class="rank-fill" data-w="' + k.percent + '"></span></span>' +
+        '<span class="rank-pct">' + k.percent + '%</span>';
+      rankedHost.appendChild(li);
+    });
+
     // Kinsey scale strip
     const scaleHost = $('kinsey-scale');
     scaleHost.innerHTML = '';

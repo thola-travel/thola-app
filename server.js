@@ -105,6 +105,17 @@ function buildParticipantEmailHtml(submission) {
     )
     .join('');
 
+  const rankedRows = featured
+    .map(
+      (k, i) => `
+      <tr>
+        <td style="padding:7px 10px;font-weight:bold;color:#6d28d9;white-space:nowrap;">${i + 1}.</td>
+        <td style="padding:7px 10px;">${escapeHtml(k.plainName || k.name)}${k.role && k.role.side !== 'both sides' ? ` <span style="color:#7c6f92;font-size:13px;">· ${escapeHtml(k.role.side.toLowerCase())}</span>` : ''}</td>
+        <td style="padding:7px 10px;font-weight:bold;color:#6d28d9;text-align:right;white-space:nowrap;">${k.percent}%</td>
+      </tr>`
+    )
+    .join('');
+
   return `
   <div style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;max-width:640px;margin:0 auto;color:#2b2140;line-height:1.6;">
     <div style="background:linear-gradient(120deg,#7c3aed,#ec4899);border-radius:16px;padding:28px;color:#fff;text-align:center;">
@@ -112,25 +123,34 @@ function buildParticipantEmailHtml(submission) {
       <p style="margin:8px 0 0;opacity:.9;">Everything you discovered, ${escapeHtml(name)}. Made for you to keep.</p>
     </div>
 
-    <h2 style="color:#6d28d9;margin-top:28px;">Your summary</h2>
+    <h2 style="color:#6d28d9;margin-top:28px;">Your kinks, ranked</h2>
+    ${rankedRows ? `
+    <div style="background:#faf7ff;border-radius:12px;padding:10px 12px;">
+      <table style="border-collapse:collapse;width:100%;">${rankedRows}</table>
+    </div>` : `
+    <div style="${CARD_STYLE}">
+      <p style="margin:0;">No single category dominated. Your profile leans toward presence, connection, and moving at your own pace. That's a complete answer in itself.</p>
+    </div>`}
+
+    <h2 style="color:#6d28d9;margin-top:28px;">What your answers say</h2>
     <div style="background:#faf7ff;border-radius:12px;padding:18px 20px;white-space:pre-wrap;">${escapeHtml(results.summaryText)}</div>
 
-    <h2 style="color:#6d28d9;margin-top:28px;">Where you fall on the Kinsey scale</h2>
-    <div style="${CARD_STYLE}">
-      <h3 style="margin:0 0 6px;color:#6d28d9;">${escapeHtml(results.kinsey.label)}</h3>
-      <p style="margin:0;">${escapeHtml(results.kinsey.description)}</p>
-    </div>
+    <h2 style="color:#6d28d9;margin-top:28px;">Your top kinks, explained</h2>
+    ${featured.length > 0 ? featured.map(categoryCardHtml).join('') : `
+      <div style="${CARD_STYLE}">
+        <p style="margin:0;">Connection, presence, and pace are the heart of your profile, and that's a complete answer in itself.</p>
+      </div>`}
 
     ${desireMap ? `
     <h2 style="color:#6d28d9;margin-top:28px;">Your desire map</h2>
     <p style="color:#7c6f92;margin:4px 0 10px;">What speeds you up, what slows you down, and how your solo life fits in.</p>
     ${desireMap}` : ''}
 
-    <h2 style="color:#6d28d9;margin-top:28px;">What lit up for you, and what it means</h2>
-    ${featured.length > 0 ? featured.map(categoryCardHtml).join('') : `
-      <div style="${CARD_STYLE}">
-        <p style="margin:0;">No single category dominated. Your profile leans toward presence, connection, and moving at your own pace. That's a complete answer in itself.</p>
-      </div>`}
+    <h2 style="color:#6d28d9;margin-top:28px;">Where you fall on the Kinsey scale</h2>
+    <div style="${CARD_STYLE}">
+      <h3 style="margin:0 0 6px;color:#6d28d9;">${escapeHtml(results.kinsey.label)}</h3>
+      <p style="margin:0;">${escapeHtml(results.kinsey.description)}</p>
+    </div>
 
     <h2 style="color:#6d28d9;margin-top:28px;">Gentle suggestions for the road</h2>
     <ul style="padding-left:20px;">${suggestions}</ul>

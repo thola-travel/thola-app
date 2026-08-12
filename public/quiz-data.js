@@ -99,6 +99,40 @@ const CATEGORIES = {
     firstStep:
       'Try a "sensation menu" night. Five different touches, eyes closed, and you rate each one together after.',
   },
+  sadism: {
+    group: 'bondage',
+    name: 'Sadism',
+    tagline: 'Their gasp is your reward.',
+    description:
+      'Consensual sadism is arousal from delivering intensity a partner craves, and from watching it land. Ethical sadists are defined by attunement: they read every reaction, negotiate everything first, and stop on a word. The reaction is the reward, and it only counts if it was asked for.',
+    examples: [
+      'Delivering the sting a partner begged for, and savoring the gasp',
+      'Watching a partner\'s face while intensity builds',
+      'Negotiating limits in detail beforehand, then playing inside them',
+      'Warm, attentive aftercare as the second half of the job',
+    ],
+    support:
+      'Sadomasochistic fantasies show up in a large share of the population in study after study, and consensual sadism between adults is recognized as healthy play, not pathology. The clinical line sits at consent, and you\'re on the right side of it by definition here.',
+    firstStep:
+      'Ask a willing partner to rate intensity out loud from 1 to 10 while you experiment with grip, pace, and pressure. Learning to read their numbers is the skill everything else builds on.',
+  },
+  masochism: {
+    group: 'bondage',
+    name: 'Masochism',
+    tagline: 'Intensity lands as pleasure.',
+    description:
+      'Masochism means your body processes chosen intensity as pleasure: the sting, the ache, the endorphin wave, the floaty clarity after. It\'s on your terms, at your intensity, with your safeword. Many masochists describe it as release, focus, or even meditation.',
+    examples: [
+      'The right sting reading as heat instead of hurt',
+      'Asking for more when the wave builds',
+      'The pleasant ache the next day that keeps replaying the night',
+      'The floaty, clear-headed state intense play can bring on',
+    ],
+    support:
+      'Endorphins and adrenaline are real chemistry: bodies genuinely convert chosen intensity into euphoria, the same loop that makes hot sauce and marathons enjoyable. Masochism between consenting adults is a well-documented, healthy way to be wired.',
+    firstStep:
+      'Explore your own dial first: firm pressure, a hot shower turned up a notch, a hard massage. Notice exactly where "more" stops being the honest answer, and treat that as your starting map.',
+  },
   roleplay: {
     group: 'imagination',
     name: 'Roleplay & Scenarios',
@@ -647,6 +681,26 @@ const CATEGORIES = {
       'Start with a simple guided relaxation read aloud by your partner. No triggers, no depth. Just their voice and your breath. Then talk about what it felt like.',
   },
 
+  sleepy: {
+    group: 'imagination',
+    name: 'Drowsy & Sleepy Play',
+    sparkPrompt: 'Half-asleep, drowsy intimacy, arranged with explicit prior consent: a standing "you may wake me like this."',
+    roles: [["Yes, being woken", "The appeal for you is drifting at the edge of sleep and being drawn gently into pleasure you invited in advance."], ["Yes, doing the waking", "You\'d be the one starting slow and soft, holding a standing invitation your partner gave while wide awake."]],
+    tagline: 'The edge of sleep, by invitation.',
+    description:
+      'Sleepy play (somnophilia, formally) is the charge of drowsy, half-asleep intimacy. Done right it runs on one strict rule: the consent conversation happens fully awake, in advance, as a standing and revocable invitation. The drowsiness is the mood. The permission is never drowsy.',
+    examples: [
+      'A standing "you can wake me like this" agreed on in daylight',
+      'Slow, soft touch at the edge of sleep',
+      'Lazy, half-dreaming morning intimacy',
+      'Checking in once fully awake, every time',
+    ],
+    support:
+      'This fantasy is common and well-documented, and the community around it is emphatic about the awake-in-advance consent rule. Wanting the softness of that liminal state says nothing troubling about you. It\'s tenderness with the lights low.',
+    firstStep:
+      'Have the conversation fully awake first: what\'s welcome, what\'s not, and that the invitation can be withdrawn anytime. Then start with mornings, where sleep is already lifting.',
+  },
+
   /* ==================== SPARK: Seen & Shared ==================== */
 
   filming: {
@@ -842,6 +896,25 @@ const CATEGORIES = {
       'Raise it as fantasy first and gauge interest honestly. If you both lean in, the shower is the traditional low-stakes venue.',
   },
 
+  objects: {
+    group: 'fetish',
+    name: 'Objects & Inflatables',
+    sparkPrompt: 'A charge from a specific object: balloons, inflatables, plush, or another particular thing that does it for you.',
+    tagline: 'Your spark has a specific shape.',
+    description:
+      'Object fetishes attach erotic charge to a specific thing: balloons (the "looner" community), inflatables, plush, or something else entirely. The draw is usually sensory: the texture, the sound, the tension, the anticipation.',
+    examples: [
+      'The squeak and tension of a balloon (to pop or carefully not to)',
+      'Inflatables as texture and bounce',
+      'Plush and soft objects as comfort turned charged',
+      'Collecting or keeping a favorite object for private time',
+    ],
+    support:
+      'Object fetishes are among the oldest documented in sexuality research, and communities like looners are well-established and famously friendly. A specific spark harms no one, and specific is not strange. It\'s just precise wiring.',
+    firstStep:
+      'No partner needed for this one: explore solo first, notice which part of the experience carries the charge (sound, texture, tension), and share it with a partner only when and if you want to.',
+  },
+
   /* ==================== SPARK: Voice & Mind ==================== */
 
   dirtytalk: {
@@ -1014,6 +1087,78 @@ const QUESTIONS = [
       { label: 'Taking care of my partner: water, blankets, soft words', scores: { dominance: 2, praise: 1 } },
       { label: 'Laughing together about the characters we just played', scores: { roleplay: 2, sensual: 1 } },
       { label: 'Long, quiet cuddling. No words needed', scores: { sensual: 3 } },
+    ],
+  },
+  {
+    question: 'Your partner gasps, squirms, and asks for more intensity. What happens in you?',
+    options: [
+      { label: 'That reaction is the whole point. I love causing it', scores: { sadism: 3, dominance: 1 } },
+      { label: 'Envy. I want to be the one gasping', scores: { masochism: 3 } },
+      { label: 'Curiosity, though I\'d keep checking in rather than cranking up', scores: { sensual: 1, praise: 1 } },
+      { label: 'That scene isn\'t for me, on either side', scores: { sensual: 2 } },
+    ],
+  },
+  {
+    question: 'Where does the line between pain and pleasure sit for you?',
+    options: [
+      { label: 'There isn\'t one. The right sting is pleasure', scores: { masochism: 3, sensation: 1 } },
+      { label: 'I love delivering the sting for someone who craves it', scores: { sadism: 3 } },
+      { label: 'Firm and intense, yes. Actual pain, no', scores: { sensation: 2 } },
+      { label: 'Nowhere near each other. Gentle is my language', scores: { sensual: 2 } },
+    ],
+  },
+  {
+    question: 'You\'re in charge tonight. What\'s the best part?',
+    options: [
+      { label: 'The control itself: decisions, obedience, my word being final', scores: { dominance: 3 } },
+      { label: 'The reactions: making them gasp, squirm, and beg', scores: { sadism: 2, dominance: 1 } },
+      { label: 'The theater of it: playing the powerful character well', scores: { roleplay: 2, dominance: 1 } },
+      { label: 'Honestly, I\'d trade the job away', scores: { submission: 2 } },
+    ],
+  },
+  {
+    question: 'You\'re the one surrendering tonight. What\'s the best part?',
+    options: [
+      { label: 'Obedience itself. Following feels like flying', scores: { submission: 3 } },
+      { label: 'The intensity my body gets to feel', scores: { masochism: 2, sensation: 1 } },
+      { label: 'The praise I earn by being good', scores: { praise: 2, submission: 1 } },
+      { label: 'Surrender isn\'t really the appeal for me', scores: { dominance: 1, sensual: 1 } },
+    ],
+  },
+  {
+    question: 'A partner describes exactly what they want to do to you, in vivid detail. You…',
+    options: [
+      { label: 'Melt. Words like that undo me', scores: { praise: 2, submission: 1 } },
+      { label: 'Counter with what I\'m going to do to them instead', scores: { dominance: 2, sadism: 1 } },
+      { label: 'Ask them to keep going while I just watch them say it', scores: { voyeurism: 2 } },
+      { label: 'Would rather be shown than told', scores: { sensation: 1, sensual: 1 } },
+    ],
+  },
+  {
+    question: 'After an intense night, what do you want your body to feel like the next day?',
+    options: [
+      { label: 'A pleasant ache that reminds me all day', scores: { masochism: 3 } },
+      { label: 'Nothing on me. But I love knowing they still feel it', scores: { sadism: 2 } },
+      { label: 'Relaxed and glowing, no souvenirs', scores: { sensual: 2 } },
+      { label: 'Whatever it is, I want the memory of how it looked', scores: { voyeurism: 1, exhibition: 1 } },
+    ],
+  },
+  {
+    question: 'Which daydream comes closest to one of yours?',
+    options: [
+      { label: 'A partner begging, and me deciding whether to say yes', scores: { dominance: 2, sadism: 1 } },
+      { label: 'Being pushed right to my limit by someone I trust completely', scores: { masochism: 2, submission: 1 } },
+      { label: 'An audience that can\'t look away from me', scores: { exhibition: 2 } },
+      { label: 'A slow morning with nowhere to be and nothing to prove', scores: { sensual: 2 } },
+    ],
+  },
+  {
+    question: 'How do you feel about marks, aches, and evidence?',
+    options: [
+      { label: 'Badges of honor. I want them', scores: { masochism: 2 } },
+      { label: 'I like leaving them, where they\'re welcome', scores: { sadism: 2 } },
+      { label: 'A mirror-check thrill, then fade please', scores: { sensation: 1, exhibition: 1 } },
+      { label: 'No marks. Nothing to explain later', scores: { sensual: 1 } },
     ],
   },
 ];

@@ -436,6 +436,59 @@ input[type="text"]:focus, input[type="email"]:focus {
 .summary-card h1 { margin-bottom: 14px; }
 .results-summary { white-space: pre-line; font-size: 1.02rem; }
 
+/* ---------- Ranked list ---------- */
+.ranked-list { list-style: none; display: grid; gap: 8px; margin-top: 6px; }
+.ranked-item {
+  display: grid;
+  grid-template-columns: 30px 26px minmax(150px, 1.2fr) 1fr 52px;
+  align-items: center;
+  gap: 10px;
+  background: rgba(124, 58, 237, 0.06);
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition: transform 0.2s var(--spring), background 0.2s;
+}
+.ranked-item:hover { transform: translateX(4px); background: rgba(124, 58, 237, 0.11); }
+.rank-num {
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.rank-icon { color: var(--accent); display: grid; place-items: center; }
+.rank-icon .icon { width: 1.2em; height: 1.2em; }
+.rank-name { font-weight: 600; font-size: 0.95rem; }
+.rank-side {
+  display: block;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+.rank-track {
+  height: 7px;
+  background: rgba(124, 58, 237, 0.14);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.rank-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.9s var(--spring);
+}
+.rank-pct {
+  font-weight: 800;
+  color: var(--accent);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  .ranked-item { grid-template-columns: 24px 22px 1fr 46px; }
+  .rank-track { display: none; }
+}
+
 .kinsey-card h2 { margin-bottom: 18px; }
 .kinsey-scale {
   display: grid;
