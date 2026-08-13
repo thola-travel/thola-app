@@ -53,6 +53,28 @@ CHROMIUM_PATH=/path/to/chrome node test/smoke.js
 
 This drives the whole quiz in a real browser (name and email entry, all 71 questions, submission) and asserts the results render with no JS errors.
 
+## Production
+
+The server ships production-ready:
+
+- **Security:** strict Content-Security-Policy and security headers (helmet), same-origin API only, no `x-powered-by`, JSON bodies capped at 300 KB.
+- **Abuse protection:** per-IP rate limits (120 API requests / 15 min, 10 submissions / hour) and an invisible honeypot field that silently discards bot submissions. Set `TRUST_PROXY` to your proxy hop count (default 1) so limits see real client IPs.
+- **Input handling:** every submission is rebuilt server-side from a whitelist of expected fields with hard size caps; malformed payloads get a clear 400.
+- **Operations:** `GET /healthz` for uptime checks, request logging for the API, clear startup config warnings (for example partial SMTP settings), graceful shutdown on SIGTERM/SIGINT.
+- **Data care:** submission backups can be disabled (`SAVE_SUBMISSIONS=off`) and are otherwise auto-deleted after `SUBMISSION_RETENTION_DAYS` (default 30; 0 keeps forever).
+- **Email resilience:** one automatic retry on failure, hard send deadlines, and results that never wait on a mail server.
+
+### Deploying
+
+Docker:
+
+```bash
+docker build -t desire-quiz .
+docker run -p 3000:3000 --env-file .env desire-quiz
+```
+
+Render/Railway/Fly: point the service at this repo, set the environment variables from `.env.example`, and use `npm start` (or the Dockerfile). The app listens on `PORT` and reports readiness at `/healthz`. Run it behind HTTPS (all these hosts provide it by default); the quiz collects intimate data and must not be served over plain HTTP.
+
 ## Privacy notes
 
 - `submissions/` and `.env` are git-ignored, so personal data and credentials never reach the repository.

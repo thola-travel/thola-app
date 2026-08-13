@@ -5,28 +5,122 @@
  * Each participant receives their own results email (summary, meanings,
  * examples, and suggestions, never their raw answers). If ADMIN_EMAIL is
  * set, a full copy (including answers) also goes there and the frontend
- * discloses that in the consent notice via GET /api/config. Every
- * submission is written to ./submissions/ as a JSON backup so a mail
- * outage never loses one.
+ * discloses that in the consent notice via GET /api/config.
+ *
+ * Production posture: security headers with a strict CSP, per-IP rate
+ * limits, server-side payload sanitization, a bot honeypot, request
+ * logging, health checks, graceful shutdown, retention cleanup for stored
+ * submissions, and email that retries once but can never delay results.
  */
 
 require('dotenv').config();
 
 const express = require('express');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 
 const DB = require('./public/quiz-data.js');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+/* ---------- Configuration & validation ---------- */
+
+const PORT = Number(process.env.PORT || 3000);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 const SUBMISSIONS_DIR = path.join(__dirname, 'submissions');
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SAVE_SUBMISSIONS = String(process.env.SAVE_SUBMISSIONS || 'on').toLowerCase() !== 'off';
+const RETENTION_DAYS = Number(process.env.SUBMISSION_RETENTION_DAYS || 30);
+const EMAIL_OFF = String(process.env.EMAIL_MODE || '').toLowerCase() === 'off';
 
-app.use(express.json({ limit: '1mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+function validateEnvironment() {
+  const problems = [];
+  if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+    problems.push(`PORT must be a number between 1 and 65535 (got "${process.env.PORT}")`);
+  }
+  const smtpVars = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'];
+  const smtpSet = smtpVars.filter((v) => process.env[v]);
+  if (smtpSet.length > 0 && smtpSet.length < smtpVars.length) {
+    problems.push(
+      'Partial SMTP configuration: ' + smtpSet.join(', ') + ' set but ' +
+      smtpVars.filter((v) => !process.env[v]).join(', ') + ' missing. Email will run in test mode until all three are set.'
+    );
+  }
+  if (ADMIN_EMAIL && !EMAIL_RE.test(ADMIN_EMAIL)) {
+    problems.push(`ADMIN_EMAIL is not a valid email address ("${ADMIN_EMAIL}")`);
+  }
+  if (!Number.isFinite(RETENTION_DAYS) || RETENTION_DAYS < 0) {
+    problems.push(`SUBMISSION_RETENTION_DAYS must be 0 (keep forever) or a positive number (got "${process.env.SUBMISSION_RETENTION_DAYS}")`);
+  }
+  return problems;
+}
+
+const app = express();
+
+// Behind Render/Railway/Fly/nginx there is one proxy hop by default; set
+// TRUST_PROXY to the hop count for your setup (0 = direct).
+app.set('trust proxy', Number(process.env.TRUST_PROXY ?? 1));
+app.disable('x-powered-by');
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+  })
+);
+
+// Request log for the API and anything that goes wrong elsewhere.
+app.use((req, res, next) => {
+  const start = process.hrtime.bigint();
+  res.on('finish', () => {
+    if (req.path.startsWith('/api') || res.statusCode >= 400) {
+      const ms = Number(process.hrtime.bigint() - start) / 1e6;
+      console.log(
+        `${new Date().toISOString()} ${req.ip} ${req.method} ${req.path} ${res.statusCode} ${ms.toFixed(0)}ms`
+      );
+    }
+  });
+  next();
+});
+
+app.use(express.json({ limit: '300kb' }));
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h' }));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 120,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { ok: false, error: 'Too many requests. Please try again in a few minutes.' },
+});
+const submitLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { ok: false, error: 'Too many submissions from this connection. Please try again later.' },
+});
+app.use('/api', apiLimiter);
+
+app.get('/healthz', (_req, res) => {
+  res.json({
+    ok: true,
+    uptimeSeconds: Math.round(process.uptime()),
+    email: smtpConfigured() ? 'smtp' : EMAIL_OFF ? 'off' : 'test-mode',
+  });
+});
 
 app.get('/api/config', (_req, res) => {
   res.json({ adminCopy: Boolean(ADMIN_EMAIL) });
@@ -258,35 +352,103 @@ function buildAdminEmailHtml(submission) {
   </div>`;
 }
 
+/* ---------- Payload sanitization ---------- */
+
+const str = (v, max) => String(v ?? '').slice(0, max);
+
+/**
+ * Rebuild the submission from scratch, keeping only expected fields at
+ * bounded sizes. Anything malformed returns null and the request is
+ * rejected; nothing from the raw body is stored or emailed directly.
+ */
+function sanitizeSubmission(body) {
+  const { name, email, answers, results } = body || {};
+  if (!name || !String(name).trim()) return null;
+  if (!email || !EMAIL_RE.test(String(email)) || String(email).length > 200) return null;
+  if (!Array.isArray(answers) || answers.length === 0 || answers.length > 300) return null;
+  if (!results || typeof results !== 'object') return null;
+  const { kinkProfile, kinsey, summaryText } = results;
+  if (!Array.isArray(kinkProfile) || kinkProfile.length === 0 || kinkProfile.length > 100) return null;
+  if (!kinsey || typeof kinsey !== 'object') return null;
+  if (typeof summaryText !== 'string') return null;
+
+  return {
+    name: str(name, 100).trim(),
+    email: str(email, 200),
+    submittedAt: new Date().toISOString(),
+    answers: answers.map((a) => ({
+      section: str(a && a.section, 60),
+      question: str(a && a.question, 500),
+      answer: str(a && a.answer, 500),
+    })),
+    results: {
+      kinkProfile: kinkProfile.map((k) => ({
+        key: str(k && k.key, 40),
+        name: str(k && k.name, 80),
+        plainName: str(k && k.plainName, 80),
+        group: str(k && k.group, 40),
+        percent: Math.max(0, Math.min(100, Math.round(Number(k && k.percent) || 0))),
+        level: str(k && k.level, 40),
+        role: k && k.role && typeof k.role === 'object'
+          ? { side: str(k.role.side, 60), note: str(k.role.note, 400) }
+          : null,
+      })),
+      kinsey: {
+        key: str(kinsey.key, 4),
+        label: str(kinsey.label, 120),
+        description: str(kinsey.description, 1200),
+      },
+      aboutYou: (Array.isArray(results.aboutYou) ? results.aboutYou : []).slice(0, 50).map((item) => ({
+        question: str(item && item.question, 300),
+        answer: str(item && item.answer, 300),
+        reflection: str(item && item.reflection, 800),
+      })),
+      suggestions: (Array.isArray(results.suggestions) ? results.suggestions : []).slice(0, 50).map((s) => str(s, 500)),
+      summaryText: str(summaryText, 20000),
+    },
+  };
+}
+
 /* ---------- Routes ---------- */
 
-app.post('/api/submit', async (req, res) => {
+async function deliverEmail(mailer, message, label) {
+  // One retry for transient failures; a second failure is logged and moved past.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      return await sendWithDeadline(mailer.transporter, message);
+    } catch (mailErr) {
+      console.error(`${label} attempt ${attempt} failed:`, mailErr.message);
+      if (attempt === 1) await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+  return null;
+}
+
+app.post('/api/submit', submitLimiter, async (req, res) => {
   try {
-    const { name, email, answers, results } = req.body || {};
-
-    if (!name || !Array.isArray(answers) || answers.length === 0 || !results) {
-      return res.status(400).json({ ok: false, error: 'Missing name, answers, or results.' });
-    }
-    if (!email || !EMAIL_RE.test(String(email))) {
-      return res.status(400).json({ ok: false, error: 'A valid email address is required.' });
+    // Honeypot: the visible form never fills this field. Bots do. Report
+    // success so they move on, and do nothing at all.
+    if (req.body && typeof req.body.website === 'string' && req.body.website.trim() !== '') {
+      console.warn('Honeypot tripped from', req.ip, '- submission discarded');
+      return res.json({ ok: true, participantEmailSent: true, testMode: false, previewUrl: null });
     }
 
-    const submission = {
-      name: String(name).slice(0, 100),
-      email: String(email).slice(0, 200),
-      submittedAt: new Date().toISOString(),
-      answers,
-      results,
-    };
+    const submission = sanitizeSubmission(req.body);
+    if (!submission) {
+      return res.status(400).json({ ok: false, error: 'The submission was incomplete or malformed. Please retake the quiz and submit again.' });
+    }
 
-    // Local backup first; a mail outage should never lose a submission.
-    fs.mkdirSync(SUBMISSIONS_DIR, { recursive: true });
-    const safeName = submission.name.replace(/[^a-z0-9-]/gi, '_').toLowerCase();
-    const backupFile = path.join(
-      SUBMISSIONS_DIR,
-      `${submission.submittedAt.replace(/[:.]/g, '-')}-${safeName}.json`
-    );
-    fs.writeFileSync(backupFile, JSON.stringify(submission, null, 2));
+    // Local backup first (unless disabled); a mail outage should never lose one.
+    let backupFile = null;
+    if (SAVE_SUBMISSIONS) {
+      fs.mkdirSync(SUBMISSIONS_DIR, { recursive: true });
+      const safeName = submission.name.replace(/[^a-z0-9-]/gi, '_').toLowerCase();
+      backupFile = path.join(
+        SUBMISSIONS_DIR,
+        `${submission.submittedAt.replace(/[:.]/g, '-')}-${safeName}.json`
+      );
+      fs.writeFileSync(backupFile, JSON.stringify(submission, null, 2));
+    }
 
     let participantEmailSent = false;
     let testMode = false;
@@ -295,13 +457,13 @@ app.post('/api/submit', async (req, res) => {
     const mailer = await getMailer();
     if (mailer) {
       testMode = mailer.testMode;
-      try {
-        const info = await sendWithDeadline(mailer.transporter, {
-          from: mailer.from,
-          to: submission.email,
-          subject: `${submission.name}, your Desire Profile is ready`,
-          html: buildParticipantEmailHtml(submission),
-        });
+      const info = await deliverEmail(mailer, {
+        from: mailer.from,
+        to: submission.email,
+        subject: `${submission.name}, your Desire Profile is ready`,
+        html: buildParticipantEmailHtml(submission),
+      }, 'Participant email');
+      if (info) {
         participantEmailSent = true;
         if (testMode) {
           previewUrl = nodemailer.getTestMessageUrl(info) || null;
@@ -309,45 +471,104 @@ app.post('/api/submit', async (req, res) => {
         } else {
           console.log('Participant email sent to', submission.email);
         }
-      } catch (mailErr) {
-        console.error('Participant email failed (submission saved locally):', mailErr.message);
       }
 
       if (ADMIN_EMAIL) {
-        try {
-          const adminInfo = await sendWithDeadline(mailer.transporter, {
-            from: mailer.from,
-            to: ADMIN_EMAIL,
-            subject: `Quiz submission: ${submission.name}`,
-            html: buildAdminEmailHtml(submission),
-          });
-          if (testMode) {
-            console.log('Test mode: admin copy captured. Preview:', nodemailer.getTestMessageUrl(adminInfo));
-          }
-        } catch (mailErr) {
-          console.error('Admin copy failed (submission saved locally):', mailErr.message);
+        const adminInfo = await deliverEmail(mailer, {
+          from: mailer.from,
+          to: ADMIN_EMAIL,
+          subject: `Quiz submission: ${submission.name}`,
+          html: buildAdminEmailHtml(submission),
+        }, 'Admin copy');
+        if (adminInfo && testMode) {
+          console.log('Test mode: admin copy captured. Preview:', nodemailer.getTestMessageUrl(adminInfo));
         }
       }
-    } else {
+    } else if (backupFile) {
       console.warn('Email is off, submission saved to', backupFile);
+    } else {
+      console.warn('Email is off and SAVE_SUBMISSIONS=off: submission processed but not persisted.');
     }
 
     return res.json({ ok: true, participantEmailSent, testMode, previewUrl });
   } catch (err) {
     console.error('Submission error:', err);
-    return res.status(500).json({ ok: false, error: 'Server error.' });
+    return res.status(500).json({ ok: false, error: 'Something went wrong on our side. Your answers were not lost; please submit again.' });
   }
 });
 
-app.listen(PORT, () => {
+// Unknown API routes answer in JSON rather than falling through to HTML.
+app.use('/api', (_req, res) => {
+  res.status(404).json({ ok: false, error: 'Not found.' });
+});
+
+// JSON parse failures and anything else unexpected.
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+  if (err && err.type === 'entity.too.large') {
+    return res.status(413).json({ ok: false, error: 'Submission too large.' });
+  }
+  if (err && err.type === 'entity.parse.failed') {
+    return res.status(400).json({ ok: false, error: 'Invalid request body.' });
+  }
+  console.error('Unhandled error:', err);
+  return res.status(500).json({ ok: false, error: 'Server error.' });
+});
+
+/* ---------- Retention cleanup ---------- */
+
+function cleanupOldSubmissions() {
+  if (!SAVE_SUBMISSIONS || RETENTION_DAYS <= 0) return;
+  let removed = 0;
+  try {
+    if (!fs.existsSync(SUBMISSIONS_DIR)) return;
+    const cutoff = Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    for (const file of fs.readdirSync(SUBMISSIONS_DIR)) {
+      const full = path.join(SUBMISSIONS_DIR, file);
+      if (fs.statSync(full).mtimeMs < cutoff) {
+        fs.unlinkSync(full);
+        removed++;
+      }
+    }
+  } catch (err) {
+    console.error('Retention cleanup failed:', err.message);
+  }
+  if (removed > 0) console.log(`Retention: removed ${removed} submission(s) older than ${RETENTION_DAYS} days.`);
+}
+
+/* ---------- Startup & shutdown ---------- */
+
+const envProblems = validateEnvironment();
+envProblems.forEach((p) => console.warn('Config warning:', p));
+
+cleanupOldSubmissions();
+const retentionTimer = setInterval(cleanupOldSubmissions, 24 * 60 * 60 * 1000);
+retentionTimer.unref();
+
+const server = app.listen(PORT, () => {
   console.log(`Desire Discovery Quiz running at http://localhost:${PORT}`);
   if (smtpConfigured()) {
     console.log('Email: real delivery via', process.env.SMTP_HOST);
-  } else if (String(process.env.EMAIL_MODE || '').toLowerCase() === 'off') {
-    console.log('Email: off (EMAIL_MODE=off). Submissions are saved to ./submissions/ only.');
+  } else if (EMAIL_OFF) {
+    console.log('Email: off (EMAIL_MODE=off).');
   } else {
     console.log('Email: TEST MODE. No SMTP credentials set, so emails are captured by a throwaway');
     console.log('Ethereal inbox and each submission response includes a preview link to inspect');
     console.log('the exact email. Set SMTP_* in .env for real delivery (see .env.example).');
   }
+  console.log(
+    `Submissions: ${SAVE_SUBMISSIONS ? `saved to ./submissions/ (retention: ${RETENTION_DAYS > 0 ? RETENTION_DAYS + ' days' : 'forever'})` : 'not saved (SAVE_SUBMISSIONS=off)'}`
+  );
 });
+
+function shutdown(signal) {
+  console.log(`${signal} received: closing server…`);
+  server.close(() => {
+    console.log('Server closed cleanly.');
+    process.exit(0);
+  });
+  // If connections keep it open, leave anyway after a grace period.
+  setTimeout(() => process.exit(0), 10000).unref();
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

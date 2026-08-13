@@ -482,7 +482,13 @@
     }, 620);
 
     const results = analyze();
-    const payload = { name: state.name, email: state.email, answers: collectAnswers(), results };
+    const payload = {
+      name: state.name,
+      email: state.email,
+      answers: collectAnswers(),
+      results,
+      website: (document.getElementById('website') || { value: '' }).value,
+    };
 
     // Results must never wait on a slow mail server: give the request a
     // hard deadline and fall back to showing results without the email.

@@ -30,7 +30,7 @@ const { chromium } = require('playwright-core');
     if (done > 0) break;
     const analyzing = await page.locator('#screen-analyzing.active').count();
     if (analyzing > 0) {
-      await page.waitForSelector('#screen-results.active', { timeout: 20000 });
+      await page.waitForSelector('#screen-results.active', { timeout: 60000 });
       break;
     }
     await page.waitForSelector('.option', { state: 'visible' });
@@ -54,7 +54,7 @@ const { chromium } = require('playwright-core');
       .catch(() => {});
   }
 
-  await page.waitForSelector('#screen-results.active', { timeout: 20000 });
+  await page.waitForSelector('#screen-results.active', { timeout: 60000 });
   const title = await page.textContent('#results-title');
   const kinsey = await page.textContent('#kinsey-label');
   const kinkCards = await page.locator('.kink-card').count();

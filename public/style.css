@@ -166,6 +166,15 @@ input[type="text"]:focus, input[type="email"]:focus {
   transform: translateY(-1px);
 }
 
+/* Honeypot: invisible to people, filled by naive bots. */
+.hp-wrap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .consent {
   display: flex;
   gap: 10px;
