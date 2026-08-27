@@ -29,8 +29,8 @@
             { label: cat.roles[1][0], value: 1, roleNote: cat.roles[1][1] },
             { label: 'Yes, both sides', value: 1, roleNote: 'Both sides of this appeal to you, depending on the day and the partner.' },
             { label: 'Curious', value: 0.55 },
-            { label: 'Take it or leave it', value: 0.15 },
-            { label: 'Not for me', value: 0 },
+            { label: 'Neutral', value: 0.15 },
+            { label: 'Does not appeal', value: 0 },
           ]
         : SPARK_SCALE.map((s) => ({ label: s.label, value: s.value })),
     })),
@@ -44,6 +44,25 @@
     index: 0,
     selections: new Array(allQuestions.length).fill(null),
   };
+
+  // Follow-up asked after every full "yes" in the spark round. The answer
+  // weights that category's score so rankings discriminate between a core
+  // interest and a peripheral one instead of piling everything at 100%.
+  const DEPTH_OPTIONS = [
+    { label: 'Central. It shapes most of my fantasies or play', mult: 1 },
+    { label: 'A regular feature. It comes up often', mult: 0.85 },
+    { label: 'Occasional. Enjoyable when it happens, not sought out', mult: 0.65 },
+    { label: 'Peripheral. It rarely surfaces on its own', mult: 0.45 },
+  ];
+
+  function depthQuestionFor(categoryKey) {
+    return {
+      type: 'sparkDepth',
+      categoryKey,
+      question: 'How central is ' + CATEGORIES[categoryKey].name.toLowerCase() + ' to your sexuality?',
+      options: DEPTH_OPTIONS.map((d) => ({ label: d.label, mult: d.mult })),
+    };
+  }
 
   // Max possible weighted score per broad category (Parts 1 and 3), for
   // normalizing totals to percentages.
@@ -107,7 +126,7 @@
     .then((cfg) => {
       if (cfg && cfg.adminCopy) {
         $('consent-text').textContent =
-          'My summary and results will be emailed to the address I entered above, and a copy of my responses is kept by the quiz administrator.';
+          'My results will be sent directly to the email address above. My responses are stored securely, and a copy is provided to the quiz administrator.';
       }
     })
     .catch(() => {});
@@ -123,6 +142,7 @@
   // ---------- Real-time analysis ----------
   function currentScores() {
     const totals = {};
+    const depth = {};
     Object.keys(CATEGORIES).forEach((k) => (totals[k] = null)); // null = no signal yet
     state.selections.forEach((sel, i) => {
       const q = allQuestions[i];
@@ -133,18 +153,26 @@
         });
       } else if (q.type === 'spark') {
         totals[q.categoryKey] = q.options[sel].value; // 0..1 interest scale
+      } else if (q.type === 'sparkDepth') {
+        depth[q.categoryKey] = q.options[sel].mult;
       }
     });
-    return totals;
+    return { totals, depth };
   }
 
-  function percentFor(key, totals) {
+  function percentFor(key, scores) {
     const cat = CATEGORIES[key];
     if (cat.sparkPrompt) {
-      return totals[key] === null ? null : Math.round(totals[key] * 100);
+      const base = scores.totals[key];
+      if (base === null) return null;
+      // A full yes is weighted by the centrality follow-up when answered.
+      if (base === 1 && scores.depth[key] !== undefined) {
+        return Math.round(100 * scores.depth[key]);
+      }
+      return Math.round(base * 100);
     }
-    if (totals[key] === null) return null;
-    return Math.round((totals[key] / (broadMax[key] || 1)) * 100);
+    if (scores.totals[key] === null) return null;
+    return Math.round((scores.totals[key] / (broadMax[key] || 1)) * 100);
   }
 
   function answeredCount() {
@@ -152,9 +180,9 @@
   }
 
   function updateLivePanel() {
-    const totals = currentScores();
+    const scores = currentScores();
     const ranked = Object.keys(CATEGORIES)
-      .map((key) => ({ key, pct: percentFor(key, totals) }))
+      .map((key) => ({ key, pct: percentFor(key, scores) }))
       .filter((e) => e.pct !== null)
       .sort((a, b) => b.pct - a.pct);
 
@@ -176,36 +204,37 @@
     const blurb = $('live-blurb');
     const answered = answeredCount();
     if (answered === 0) {
-      blurb.textContent = 'Answer a few questions and your profile will start to appear…';
+      blurb.textContent = 'Scores appear as responses accumulate.';
       return;
     }
     const top = ranked[0] && CATEGORIES[ranked[0].key];
     const second = ranked[1] && CATEGORIES[ranked[1].key];
     if (!top || ranked[0].pct === 0) {
-      blurb.textContent = 'Still listening… your profile is warming up.';
+      blurb.textContent = 'No clear signal yet.';
     } else if (answered < 4) {
-      blurb.textContent = 'Early signs point toward ' + top.name.toLowerCase() + '… keep going, the picture is still forming.';
+      blurb.textContent = 'Early signal: ' + top.name.toLowerCase() + '. Sample still small.';
     } else if (second && ranked[0].pct - ranked[1].pct <= 8 && ranked[1].pct > 0) {
       blurb.textContent =
-        'Interesting. A blend of ' + top.name.toLowerCase() + ' and ' + second.name.toLowerCase() +
-        ' is taking shape. Versatile so far.';
+        'Current leaders: ' + top.name.toLowerCase() + ' and ' + second.name.toLowerCase() + ', closely matched.';
     } else {
-      blurb.textContent = top.name + ' is emerging as a strong thread. ' + top.tagline;
+      blurb.textContent = 'Strongest signal so far: ' + top.name.toLowerCase() + '.';
     }
   }
 
   // ---------- Quiz rendering ----------
   const PART_TAGS = {
-    kink: 'Part 1 · Your Play Style',
-    spark: 'Part 2 · Spark Round',
-    personal: 'Part 3 · Desire & Solo Life',
-    kinsey: 'Part 4 · Attraction & the Kinsey Scale',
+    kink: 'Part 1 · Play Style',
+    spark: 'Part 2 · Interest Inventory',
+    sparkDepth: 'Part 2 · Interest Inventory',
+    personal: 'Part 3 · Desire & Solo Patterns',
+    kinsey: 'Part 4 · Kinsey Scale',
   };
   const PART_HINTS = {
-    kink: 'Pick the answer that feels most true',
-    spark: 'Gut reaction. Your first instinct is the honest one',
-    personal: 'Just between you and you. Honest beats impressive',
-    kinsey: 'Attraction, not behavior. Answer from your inner experience',
+    kink: 'Select the closest answer',
+    spark: 'Answer by first instinct',
+    sparkDepth: 'This weights the score for your ranking',
+    personal: 'Answer privately and candidly',
+    kinsey: 'Attraction, not behavior',
   };
 
   function renderQuestion(animated) {
@@ -218,9 +247,11 @@
       $('progress-fill').style.width = ((state.index / allQuestions.length) * 100) + '%';
 
       const sparkHeader = $('spark-header');
-      if (q.type === 'spark') {
+      if (q.type === 'spark' || q.type === 'sparkDepth') {
         sparkHeader.hidden = false;
         $('spark-icon').innerHTML = icon(q.categoryKey, 'icon-xl');
+        $('spark-kicker-text').textContent =
+          q.type === 'spark' ? 'Does this appeal to you?' : 'Follow-up';
       } else {
         sparkHeader.hidden = true;
       }
@@ -268,6 +299,22 @@
     if (advancing) return;
     state.selections[state.index] = optionIndex;
 
+    // A full "yes" on a spark question gets a centrality follow-up inserted
+    // right after it; changing the answer away from "yes" removes it again.
+    const q = allQuestions[state.index];
+    if (q.type === 'spark') {
+      const next = allQuestions[state.index + 1];
+      const hasFollowUp = next && next.type === 'sparkDepth' && next.categoryKey === q.categoryKey;
+      const isYes = q.options[optionIndex].value === 1;
+      if (isYes && !hasFollowUp) {
+        allQuestions.splice(state.index + 1, 0, depthQuestionFor(q.categoryKey));
+        state.selections.splice(state.index + 1, 0, null);
+      } else if (!isYes && hasFollowUp) {
+        allQuestions.splice(state.index + 1, 1);
+        state.selections.splice(state.index + 1, 1);
+      }
+    }
+
     // Repaint just the selection highlight, then advance with animation.
     const host = $('options');
     Array.from(host.children).forEach((b, i) => b.classList.toggle('selected', i === optionIndex));
@@ -300,7 +347,7 @@
   }
 
   function analyze() {
-    const totals = currentScores();
+    const scores = currentScores();
 
     // Which side of each two-sided kink the participant chose.
     const roleChoices = {};
@@ -318,7 +365,7 @@
 
     const kinkProfile = Object.entries(CATEGORIES)
       .map(([key, cat]) => {
-        const percent = percentFor(key, totals) || 0;
+        const percent = percentFor(key, scores) || 0;
         const { level, cls } = levelFor(percent);
         return {
           key,
@@ -391,44 +438,43 @@
     if (strong.length > 0) {
       const names = strong.slice(0, 5).map(nameWithSide);
       lines.push(
-        name + ', here\'s the clear picture from your answers: you\'re most strongly drawn to ' +
-        joinNicely(names) +
-        (strong.length > 5 ? ' (and ' + (strong.length - 5) + ' more)' : '') + '. ' +
+        'Strongest signals: ' + joinNicely(names) +
+        (strong.length > 5 ? ', with ' + (strong.length - 5) + ' further categories above the 60% threshold' : '') + '. ' +
+        'Percentages combine your direct ratings, the centrality follow-ups, and response patterns across the scenario questions. ' +
         (strong.length > 1
-          ? 'These interests tend to travel together. Think of them less as separate kinks and more as one coherent way you like to connect.'
-          : 'A focused profile is genuinely useful. When you know exactly what lights you up, it gets much easier to ask for.')
+          ? 'Several of these categories commonly co-occur; treat the cluster, not any single item, as the profile.'
+          : 'A single dominant category indicates a focused preference profile.')
       );
     } else if (curious.length > 0) {
       lines.push(
-        name + ', no single kink dominates your profile, but you carry real sparks of curiosity toward ' +
+        'No category crossed the strong-match threshold (60%). Moderate interest registered for ' +
         joinNicely(curious.slice(0, 5).map((k) => k.plainName.toLowerCase())) +
-        '. Curiosity is where every good discovery starts. There\'s no rush.'
+        '. Scores in this band typically indicate curiosity rather than an established preference.'
       );
     } else {
       lines.push(
-        name + ', your answers point somewhere simple and real: connection itself is what excites you. ' +
-        'The kink spectrum is wide, and "deep presence with a partner I trust" is a complete answer on it.'
+        'No kink category registered above the interest thresholds. Your responses consistently favored connection, presence, and low-intensity ' +
+        'contact, which is itself a stable and common preference profile.'
       );
     }
 
     if (curious.length > 0 && strong.length > 0) {
       lines.push(
-        'Alongside your core profile, you showed a curious spark toward ' +
+        'Moderate interest (35-59%) also registered for ' +
         joinNicely(curious.slice(0, 6).map((k) => k.plainName.toLowerCase())) +
-        (curious.length > 6 ? ', plus a few more' : '') +
-        '. Worth exploring gently, at your own pace, if and when it appeals.'
+        (curious.length > 6 ? ', among others' : '') +
+        '. Scores in this band usually reflect curiosity; the spectrum map below shows the complete distribution.'
       );
     }
 
     lines.push(
-      'On attraction: you land at ' + kinsey.label.split(':')[0].replace('Kinsey', 'point') +
+      'Orientation: your attraction responses place you at ' + kinsey.label.split(':')[0].replace('Kinsey', 'point') +
       ' on the Kinsey scale. ' + kinsey.description
     );
 
     lines.push(
-      'One thing to hold onto, ' + name + ': nothing in your profile is unusual, broken, or too much. ' +
-      'Every interest here is shared by millions of people, and every one is healthy when explored with consent, ' +
-      'honest communication, and partners you trust. Your desires are part of who you are. Not a flaw to manage.'
+      'For reference: population research (for example Joyal & Carpentier, 2017) finds that roughly half of adults report interest in at least one ' +
+      'practice outside conventional norms. Every category measured here falls within the documented range of human sexuality when practiced with consent.'
     );
 
     return lines.join('\n\n');
@@ -443,15 +489,19 @@
   // ---------- Submission flow ----------
   const SECTION_NAMES = {
     kink: 'Play Style',
-    spark: 'Spark Round',
-    personal: 'Desire & Solo Life',
+    spark: 'Interest Inventory',
+    sparkDepth: 'Interest Inventory',
+    personal: 'Desire & Solo Patterns',
     kinsey: 'Kinsey Scale',
   };
 
   function collectAnswers() {
     return allQuestions.map((q, i) => ({
       section: SECTION_NAMES[q.type],
-      question: q.type === 'spark' ? CATEGORIES[q.categoryKey].name + ': ' + q.question : q.question,
+      question:
+        q.type === 'spark' || q.type === 'sparkDepth'
+          ? CATEGORIES[q.categoryKey].name + ': ' + q.question
+          : q.question,
       answer: state.selections[i] !== null ? q.options[state.selections[i]].label : '(skipped)',
     }));
   }
@@ -459,11 +509,11 @@
   function beginAnalysis() {
     showScreen('analyzing');
     const steps = [
-      'Compiling your responses…',
-      'Mapping your play-style profile…',
-      'Charting every spark across the spectrum…',
-      'Placing you on the Kinsey scale…',
-      'Writing your summary…',
+      'Compiling responses…',
+      'Scoring play-style scenarios…',
+      'Scoring the interest inventory…',
+      'Computing Kinsey placement…',
+      'Writing your report…',
     ];
     let s = 0;
     const stepEl = $('analyzing-step');
@@ -528,8 +578,8 @@
       '<p>' + cat.description + '</p>' +
       '<h4>What this can look like</h4>' +
       '<ul>' + cat.examples.map((e) => '<li>' + e + '</li>').join('') + '</ul>' +
-      '<div class="support-note"><span class="note-label">Good to know</span>' + cat.support + '</div>' +
-      '<div class="first-step"><span class="note-label">A gentle first step</span>' + cat.firstStep + '</div>'
+      '<div class="support-note"><span class="note-label">Context</span>' + cat.support + '</div>' +
+      '<div class="first-step"><span class="note-label">Starting point</span>' + cat.firstStep + '</div>'
     );
   }
 
@@ -538,12 +588,12 @@
     return (
       cardHead(k, cat) +
       '<p>' + cat.description + '</p>' +
-      '<div class="first-step"><span class="note-label">If curiosity ever calls</span>' + cat.firstStep + '</div>'
+      '<div class="first-step"><span class="note-label">Starting point</span>' + cat.firstStep + '</div>'
     );
   }
 
   function renderResults(results, serverResp) {
-    $('results-title').textContent = state.name + ', here\'s your Desire Profile';
+    $('results-title').textContent = 'Assessment results: ' + state.name;
     $('results-summary').textContent = results.summaryText;
 
     // Ranked list: top kinks first, straight down the line.
@@ -656,17 +706,16 @@
     });
 
     $('closing-note').textContent =
-      'Getting to know yourself is a long conversation, ' + state.name +
-      '. Come back whenever you like. Answers shift as you grow, and every version of your profile is worth having.';
+      'Preference profiles shift with time and context. Retaking the assessment at intervals shows how yours changes; the differences between runs are themselves informative.';
     const emailNote = $('email-note');
     if (serverResp && serverResp.participantEmailSent && serverResp.testMode && serverResp.previewUrl) {
       emailNote.innerHTML =
         'Test mode: the email was captured instead of delivered. ' +
         '<a href="' + serverResp.previewUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">Open the exact email here</a>.';
     } else if (serverResp && serverResp.participantEmailSent) {
-      emailNote.textContent = 'A copy of your summary and results is on its way to ' + state.email + '.';
+      emailNote.textContent = 'Your report has been sent directly to ' + state.email + '. It is not shared with anyone else.';
     } else {
-      emailNote.textContent = 'Your results are shown above. Email delivery isn\'t available right now, so consider saving this page.';
+      emailNote.textContent = 'Email delivery is currently unavailable. Your results are shown above; consider saving this page.';
     }
 
     showScreen('results');

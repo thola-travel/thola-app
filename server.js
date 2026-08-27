@@ -227,8 +227,8 @@ function categoryCardHtml(entry) {
     <ul style="margin:0 0 8px;padding-left:20px;">
       ${cat.examples.map((e) => `<li style="margin:3px 0;">${escapeHtml(e)}</li>`).join('')}
     </ul>
-    <p style="margin:8px 0;background:#ecfdf5;border-radius:8px;padding:10px 12px;"><strong style="color:#059669;font-size:12px;letter-spacing:.08em;">GOOD TO KNOW</strong><br>${escapeHtml(cat.support)}</p>
-    <p style="margin:8px 0 0;"><strong>A gentle first step:</strong> ${escapeHtml(cat.firstStep)}</p>
+    <p style="margin:8px 0;background:#ecfdf5;border-radius:8px;padding:10px 12px;"><strong style="color:#059669;font-size:12px;letter-spacing:.08em;">CONTEXT</strong><br>${escapeHtml(cat.support)}</p>
+    <p style="margin:8px 0 0;"><strong>Starting point:</strong> ${escapeHtml(cat.firstStep)}</p>
   </div>`;
 }
 
@@ -267,30 +267,30 @@ function buildParticipantEmailHtml(submission) {
   <div style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;max-width:640px;margin:0 auto;color:#2b2140;line-height:1.6;">
     <div style="background:linear-gradient(120deg,#7c3aed,#ec4899);border-radius:16px;padding:28px;color:#fff;text-align:center;">
       <h1 style="margin:0;">Your Desire Profile</h1>
-      <p style="margin:8px 0 0;opacity:.9;">Everything you discovered, ${escapeHtml(name)}. Made for you to keep.</p>
+      <p style="margin:8px 0 0;opacity:.9;">Assessment report for ${escapeHtml(name)}. Sent only to this address.</p>
     </div>
 
-    <h2 style="color:#6d28d9;margin-top:28px;">Your kinks, ranked</h2>
+    <h2 style="color:#6d28d9;margin-top:28px;">Ranked results</h2>
     ${rankedRows ? `
     <div style="background:#faf7ff;border-radius:12px;padding:10px 12px;">
       <table style="border-collapse:collapse;width:100%;">${rankedRows}</table>
     </div>` : `
     <div style="${CARD_STYLE}">
-      <p style="margin:0;">No single category dominated. Your profile leans toward presence, connection, and moving at your own pace. That's a complete answer in itself.</p>
+      <p style="margin:0;">No category crossed the interest thresholds. Your responses consistently favored connection and presence, which is itself a stable and common preference profile.</p>
     </div>`}
 
-    <h2 style="color:#6d28d9;margin-top:28px;">What your answers say</h2>
+    <h2 style="color:#6d28d9;margin-top:28px;">Analysis</h2>
     <div style="background:#faf7ff;border-radius:12px;padding:18px 20px;white-space:pre-wrap;">${escapeHtml(results.summaryText)}</div>
 
-    <h2 style="color:#6d28d9;margin-top:28px;">Your top kinks, explained</h2>
+    <h2 style="color:#6d28d9;margin-top:28px;">Category detail</h2>
     ${featured.length > 0 ? featured.map(categoryCardHtml).join('') : `
       <div style="${CARD_STYLE}">
-        <p style="margin:0;">Connection, presence, and pace are the heart of your profile, and that's a complete answer in itself.</p>
+        <p style="margin:0;">No category crossed the interest thresholds; see the analysis above.</p>
       </div>`}
 
     ${desireMap ? `
-    <h2 style="color:#6d28d9;margin-top:28px;">Your desire map</h2>
-    <p style="color:#7c6f92;margin:4px 0 10px;">What speeds you up, what slows you down, and how your solo life fits in.</p>
+    <h2 style="color:#6d28d9;margin-top:28px;">Desire patterns</h2>
+    <p style="color:#7c6f92;margin:4px 0 10px;">Accelerators, inhibitors, and solo patterns, interpreted from your responses.</p>
     ${desireMap}` : ''}
 
     <h2 style="color:#6d28d9;margin-top:28px;">Where you fall on the Kinsey scale</h2>
@@ -299,12 +299,11 @@ function buildParticipantEmailHtml(submission) {
       <p style="margin:0;">${escapeHtml(results.kinsey.description)}</p>
     </div>
 
-    <h2 style="color:#6d28d9;margin-top:28px;">Gentle suggestions for the road</h2>
+    <h2 style="color:#6d28d9;margin-top:28px;">Recommendations</h2>
     <ul style="padding-left:20px;">${suggestions}</ul>
 
     <div style="background:#faf7ff;border-radius:12px;padding:18px 20px;margin-top:24px;text-align:center;">
-      <p style="margin:0;">Nothing in this profile is unusual, broken, or too much. Desire changes as you do,
-      so come back to this kindly, explore at your own pace, and let each discovery help you know yourself a little better.</p>
+      <p style="margin:0;">This report was generated from your responses and sent only to this address. Population research finds roughly half of adults report at least one interest outside conventional norms; every category measured here falls within the documented range of human sexuality when practiced with consent.</p>
     </div>
   </div>`;
 }

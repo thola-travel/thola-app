@@ -22,10 +22,10 @@ const GROUPS = {
 };
 
 const SPARK_SCALE = [
-  { label: 'Yes please', value: 1 },
+  { label: 'Strongly appeals', value: 1 },
   { label: 'Curious', value: 0.55 },
-  { label: 'Take it or leave it', value: 0.15 },
-  { label: 'Not for me', value: 0 },
+  { label: 'Neutral', value: 0.15 },
+  { label: 'Does not appeal', value: 0 },
 ];
 
 const CATEGORIES = {
@@ -44,7 +44,7 @@ const CATEGORIES = {
       'Aftercare: checking in and looking after your partner when play ends',
     ],
     support:
-      'Wanting to be in charge is one of the most common dynamics in intimacy, full stop. The best dominants are known for consent, communication, and care. Liking this role means you like to give as much as you like to lead.',
+      'Dominance themes appear in a large minority of adults\' reported fantasies (Joyal & Carpentier, 2017). In practice the role rests on negotiation and continuous monitoring of the partner\'s state, not on force of personality.',
     firstStep:
       'Plan one evening start to finish and walk your partner through it in a warm, confident voice. Compare notes afterward about what worked.',
   },
@@ -61,7 +61,7 @@ const CATEGORIES = {
       'The comfort of structure: rituals, titles, routines you both chose',
     ],
     support:
-      'Submission is chosen, negotiated, and revocable at any moment. That makes it a position of real power. Wanting to let go takes a capacity for trust that plenty of people wish they had.',
+      'Submission fantasies are among the most frequently reported in large surveys, across genders. Because the arrangement is negotiated and revocable, researchers classify it as agreed role division rather than passivity.',
     firstStep:
       'Hand over one small decision on purpose. What you wear, what happens first, who picks the music. Then just notice how it feels to follow.',
   },
@@ -78,7 +78,7 @@ const CATEGORIES = {
       'Agreeing on a signal so it all ends the second anyone wants it to',
     ],
     support:
-      'In survey after survey, bondage lands near the top of the most common fantasies in the world. With communication and a quick-release mindset, it\'s trust and sensation working together.',
+      'Restraint ranks near the top of reported fantasies in population studies; roughly half of Joyal & Carpentier\'s (2017) sample reported interest in some form. Standard practice pairs any restraint with an agreed release signal.',
     firstStep:
       'Start with a silk scarf or soft velcro cuffs. Agree on a release word first, and keep the first session short.',
   },
@@ -95,14 +95,14 @@ const CATEGORIES = {
       'Contrast on purpose: soft then firm, slow then sudden',
     ],
     support:
-      'Skin is packed with different nerve receptors, and they love variety. Enjoying contrast and intensity is basic biology working as intended.',
+      'Skin carries separate receptor systems for pressure, temperature, and light touch, and alternating them measurably heightens response. Preference for contrast is a sensory processing pattern within normal variation.',
     firstStep:
       'Try a "sensation menu" night. Five different touches, eyes closed, and you rate each one together after.',
   },
   sadism: {
     group: 'bondage',
     name: 'Sadism',
-    tagline: 'Their gasp is your reward.',
+    tagline: 'Arousal from delivering consensual intensity.',
     description:
       'Consensual sadism is arousal from delivering intensity a partner craves, and from watching it land. Ethical sadists are defined by attunement: they read every reaction, negotiate everything first, and stop on a word. The reaction is the reward, and it only counts if it was asked for.',
     examples: [
@@ -112,7 +112,7 @@ const CATEGORIES = {
       'Warm, attentive aftercare as the second half of the job',
     ],
     support:
-      'Sadomasochistic fantasies show up in a large share of the population in study after study, and consensual sadism between adults is recognized as healthy play, not pathology. The clinical line sits at consent, and you\'re on the right side of it by definition here.',
+      'Consensual sadism is distinguished from the clinical disorder by consent and partner welfare; DSM-5 draws the same line. Interest in administering agreed intensity appears in a substantial minority of adults.',
     firstStep:
       'Ask a willing partner to rate intensity out loud from 1 to 10 while you experiment with grip, pace, and pressure. Learning to read their numbers is the skill everything else builds on.',
   },
@@ -129,7 +129,7 @@ const CATEGORIES = {
       'The floaty, clear-headed state intense play can bring on',
     ],
     support:
-      'Endorphins and adrenaline are real chemistry: bodies genuinely convert chosen intensity into euphoria, the same loop that makes hot sauce and marathons enjoyable. Masochism between consenting adults is a well-documented, healthy way to be wired.',
+      'Chosen pain triggers endorphin and adrenaline release that many nervous systems register as euphoria; the mechanism parallels endurance sport and capsaicin tolerance. By current diagnostic standards, consensual masochism is non-pathological.',
     firstStep:
       'Explore your own dial first: firm pressure, a hot shower turned up a notch, a hard massage. Notice exactly where "more" stops being the honest answer, and treat that as your starting map.',
   },
@@ -146,9 +146,9 @@ const CATEGORIES = {
       'Saying fantasies out loud and picking one to act out',
     ],
     support:
-      'Nearly everyone fantasizes. Roleplay is just giving those stories a stage with someone you trust, and a vivid imagination is a strength, not a quirk to apologize for.',
+      'Nearly all adults report sexual fantasy, and scenario play is fantasy enacted. Novelty is a documented contributor to arousal in long-term relationships.',
     firstStep:
-      'Text each other one scenario you\'d each enjoy, then try the milder one. No pressure to be good actors. If you crack up laughing, that still counts.',
+      'Exchange one scenario each in writing and run the milder one. Fluency comes with repetition, not first-attempt performance.',
   },
   exhibition: {
     group: 'seen',
@@ -163,7 +163,7 @@ const CATEGORIES = {
       'Dressing up knowing exactly the effect it will have',
     ],
     support:
-      'Wanting to be desired is about as human as it gets. Between consenting adults in private, showing off is a common and healthy source of heat.',
+      'Arousal from being watched by a consenting audience is a common pattern. Audience consent is the operative ethical and legal line; within it, this is ordinary variation.',
     firstStep:
       'Try a slow, well-lit reveal for an audience of one. You control the pace. They provide the applause.',
   },
@@ -180,7 +180,7 @@ const CATEGORIES = {
       'Watching each other in a mirror',
     ],
     support:
-      'For a huge share of people, desire starts with the eyes. When being seen is the whole point for the person being watched, watching is a healthy way to build heat.',
+      'Visual stimuli are a primary arousal channel for much of the population. Consensual watching, where the watched party wants the audience, is distinct in kind from non-consensual voyeurism.',
     firstStep:
       'Ask your partner if you can just watch for five minutes, hands off. Afterward, tell them exactly what you loved seeing.',
   },
@@ -197,9 +197,9 @@ const CATEGORIES = {
       'Kind words as part of aftercare',
     ],
     support:
-      'If praise lands deep for you, that means affirmation genuinely feeds you. That\'s emotional attunement, not neediness, and it makes this one of the gentlest kinks there is.',
+      'Verbal affirmation engages reward pathways, and responsiveness to it during intimacy is a stable individual difference. It indexes attunement to social feedback, not dependence.',
     firstStep:
-      'Tell your partner three specific things you love watching them do. Then ask which words they\'d most love to hear back.',
+      'State three specific behaviors you respond to in your partner, and ask which phrases they respond to in return.',
   },
   sensual: {
     group: 'connection',
@@ -214,7 +214,7 @@ const CATEGORIES = {
       'Building anticipation across a whole day of small gestures',
     ],
     support:
-      'Tenderness and presence make up a complete erotic language on their own. Learning that connection is what moves you is as real a discovery as any kink on this list.',
+      'Low interest across kink categories is itself a stable and common profile. Emphasis on presence and connection predicts relationship satisfaction as strongly as any specific practice.',
     firstStep:
       'Plan one unhurried evening with phones in another room. The only goal is presence. Everything else is a bonus.',
   },
@@ -235,14 +235,14 @@ const CATEGORIES = {
       'Coin-flip nights where chance decides who leads',
     ],
     support:
-      'Ask around any experienced kink community and you\'ll find a large share of people identify as switches. Knowing both roles from the inside tends to make people better partners in either one.',
+      'In community surveys a substantial share of practitioners identify as switches. Direct experience of both roles is associated with stronger negotiation skill in either.',
     firstStep:
       'Try a flip night. One of you leads until a timer goes off, then you trade. Compare notes after.',
   },
   bratplay: {
     group: 'power',
     name: 'Brat & Tamer Play',
-    tagline: 'Playful defiance is your love language.',
+    tagline: 'Negotiated defiance and pursuit.',
     sparkPrompt: 'Playful defiance. Teasing, breaking the "rules" on purpose, and being lovingly put back in line (or doing the taming).',
     roles: [["Yes, as the brat","The fun for you is being the playful troublemaker: testing, teasing, and being lovingly reined in."],["Yes, as the tamer","You want the tamer's chair. Meeting the sass, keeping a straight face, and winning."]],
     description:
@@ -254,9 +254,9 @@ const CATEGORIES = {
       'Negotiated "punishments" that are really rewards',
     ],
     support:
-      'People love bratting because it keeps power exchange light and funny. Wanting to poke the bear, or be the bear, is playfulness. And playfulness is intimacy.',
+      'Structured rule-testing is a recognized power-exchange style in which the resistance is part of the negotiated script. It selects for partners who prefer challenge over formality.',
     firstStep:
-      'Agree on one silly rule, one playful consequence, and a safeword. Then see who breaks first.',
+      'Agree on one rule, one playful consequence, and a safeword, then run a single evening under those terms.',
   },
   discipline: {
     group: 'power',
@@ -273,7 +273,7 @@ const CATEGORIES = {
       'Negotiating what the dynamic includes, which is half the fun',
     ],
     support:
-      'Structure creates safety, and safety creates freedom. People in rules-based dynamics often say the clarity is the most relaxing part of their whole relationship.',
+      'Rule-based dynamics externalize structure that many participants report as regulating in itself. The documented range runs from single agreed rules to full protocol relationships.',
     firstStep:
       'Write one rule together that you\'d both enjoy for a single week. Then review it like co-authors and keep only what you actually liked.',
   },
@@ -292,7 +292,7 @@ const CATEGORIES = {
       'Hunter-and-prey games negotiated in advance',
     ],
     support:
-      'Underneath the manners, we\'re animals. Letting that side breathe in a safe container is healthy release. People who play this way often call it the most honest play there is.',
+      'Chase-and-capture play engages the same arousal-adrenaline loop as competitive physical sport. It is an established style within power exchange with its own community norms.',
     firstStep:
       'Try a sixty-second pillow-soft wrestling match with a clear stop word. Whoever ends up on top leads what happens next.',
   },
@@ -311,14 +311,14 @@ const CATEGORIES = {
       'Generous aftercare and a debrief, every single time',
     ],
     support:
-      'Surrender fantasies show up constantly in sexuality research. In Justin Lehmiller\'s survey of over 4,000 Americans, most respondents reported having had one, so the fantasy itself says nothing bad about you. Acting it out demands more communication than any other kink, which is why experienced players treat CNC as a masterclass in trust.',
+      'Surrender fantasies are among the most commonly reported in the fantasy literature (Lehmiller, 2018), and researchers are explicit that they do not reflect real-world wishes. Enactment requires the most detailed negotiation of any practice measured here.',
     firstStep:
-      'Long before any scene, just talk about the fantasy in past tense: "what would have happened is..." Plenty of couples find the conversation alone is electric.',
+      'Well before any scene, discuss the fantasy in the conditional tense and gauge both responses. Many couples find the discussion itself sufficient.',
   },
   petplay: {
     group: 'power',
     name: 'Pet Play',
-    tagline: 'A collar can be a key to a freer headspace.',
+    tagline: 'Role immersion in an animal persona.',
     sparkPrompt: 'Stepping into an animal persona. Kitten, puppy, pony. Collars, headspace, and a doting handler.',
     roles: [["Yes, as the pet","The wordless headspace is yours: collar on, human worries off."],["Yes, as the handler","You're the doting one: care, training, treats, and running the whole show."]],
     description:
@@ -330,14 +330,14 @@ const CATEGORIES = {
       'A handler who runs everything so the pet can just be',
     ],
     support:
-      'Pet play has a long-established community with its own events and conventions worldwide. Wanting a simpler, wordless headspace is a real form of rest, and trust is what makes it possible.',
+      'The documented appeal is role immersion that suspends verbal, adult self-monitoring; practitioners describe the state as restful. An established international community exists.',
     firstStep:
       'Try ten minutes of the headspace with zero gear. One partner dotes on the other as their chosen animal. See how it feels.',
   },
   caregiver: {
     group: 'power',
     name: 'Caregiver & Nurture Dynamics',
-    tagline: 'Being cherished is the whole point.',
+    tagline: 'Nurture as an erotic structure.',
     sparkPrompt: 'A dynamic built on nurture between adults. One partner protective and guiding, the other cherished and taken care of.',
     roles: [["Yes, being cared for","Being doted on, guided, and kept safe is your side of this dynamic."],["Yes, as the caregiver","Nurturing is your engine: planning, protecting, and taking every decision off their plate."]],
     description:
@@ -349,14 +349,14 @@ const CATEGORIES = {
       'Comfort objects, cozy rituals, being tucked in',
     ],
     support:
-      'Wanting to be taken care of, or to be the one who does the caring, is one of the most tender dynamics there is. Between consenting adults it gives vulnerability a safe place to live.',
+      'Caregiving and care-receiving dynamics map onto attachment behavior expressed between consenting adults. Reported benefits center on structure and perceived safety rather than surface aesthetics.',
     firstStep:
       'Give your partner one full cared-for evening where you handle every decision and comfort. Then swap, or repeat. Whichever fits.',
   },
   orgasmcontrol: {
     group: 'power',
     name: 'Orgasm Control & Edging',
-    tagline: 'Anticipation is your favorite drug.',
+    tagline: 'Timing and denial as instruments.',
     sparkPrompt: 'Pleasure as a game of timing. Building, pausing, denying, or commanding release. Possibly chastity play.',
     roles: [["Yes, being controlled","You want your release in someone else's hands: asking, waiting, earning it."],["Yes, holding the keys","You want to be the timekeeper: building, pausing, granting, denying."]],
     description:
@@ -368,7 +368,7 @@ const CATEGORIES = {
       'Chastity play with keys, timers, and plenty of teasing',
     ],
     support:
-      'Delayed gratification measurably intensifies reward. That\'s well-documented psychology, and this kink is basically that finding put to happy use. Control games around release are common and healthy.',
+      'Delay reliably intensifies eventual reward, a standard reinforcement finding. Control-of-release practices are widespread across genders and orientations.',
     firstStep:
       'Try one round of "almost." Build close to the peak, pause for ten breaths, then notice what the wave does when you finally let it land.',
   },
@@ -390,9 +390,9 @@ const CATEGORIES = {
       'Learning together from books and classes. The learning is a date in itself.',
     ],
     support:
-      'Shibari has a worldwide community of artists and teachers, with beginner classes in most major cities. Loving rope means loving craft, patience, and closeness at the same time.',
+      'Rope bondage has a developed technical tradition (shibari) with formal instruction available in most large cities. Reported injuries concentrate in nerve compression, which is why beginner teaching emphasizes placement and cutting tools.',
     firstStep:
-      'Buy one soft practice rope and learn a single decorative wrist wrap from a beginner tutorial. Keep safety shears in reach from day one. It\'s the habit that marks people who know what they\'re doing.',
+      'Buy one soft practice rope and learn a single decorative wrist wrap from a beginner tutorial. Keep safety shears within reach from the first session.',
   },
   sensorydep: {
     group: 'bondage',
@@ -409,7 +409,7 @@ const CATEGORIES = {
       'Floating in stillness while your partner runs the show',
     ],
     support:
-      'The brain reliably compensates for a missing sense by turning up the others. You already use this trick when you close your eyes to savor food. This is the same principle with better company.',
+      'Removing one sensory channel reliably increases sensitivity in the remaining ones, a well-replicated perception finding. Blindfolds are the most common entry point in practice surveys.',
     firstStep:
       'Start with just a blindfold and a ten-minute timer. Agree that a single word lifts it instantly.',
   },
@@ -428,7 +428,7 @@ const CATEGORIES = {
       'The warm, floaty glow many people feel afterward',
     ],
     support:
-      'Impact play may be the most practiced kink on earth, and its community is obsessive about doing it safely. The glow is endorphins doing their job. Enjoying intensity is body chemistry, not damage.',
+      'Impact play is among the most practiced kink activities. Rhythmic intensity releases endorphins many report as a calm, clear afterstate; community safety practice confines strikes to large muscle groups.',
     firstStep:
       'Start with hands only, on the padded areas, using a 1-to-10 check-in scale. The receiver calls every number.',
   },
@@ -447,7 +447,7 @@ const CATEGORIES = {
       'A chilled spoon, which works far better than it has any right to',
     ],
     support:
-      'Your skin\'s temperature receptors are among its most sensitive. This one is pure sensory science, and with body-safe materials it\'s one of the friendliest starting points in kink.',
+      'Thermoreceptors adapt quickly to constant input, which is why alternation produces a stronger response than any single temperature. Purpose-made massage candles exist because standard wax burns skin.',
     firstStep:
       'Buy one massage candle made for skin (regular candles burn too hot) and pair it with a glass of ice. Alternate, and let the receiver rate each pass.',
   },
@@ -466,7 +466,7 @@ const CATEGORIES = {
       'Slow, unbearable anticipation before contact',
     ],
     support:
-      'Tickling has a devoted worldwide community, and it\'s one of the few kinks built literally on laughter. Joy and squirming are a real erotic language.',
+      'Knismolagnia is documented in the fetish literature as a distinct interest combining touch, anticipation, and control. Because laughter is involuntary, practitioners standardize non-verbal stop signals.',
     firstStep:
       'Agree on a clear stop signal first. Laughing makes the word "stop" unreliable, so use a hand tap. Then map out which spots are fun and which are genuinely too much.',
   },
@@ -485,7 +485,7 @@ const CATEGORIES = {
       'Using only devices designed for bodies. Never improvised electronics.',
     ],
     support:
-      'E-stim has a well-established, safety-literate community and a whole industry of body-safe gear behind it. Liking a sensation that technology makes possible isn\'t strange. It\'s just specific.',
+      'Modern e-stim derives from TENS technology and uses current-limited, body-safe devices. The manufacturer guidance (never across the chest) is the operative safety rule.',
     firstStep:
       'Start with an entry-level TENS unit on its lowest setting, on a forearm. Learn the sensation somewhere neutral first, and read the safety guidance (never across the chest).',
   },
@@ -504,14 +504,14 @@ const CATEGORIES = {
       'Agreeing in advance where marks are welcome and where they\'re not',
     ],
     support:
-      'The urge to mark and be marked is ancient and tied to belonging. Settle placement in advance and it becomes a sweet mix of intensity and sentiment.',
+      'Marking combines acute sensation with a lasting visual signal, and both components have documented erotic salience. Agreeing on placement beforehand is the standard practice.',
     firstStep:
       'Have the thirty-second map talk: where marks are welcome, where they must never show. Then let intensity build gradually.',
   },
   edgeplay: {
     group: 'bondage',
     name: 'Thrill & Edge Play',
-    tagline: 'The rollercoaster principle, with real safety rails required.',
+    tagline: 'High-risk intensity play. Education required.',
     sparkPrompt: 'High-trust thrill play. Fear, adrenaline, and intensity at the edges. This category requires real education before practice.',
     roles: [["Yes, riding the edge","You'd be the one feeling the adrenaline, inside a container someone trusted runs."],["Yes, creating the thrill","You'd run the scene, which carries the bigger share of the safety homework."]],
     description:
@@ -523,7 +523,7 @@ const CATEGORIES = {
       'Community workshops and mentors as the entry path, not experimentation',
     ],
     support:
-      'Being drawn to adrenaline is the same wiring that loves horror movies and skydiving. Wanting the thrill is valid. So is taking the risk seriously, and learning from experienced educators first is how people honor both.',
+      'This category carries objectively higher physical risk than anything else measured here; breath restriction in particular has no medically safe protocol. Community norms route newcomers through in-person education rather than experimentation.',
     firstStep:
       'Chase the feeling, not the hazard. Start with suspense, anticipation, and harmless props. Treat anything genuinely risky as something that requires in-person education first.',
   },
@@ -545,9 +545,9 @@ const CATEGORIES = {
       'One signature item, like a jacket or boots, that flips the switch',
     ],
     support:
-      'Clothing has carried erotic charge in every culture with a written history. Responding to a costume is responding to story and symbolism. That\'s imagination working exactly as designed.',
+      'Clothing-based arousal cues are among the oldest documented erotic patterns. Uniforms concentrate role and status signals, which is the operative mechanism.',
     firstStep:
-      'Each of you names one outfit you\'d love to see the other in. Thrift stores make this a cheap and very funny date.',
+      'Each partner names one outfit they would respond to. Secondhand shops make the trial inexpensive.',
   },
   authority: {
     group: 'imagination',
@@ -564,7 +564,7 @@ const CATEGORIES = {
       'Debriefing after, back on equal footing, comparing favorite moments',
     ],
     support:
-      'Power-gap fantasies rank among the most common in sexuality research, and the reason makes sense: real life makes those lines uncrossable, so the charge goes to fantasy, where it\'s safe. Playing pretend with a consenting partner harms no one and delights two.',
+      'Authority-gap scenarios rank high in fantasy surveys precisely because their real counterparts are prohibited; fantasy carries the charge without the harm. Consensual enactment between adults is categorically distinct from the real thing.',
     firstStep:
       'Pick a scenario, agree on the tone, and give each character a name. The names alone make it easier to step in and out.',
   },
@@ -582,7 +582,7 @@ const CATEGORIES = {
       'A fursona as a freer, more playful version of yourself',
     ],
     support:
-      'Monster romance novels sell in the millions, and fantasy persona communities thrive worldwide. This territory is far more mainstream than it admits at parties. Giving your imagination a body now and then is play at its purest.',
+      'Fantastical and monster-themed erotica is a commercially large genre, indicating broad demand. Persona play, including fursonas, functions as bounded identity experimentation.',
     firstStep:
       'Start with story. Tell each other a short fantastical scenario out loud, then borrow one element for real life: a voice, a persona, a single prop.',
   },
@@ -600,9 +600,9 @@ const CATEGORIES = {
       'Finding out what confidence feels like from the other side',
     ],
     support:
-      'Cross-dressing is ancient. Theater history is full of it, and it remains extremely common today. Whether it\'s pure play or something deeper, exploring it is healthy self-knowledge, and you\'re in vast company.',
+      'Cross-gender expression for erotic or exploratory purposes is documented across cultures and historical periods. Its significance ranges from situational play to identity signal; repeated self-observation is what distinguishes them.',
     firstStep:
-      'Start private and low-stakes. One item of clothing, alone or with a trusted partner. Just notice what you feel. Curiosity deserves data, not judgment.',
+      'One item of clothing, in private. Record the response and repeat before drawing conclusions.',
   },
   medical: {
     group: 'imagination',
@@ -619,14 +619,14 @@ const CATEGORIES = {
       'The power dynamic between examiner and examined',
     ],
     support:
-      'Medical play is a well-established niche with dedicated communities and gear makers. The core wish, being completely attended to, is one of intimacy\'s oldest, just wearing a lab coat.',
+      'Clinical roleplay concentrates vulnerability, authority, and focused attention, the same active elements found in other examination-style play. Dedicated equipment suppliers and community protocols exist.',
     firstStep:
       'A box of nitrile gloves and a theatrical intake interview is a complete starter kit. Keep anything invasive out of scope until you\'ve both properly researched it.',
   },
   sizeplay: {
     group: 'imagination',
     name: 'Size & Strength Play',
-    tagline: 'The delicious physics of difference.',
+    tagline: 'Arousal from physical size and strength difference.',
     sparkPrompt: 'The charge of size and strength difference. Being lifted, pinned, enveloped, or doing the lifting.',
     roles: [["Yes, being overpowered","Being lifted, pinned, and dwarfed is the thrill for you."],["Yes, doing the lifting","Your side is the strength: carrying, pinning, towering."]],
     description:
@@ -638,7 +638,7 @@ const CATEGORIES = {
       'Fantasy scenarios of dramatic, impossible size difference',
     ],
     support:
-      'The thrill of size difference shows up across every gender and orientation. Protection and power are primal feelings, and enjoying the physics of bodies is about as natural as kink gets.',
+      'Strength and size differentials are common arousal cues across genders and orientations, extending into pure fantasy at the macrophilia end. The physical versions carry ordinary lifting-injury risk and nothing more exotic.',
     firstStep:
       'Ask for one lift, pin, or carry. Warm up first and lift with your knees, not your back. Then see how the difference feels when it\'s deliberate.',
   },
@@ -657,7 +657,7 @@ const CATEGORIES = {
       'Clear contraception agreements that make the fantasy safe to say out loud',
     ],
     support:
-      'This ranks among the most-searched fantasies on the internet. The wiring is ancient, and for almost everyone the appeal is intensity and belonging, not literal outcomes. Talk about it openly. Fantasy and family planning are separate conversations, and both deserve clarity.',
+      'Impregnation-themed fantasy ranks among the most searched erotic themes. Content research consistently finds the appeal is possession and intensity rather than literal reproduction; contraception agreements are the standard boundary.',
     firstStep:
       'Introduce it as vocabulary first: a few charged words in the moment. Have the daylight conversation beforehand about where the fantasy/reality line sits for both of you.',
   },
@@ -671,12 +671,12 @@ const CATEGORIES = {
       'Erotic hypnosis and mind play use relaxation, focus, and suggestion to create a floaty, altered headspace. That can mean simple guided relaxation with an erotic glow, or deeper trance play between partners who trust each other completely.',
     examples: [
       'A partner\'s voice guiding a slow, full-body relaxation',
-      'Trigger words that call back a marvelous feeling',
+      'Agreed trigger words that recall a conditioned state',
       'The floaty, suggestible state fans of this describe',
       'Long trust conversations first. The mind deserves the same care as the body.',
     ],
     support:
-      'Fascination with trance is fascination with consciousness itself. Practiced with consent and care, mind play has thoughtful communities and a deep literature behind it.',
+      'Erotic hypnosis extends clinical trance techniques. Suggestibility varies substantially between individuals, and effects depend on trust and expectation, as in therapeutic use.',
     firstStep:
       'Start with a simple guided relaxation read aloud by your partner. No triggers, no depth. Just their voice and your breath. Then talk about what it felt like.',
   },
@@ -696,7 +696,7 @@ const CATEGORIES = {
       'Checking in once fully awake, every time',
     ],
     support:
-      'This fantasy is common and well-documented, and the community around it is emphatic about the awake-in-advance consent rule. Wanting the softness of that liminal state says nothing troubling about you. It\'s tenderness with the lights low.',
+      'Somnophilic fantasy appears at measurable rates in fantasy surveys. The practice standard is strict: consent is negotiated fully awake, in advance, and stays revocable; the drowsy state is the setting, never the consent condition.',
     firstStep:
       'Have the conversation fully awake first: what\'s welcome, what\'s not, and that the invitation can be withdrawn anytime. Then start with mornings, where sleep is already lifting.',
   },
@@ -718,7 +718,7 @@ const CATEGORIES = {
       'Encrypted, password-protected storage as a standing rule',
     ],
     support:
-      'People have been making art of desire for as long as art has existed. With consent and real security habits, a private archive is a love letter you write together.',
+      'Private recording adds performance salience and a reviewable record, both documented arousal factors. The material risks are storage and distribution, addressed by encryption and deletion agreements.',
     firstStep:
       'Start with photos only, on one designated device. Agree on storage and deletion rules before the first shot. The security talk is what makes the fun sustainable.',
   },
@@ -736,9 +736,9 @@ const CATEGORIES = {
       'The pre-talk and the debrief, which are the real main events',
     ],
     support:
-      'In Lehmiller\'s survey of over 4,000 Americans, 89 percent had fantasized about a threesome. It is the single most common fantasy on record. Whether yours stays fantasy or becomes practice, you\'re in the statistical majority.',
+      'Group sex is the most frequently reported fantasy on record: 89% of Lehmiller\'s 4,175-person sample reported threesome fantasies. Successful practice correlates most strongly with communication quality between primary partners.',
     firstStep:
-      'Start with the map, not the territory. Each partner writes their boundaries and hopes separately, then compare. For many couples the conversation is the adventure.',
+      'Each partner writes boundaries and interests separately, then compare documents. Most couples decide whether to proceed from that exercise alone.',
   },
   compersion: {
     group: 'seen',
@@ -755,7 +755,7 @@ const CATEGORIES = {
       'Rigorous honesty as the foundation under all of it',
     ],
     support:
-      'Cuckolding ranks near the top of reported fantasies for men in multiple large studies, and polyamorous communities treat compersion as a skill worth practicing. Feeling it, or wanting to, is emotional range. Not a defect.',
+      'Partner-sharing themes rank in the top tier of male-reported fantasies in multiple large surveys, and compersion is documented in consensual non-monogamy research as a learnable response.',
     firstStep:
       'Test the waters in fantasy first. Talk through a hypothetical together and watch your real reactions, whether that\'s arousal, anxiety, or both, with curiosity instead of judgment.',
   },
@@ -777,7 +777,7 @@ const CATEGORIES = {
       'Silk sheets or gloves as the whole event',
     ],
     support:
-      'Leather and latex communities are decades-old cornerstones of kink culture with their own history and pride. A strong sensory preference is wiring, not weirdness. Sommeliers get paid for theirs.',
+      'Material-specific arousal is among the most studied fetish classes; Scorolli et al. (2007) found object and material preferences second in frequency only to body parts. Sensory specificity is the mechanism.',
     firstStep:
       'Go to a fabric or thrift store and let touch lead. One glove, scarf, or jacket in your favorite material is a complete experiment.',
   },
@@ -796,14 +796,14 @@ const CATEGORIES = {
       'Shopping together as extended foreplay',
     ],
     support:
-      'Entire industries exist because clothing is erotic to nearly everyone. The only thing that varies is degree. Savoring dress and undress is romance with good production values.',
+      'Partial concealment reliably outperforms full exposure in arousal research, and lingerie operationalizes that finding. The selection and reveal ritual adds anticipation, a separately documented factor.',
     firstStep:
-      'Shop together, in person or online, and let each partner pick one piece they\'d love to see. The picking is half the fun.',
+      'Select one piece each. Anticipation during selection is part of the measured effect.',
   },
   feet: {
     group: 'fetish',
     name: 'Feet & Footwear',
-    tagline: 'The most common fetish on the planet.',
+    tagline: 'The most common body-part preference on record.',
     sparkPrompt: 'Feet and footwear as a source of attraction. Massaging, admiring, adoring, or beautiful shoes.',
     roles: [["Yes, adoring them","You're the admirer: the massage, the attention, the devotion."],["Yes, being adored","Receiving that devotion is your side of it."]],
     description:
@@ -815,9 +815,9 @@ const CATEGORIES = {
       'Kisses that start at the ankle',
     ],
     support:
-      'A 2007 study analyzing fetish communities found feet to be the most common body-part preference by a wide margin. You are in enormous company, and the wiring may be literal. Nothing about this is strange.',
+      'Feet are the most common body-part preference in every large dataset examined (Scorolli et al., 2007). One neurological hypothesis notes that foot and genital regions sit adjacent in the somatosensory cortex.',
     firstStep:
-      'Offer, or request, a proper ten-minute foot massage with lotion and full attention. Devotion disguised as self-care.',
+      'Offer or request a ten-minute foot massage with full attention, and note the response on both sides.',
   },
   bodyworship: {
     group: 'fetish',
@@ -834,14 +834,14 @@ const CATEGORIES = {
       'Lying back and being adored, with nothing expected in return',
     ],
     support:
-      'Most of us are trained to criticize our bodies. Body worship practices the opposite, and both giving and receiving it build the feeling of being worthy. Call it what it is: appreciation with the volume turned up.',
+      'Extended asymmetric attention concentrates two documented arousal factors: focused attention and received appraisal. The giving and receiving sides show distinct but equally common appeal profiles.',
     firstStep:
       'Take turns. Fifteen minutes of unhurried appreciation each. The receiver\'s only job is to accept it.',
   },
   nichebody: {
     group: 'fetish',
     name: 'Hands, Hair & Specific Features',
-    tagline: 'Your eye knows exactly what it loves.',
+    tagline: 'Attraction keyed to specific features.',
     sparkPrompt: 'A particular pull toward a specific feature. Hands, forearms, hair, necks, shoulders, voices.',
     roles: [["Yes, as the admirer","Your specific eye does the loving here."],["Yes, being admired","Having your particular features adored is the appeal."]],
     description:
@@ -853,18 +853,18 @@ const CATEGORIES = {
       'A voice that does more than any picture could',
     ],
     support:
-      'Nearly everyone has a thing, the feature that catches them first. Naming yours just means you know your own taste. And specific taste makes for wonderfully specific compliments.',
+      'Body-part preferences beyond feet (hands, hair, necks, voices) form the most numerous single class in fetish taxonomies. The defining feature is specificity of cue, not intensity of interest.',
     firstStep:
       'Tell your partner exactly which feature undoes you and why. Specific desire, said out loud, is one of the best compliments there is.',
   },
   wetmessy: {
     group: 'fetish',
     name: 'Food & Messy Play',
-    tagline: 'Permission to make a glorious mess.',
-    sparkPrompt: 'Playful mess. Whipped cream, chocolate sauce, cake, or the general joy of getting gloriously messy.',
+    tagline: 'Texture, mess, and norm-breaking as play.',
+    sparkPrompt: 'Play involving food and mess. Whipped cream, sauces, cake, deliberate messiness.',
     roles: [["Yes, getting messy","You want to be the canvas."],["Yes, making the mess","You're the artist with the whipped cream."]],
     description:
-      'Wet-and-messy play, known as sploshing, is the giddy sensory joy of food and mess. Whipped cream. Chocolate sauce. An entire cake met with enthusiasm. It\'s texture, taste, absurdity, and childlike permission rolled together.',
+      'Wet-and-messy play, known as sploshing, is erotic play with food and mess: whipped cream, sauces, cake. The identified components are texture, taste, absurdity, and licensed rule-breaking.',
     examples: [
       'Whipped cream and chocolate sauce as art supplies',
       'The classic pie to the face, lovingly delivered',
@@ -872,14 +872,14 @@ const CATEGORIES = {
       'The laughing shower together afterward',
     ],
     support:
-      'Sploshing may be the most cheerful corner of kink. It runs on laughter. Wanting permission to be messy and ridiculous is wanting play in its purest form.',
+      'Wet-and-messy play is a documented niche with a stable community. The active elements are texture, violation of cleanliness norms, and licensed play; hygiene management is the only practical constraint.',
     firstStep:
       'Start with dessert and a towel. One can of whipped cream, applied artistically, with the shower already warm.',
   },
   watersports: {
     group: 'fetish',
     name: 'Watersports',
-    tagline: 'More common than anyone admits at dinner.',
+    tagline: 'A taboo-amplified interest, measurably common.',
     sparkPrompt: 'Erotic play involving pee. A taboo-tinged interest that\'s far more common than polite company admits.',
     roles: [["Yes, on the giving side","Your interest runs toward giving."],["Yes, on the receiving side","Your interest runs toward receiving, which asks for the deeper trust."]],
     description:
@@ -891,7 +891,7 @@ const CATEGORIES = {
       'Frank hygiene and boundary talks beforehand. Unsexy, then very sexy.',
     ],
     support:
-      'Surveys keep finding this interest is far more widespread than its reputation suggests. Taboo is a normal amplifier of desire. Enjoying it with a consenting partner and sensible hygiene is a preference, not a pathology.',
+      'Urolagnia appears at measurable rates in every large fetish survey, well above its social visibility. Taboo amplification is the documented mechanism, and hygiene practice is well established in the community literature.',
     firstStep:
       'Raise it as fantasy first and gauge interest honestly. If you both lean in, the shower is the traditional low-stakes venue.',
   },
@@ -900,7 +900,7 @@ const CATEGORIES = {
     group: 'fetish',
     name: 'Objects & Inflatables',
     sparkPrompt: 'A charge from a specific object: balloons, inflatables, plush, or another particular thing that does it for you.',
-    tagline: 'Your spark has a specific shape.',
+    tagline: 'Arousal keyed to a specific object.',
     description:
       'Object fetishes attach erotic charge to a specific thing: balloons (the "looner" community), inflatables, plush, or something else entirely. The draw is usually sensory: the texture, the sound, the tension, the anticipation.',
     examples: [
@@ -910,7 +910,7 @@ const CATEGORIES = {
       'Collecting or keeping a favorite object for private time',
     ],
     support:
-      'Object fetishes are among the oldest documented in sexuality research, and communities like looners are well-established and famously friendly. A specific spark harms no one, and specific is not strange. It\'s just precise wiring.',
+      'Object-directed arousal is among the earliest documented fetish classes and is considered benign by modern diagnostic standards when it causes no distress. The balloon community is a well-documented example.',
     firstStep:
       'No partner needed for this one: explore solo first, notice which part of the experience carries the charge (sound, texture, tension), and share it with a partner only when and if you want to.',
   },
@@ -920,7 +920,7 @@ const CATEGORIES = {
   dirtytalk: {
     group: 'mind',
     name: 'Dirty Talk',
-    tagline: 'Language is your favorite toy.',
+    tagline: 'Language as a primary stimulus.',
     sparkPrompt: 'Explicit, charged language. Hearing it, saying it, or trading it by text all day.',
     roles: [["Yes, hearing it","Words work on you. You want to be talked to."],["Yes, saying it","You're the narrator: the one whose voice does the damage."]],
     description:
@@ -932,9 +932,9 @@ const CATEGORIES = {
       'A voice note that outperforms any photo',
     ],
     support:
-      'The brain is the biggest erogenous zone, and language is how you reach it directly. Being word-driven means you can flirt from anywhere with a phone signal. Use it well.',
+      'Explicit verbal content functions as a primary arousal stimulus for a large share of adults. Effective vocabulary is idiosyncratic, which is why negotiating terms precedes using them.',
     firstStep:
-      'Trade "green words" lists: words and phrases you each love, plus any that are off-limits. Then practice by text, where nobody can see you blush.',
+      'Exchange lists of effective and off-limits words, then practice over text before speaking it aloud.',
   },
   degradation: {
     group: 'mind',
@@ -951,7 +951,7 @@ const CATEGORIES = {
       'Aftercare that explicitly reaffirms what\'s true underneath',
     ],
     support:
-      'Praise and degradation are two ends of the same axis: intensity of attention. Plenty of people enjoy both. Liking sharp words inside real safety is contrast play, and the negotiation it takes tends to deepen trust.',
+      'Erotic humiliation operates on the contrast between scene content and actual regard. Research on BDSM practitioners finds post-scene intimacy and trust frequently increase; pre-negotiated vocabulary and aftercare are the standard structure.',
     firstStep:
       'Build the vocabulary lists first. Thrilling words, neutral words, never-words. Start with the mildest item on the list and add extra-warm aftercare.',
   },
@@ -972,9 +972,9 @@ const CATEGORIES = {
       'Sessions with no goal beyond staying present together',
     ],
     support:
-      'Mindfulness research keeps confirming what tantra traditions claimed for centuries: attention is the real aphrodisiac. Craving slowness in a fast world is wisdom, not blandness.',
+      'Attention-focused practice measurably improves arousal and satisfaction in mindfulness-based sex therapy trials. Slowed pacing and breath synchronization are the operative techniques, independent of any spiritual framing.',
     firstStep:
-      'Try three minutes of synchronized breathing and eye contact before your next intimate evening. Expect giggles first. Depth comes second.',
+      'Three minutes of synchronized breathing and eye contact before intimacy. Initial awkwardness typically fades within the first minute.',
   },
 };
 
@@ -1081,9 +1081,9 @@ const QUESTIONS = [
     ],
   },
   {
-    question: 'Aftercare time. What sounds most like heaven once things wind down?',
+    question: 'After intensity winds down, which of these do you most want?',
     options: [
-      { label: 'Being held, praised, and told how wonderful I was', scores: { praise: 2, submission: 2 } },
+      { label: 'Being held, praised, and reassured', scores: { praise: 2, submission: 2 } },
       { label: 'Taking care of my partner: water, blankets, soft words', scores: { dominance: 2, praise: 1 } },
       { label: 'Laughing together about the characters we just played', scores: { roleplay: 2, sensual: 1 } },
       { label: 'Long, quiet cuddling. No words needed', scores: { sensual: 3 } },
@@ -1216,42 +1216,42 @@ const KINSEY_RESULTS = {
   0: {
     label: 'Kinsey 0: Exclusively heterosexual',
     description:
-      'Your attractions point consistently toward people of a different gender than your own. On the 0-to-6 scale Alfred Kinsey published in 1948, that places you at 0, exclusively heterosexual. Like every point on the scale, it\'s simply a description of where your attractions naturally live. Clear, valid, and yours.',
+      'Your responses indicate attraction consistently directed toward a different gender. On the 0-to-6 scale Kinsey published in 1948, this is position 0, exclusively heterosexual.',
   },
   1: {
     label: 'Kinsey 1: Predominantly heterosexual, only incidentally homosexual',
     description:
-      'Your attractions lean strongly toward a different gender, with an occasional flicker of curiosity toward your own. Kinsey\'s research found this pattern to be very common. A 1 means your compass points one way with a little natural range, and that\'s a completely normal way for attraction to work.',
+      'Attraction directed predominantly toward a different gender, with incidental same-gender response. Kinsey\'s data found this pattern common; it is position 1 on the scale.',
   },
   2: {
     label: 'Kinsey 2: Predominantly heterosexual, but more than incidentally homosexual',
     description:
-      'You\'re mostly drawn to a different gender, but attraction to your own gender is a real, recurring part of your experience. More than a passing flicker. Many people at a 2 call themselves heteroflexible or bi-curious. Whatever words fit, this blend is common and completely valid.',
+      'Predominant other-gender attraction with recurring, more than incidental, same-gender attraction. Contemporary self-labels at this position include heteroflexible and bi-curious; it is position 2 on the scale.',
   },
   3: {
     label: 'Kinsey 3: Equally heterosexual and homosexual',
     description:
-      'Your attractions land in the middle: people of your own gender and other genders draw you roughly equally. This is the classic bisexual point on Kinsey\'s scale. For you, attraction is probably about the person more than the package. Many people describe that as freeing.',
+      'Attraction to your own and other genders in roughly equal measure. This is position 3, the scale\'s bisexual midpoint.',
   },
   4: {
     label: 'Kinsey 4: Predominantly homosexual, but more than incidentally heterosexual',
     description:
-      'You\'re mostly drawn to your own gender, while attraction to other genders remains a genuine part of your experience. A 4 is a rich, real pattern of attraction that plenty of people share. Your mix is yours, and it\'s completely valid.',
+      'Predominant same-gender attraction with recurring other-gender attraction; position 4 on the scale.',
   },
   5: {
     label: 'Kinsey 5: Predominantly homosexual, only incidentally heterosexual',
     description:
-      'Your attractions point strongly toward your own gender, with only occasional flickers elsewhere. A 5 means your compass is clear, with a little natural range. That\'s a very common shape for attraction to take, and entirely valid.',
+      'Attraction directed predominantly toward your own gender, with incidental other-gender response; position 5 on the scale.',
   },
   6: {
     label: 'Kinsey 6: Exclusively homosexual',
     description:
-      'Your attractions point consistently toward people of your own gender. On Kinsey\'s scale that\'s a 6, exclusively homosexual. Like every point on the scale, it\'s a clear, valid description of where your attractions naturally live.',
+      'Attraction consistently directed toward your own gender. This is position 6, exclusively homosexual.',
   },
   X: {
     label: 'Kinsey X: Little or no sexual attraction',
     description:
-      'Your answers suggest sexual attraction plays little or no role in how you connect with people. Kinsey labeled this "X." Today many people describe it as being on the asexual spectrum. It\'s a real, recognized orientation, not a phase or a problem. Plenty of asexual people enjoy romance, intimacy, and deep connection on their own terms.',
+      'Your responses indicate little or no sexual attraction. Kinsey recorded this as category X; the contemporary term is the asexual spectrum, a recognized orientation. Romantic attachment operates independently of sexual attraction and often remains fully present.',
   },
 };
 
@@ -1270,37 +1270,37 @@ const PERSONAL_QUESTIONS = [
         label: 'Confident, take-charge energy from a partner',
         scores: { submission: 2, praise: 1 },
         reflection:
-          'Confidence reads as safety and desire at the same time, which is why it works so fast on you. It also fits neatly with the power-exchange threads in your profile.',
+          'Displayed confidence functions as your primary arousal cue. This typically co-occurs with the power-exchange scores elsewhere in this profile.',
       },
       {
         label: 'Being wanted. Compliments, adoration, obvious desire',
         scores: { praise: 2, exhibition: 1 },
         reflection:
-          'Feeling desired is your accelerator. That makes you easy to please and easy to lose: partners who go quiet with their appreciation will read as distant to you. Ask for the words. You\'re allowed to.',
+          'Expressed desire is your primary accelerator. Practical implication: explicit verbal appreciation from partners has an outsized effect, and its absence registers as distance.',
       },
       {
         label: 'Touch. Hands, warmth, skin, pressure',
         scores: { sensation: 2, sensual: 1 },
         reflection:
-          'Your desire lives in your body and wakes up through skin. Slow, generous touch will get you further than any script, and partners should know that about you.',
+          'Somatic input is your primary channel. Arousal in your pattern builds from physical contact rather than from context or language.',
       },
       {
         label: 'A great mind. Banter, teasing, the right words',
         scores: { roleplay: 1, praise: 1 },
         reflection:
-          'You get turned on through the brain first. Wit, tension, and well-chosen words do the heavy lifting, which means great flirting is basically foreplay for you.',
+          'Verbal and cognitive stimulation precedes physical response in your pattern. Conversational chemistry operates as functional foreplay.',
       },
       {
         label: 'What I can see. Watching, being watched, visuals',
         scores: { voyeurism: 2, exhibition: 1 },
         reflection:
-          'Your desire is visual. Lighting, mirrors, eye contact, and the sight of a partner enjoying themselves are your native language, and building around that is easy once you name it.',
+          'Visual input is your dominant channel, consistent with the exhibitionism and voyeurism scores in this profile.',
       },
       {
         label: 'A story in my head. Fantasy and imagination',
         scores: { roleplay: 2 },
         reflection:
-          'Your richest arousal starts in your imagination. That inner world is an asset: people with vivid fantasy lives have an endless private library, and sharing even one page of it with a partner can transform things.',
+          'Internally generated fantasy is your primary driver. Recurring scenarios are usable data about underlying preference.',
       },
     ],
   },
@@ -1311,22 +1311,22 @@ const PERSONAL_QUESTIONS = [
       {
         label: 'Out of nowhere. It just arrives, and often',
         reflection:
-          'Researchers call this spontaneous desire. It shows up uninvited and often. Handy to know: many partners run on the other pattern, responsive desire, which needs a warm-up. Neither of you is broken. You just start from different places.',
+          'This is spontaneous desire in the research terminology: arousal arising without external prompting. Pairings with responsive-desire partners work best when the difference is named explicitly.',
       },
       {
         label: 'Once things get going. It builds in response to touch and closeness',
         reflection:
-          'Emily Nagoski calls this responsive desire, and it\'s one of the most common patterns there is, especially in long-term relationships. Your desire likes a running start. Plan for the warm-up instead of waiting to be struck by lightning, and everything works better.',
+          'This is responsive desire: arousal follows stimulation rather than preceding it. It is among the most common patterns, particularly in long-term relationships, and indicates nothing about attraction level.',
       },
       {
         label: 'Only when the setting is right. Low stress, privacy, the right mood',
         reflection:
-          'Your arousal is context-sensitive. Scientists who study this describe an accelerator and a brake, and your brake is attentive. That\'s not a flaw. It means the setting is part of your foreplay, so treat it that way.',
+          'Context-dependent arousal reflects a sensitive inhibition system in dual-control-model terms. Environment functions as part of the stimulus.',
       },
       {
         label: 'Honestly, not that often',
         reflection:
-          'Desire that shows up rarely is still a normal pattern, and it varies hugely across people and across seasons of life. If it ever bothers you, that\'s worth a conversation with a doctor or therapist. If it doesn\'t, there\'s nothing to fix.',
+          'Low spontaneous desire frequency is within normal population range and fluctuates with life phase. It warrants clinical attention only if it causes personal distress.',
       },
     ],
   },
@@ -1337,27 +1337,27 @@ const PERSONAL_QUESTIONS = [
       {
         label: 'Feeling rushed or pressured',
         reflection:
-          'Pressure is your hardest brake. Arousal researchers describe desire as a gas pedal plus a brake, and knowing your brake matters as much as knowing the gas. For you, patience isn\'t a nicety. It\'s a requirement worth saying out loud.',
+          'Pressure activates your inhibition system fastest. In dual-control terms, removing brakes outperforms adding accelerators; explicit pacing agreements address this directly.',
       },
       {
         label: 'Stress and a busy head. I can\'t switch off',
         reflection:
-          'Stress is the most common brake there is. Arousal needs the nervous system to feel safe, and a racing mind reads as danger. A slow transition ritual, whatever form it takes for you, will do more for your sex life than any technique.',
+          'Cognitive load is the most commonly reported arousal inhibitor in the literature. A deliberate transition period between daily tasks and intimacy measurably improves response.',
       },
       {
         label: 'Feeling criticized or self-conscious',
         reflection:
-          'Your brake is judgment, including your own. Reassurance and explicit appreciation aren\'t optional extras for you. They\'re the conditions that let you show up. Partners who understand that get the best of you.',
+          'Evaluation sensitivity is your primary brake. In this pattern, explicit reassurance functions as a precondition for arousal rather than an enhancement.',
       },
       {
         label: 'No emotional connection. It feels mechanical without it',
         reflection:
-          'Connection is your on-switch, and its absence is your off-switch. That\'s a coherent, common way to be wired, and it means investment in the relationship pays out directly in desire.',
+          'Arousal in your pattern is gated on emotional context. Relationship investment translates directly into desire, a coherent and common configuration.',
       },
       {
         label: 'The details. Hygiene, environment, timing',
         reflection:
-          'Your senses keep score, and small wrong details pull the alarm. That sensitivity has an upside: when the details are right, they work just as hard in your favor. Curate ruthlessly and without apology.',
+          'Environmental cues carry disproportionate weight in your inhibition system. The same sensitivity operates in your favor when conditions are controlled.',
       },
     ],
   },
@@ -1368,27 +1368,27 @@ const PERSONAL_QUESTIONS = [
       {
         label: 'Worrying about how I look',
         reflection:
-          'Watching yourself from the outside instead of feeling from the inside has a name: researchers call it spectatoring, and it\'s extremely common. The practical fix is redirecting attention to physical sensation, one sense at a time. It\'s a skill, and it trains up fast.',
+          'Self-observation during sex is termed spectatoring (Masters & Johnson) and reliably reduces arousal. Redirecting attention to physical sensation is the standard countermeasure and improves with practice.',
       },
       {
         label: 'Worrying about whether my partner is enjoying it',
         reflection:
-          'Generous, and also a trap: you can\'t feel your own pleasure while auditing someone else\'s. A partner who gives you clear, vocal feedback frees you from guessing. Ask for that. It changes everything.',
+          'Monitoring partner response at the expense of your own is a documented attention pattern. Direct verbal feedback from partners removes the guesswork that sustains it.',
       },
       {
         label: 'My to-do list. Intrusive everyday thoughts',
         reflection:
-          'A mind that won\'t clock out is a stress response, not a desire problem. Transition time between daily life and intimacy isn\'t indulgent. For brains like yours it\'s the whole ballgame.',
+          'Task intrusion is a stress-carryover effect, not a desire deficit. A planned transition period is the evidence-supported correction.',
       },
       {
         label: 'Fear of doing something wrong',
         reflection:
-          'Performance worry usually comes from treating intimacy as a test. It isn\'t one. The partners worth having grade on communication, not technique, and saying the fear out loud usually shrinks it to a fraction of its size.',
+          'Performance monitoring is evaluation anxiety applied to sex. Stating it to a partner typically reduces it, and reframing encounters as feedback rather than tests removes its basis.',
       },
       {
         label: 'Nothing much. I stay present pretty easily',
         reflection:
-          'Staying present during intimacy is a genuine strength. Plenty of people work hard to get where you already are. Enjoy it, and be patient with partners who need more help getting out of their heads.',
+          'Sustained present-focus during intimacy is the state mindfulness-based interventions aim to produce. No correction indicated.',
       },
     ],
   },
@@ -1399,27 +1399,27 @@ const PERSONAL_QUESTIONS = [
       {
         label: 'Most days, sometimes more than once',
         reflection:
-          'A daily rhythm is common and healthy. Frequency only becomes a problem if it crowds out things you care about, and for most people it never does. You know your own drive well, which is worth something.',
+          'Daily-range frequency is within documented norms. Frequency alone is not a clinical indicator; interference with daily functioning is the relevant measure, and frequency by itself implies none.',
       },
       {
         label: 'A few times a week',
         reflection:
-          'A few times a week matches what large surveys, like the National Survey of Sexual Health and Behavior, find for a big share of adults. Regular solo time also keeps you fluent in your own body, which partners benefit from.',
+          'This matches the modal adult frequency band in the National Survey of Sexual Health and Behavior. Regular solo experience also correlates with accurate knowledge of one\'s own responses.',
       },
       {
         label: 'A few times a month',
         reflection:
-          'A monthly-ish rhythm is completely normal. There\'s no target number to hit. What matters is that the frequency feels like yours, and it sounds like it does.',
+          'Within the documented population range. No target frequency exists in the literature.',
       },
       {
         label: 'Rarely',
         reflection:
-          'Rare is a normal frequency too. Solo drive varies enormously between people, and it isn\'t a report card on your sexuality. The only question that matters is whether it suits you.',
+          'Solo frequency varies widely between individuals and across life phases. Low frequency is a normal data point, not a deficit.',
       },
       {
         label: 'Never, or almost never',
         reflection:
-          'Not masturbating is as valid as any other answer here. Some people have little solo drive, some prefer partnered intimacy only, and some are simply not interested. None of those need fixing.',
+          'A measurable share of adults in every survey reports no masturbation, for reasons ranging from low drive to simple preference. It is a normal profile.',
       },
     ],
   },
@@ -1430,32 +1430,32 @@ const PERSONAL_QUESTIONS = [
       {
         label: 'Hands, nothing fancy',
         reflection:
-          'The classic, and the most common answer by far. Simple doesn\'t mean unskilled. Knowing exactly what works for you by hand is core knowledge no toy replaces.',
+          'Direct manual stimulation is the most commonly reported method. Method knowledge transfers directly to partner communication.',
       },
       {
         label: 'Toys are part of the routine',
         reflection:
-          'You\'re in good company. In a large US study, about half of women and nearly half of men reported having used a vibrator. Toys are mainstream, and knowing which tools work for you is practical self-knowledge.',
+          'Device use is statistically mainstream: roughly half of US women and nearly half of men report vibrator use (Herbenick et al., 2009).',
       },
       {
         label: 'Pressure or grinding works best for me',
         reflection:
-          'Pressure-based technique is common and completely normal, just less talked about. Bodies find their own best route to pleasure. Yours found one that works, and that\'s the entire assignment.',
+          'Pressure-based technique is common though under-discussed. Method variation between individuals is wide and carries no clinical significance.',
       },
       {
         label: 'I take my time. Edging, building slowly',
         reflection:
-          'You\'ve independently discovered what the orgasm-control crowd builds a whole practice around: anticipation intensifies the payoff. Your patience is a technique, and it transfers beautifully to partnered play.',
+          'Deliberate delay increases eventual orgasm intensity through arousal accumulation, the same mechanism measured in partnered orgasm control. Your solo pattern confirms responsiveness to it.',
       },
       {
         label: 'It varies with my mood',
         reflection:
-          'Variety means you listen to your body instead of running a routine, and that responsiveness is exactly the skill that makes people good partners too.',
+          'Method flexibility indicates responsiveness to current state rather than habit, which correlates with reported satisfaction.',
       },
       {
         label: 'This one doesn\'t apply to me',
         reflection:
-          'Skipping solo play is a valid way to be. Your sexuality is defined by what does work for you, not by which boxes you tick.',
+          'A non-applicable response is valid, and no inference is drawn from it.',
       },
     ],
   },
@@ -1466,32 +1466,32 @@ const PERSONAL_QUESTIONS = [
       {
         label: 'My imagination. I write the whole script',
         reflection:
-          'Running on pure imagination means your fantasy life is strong, and fantasies are useful data. The scenarios you return to are a map of what you want. Worth paying attention to, maybe even writing down.',
+          'Self-generated fantasy indicates strong internal imagery. Recurrent content is the most direct available data on preference structure, and the research literature treats it as such.',
       },
       {
         label: 'Videos',
         reflection:
-          'Video is the most common choice for a reason: it\'s immediate and it works. One tip from the research: notice which themes you pick, not just that you watch. The pattern in your choices says more about your desires than the habit itself.',
+          'Visual material is the most common aid. Your selection patterns over time are more informative about preference than the fact of use.',
       },
       {
         label: 'Written erotica or audio',
         reflection:
-          'Preferring story and voice over visuals means your arousal is narrative-driven. Context, buildup, and interiority do it for you. That preference is common, especially among people whose biggest erogenous zone is the brain.',
+          'Preference for narrative and audio over visual material indicates context-driven arousal, consistent with verbally driven patterns elsewhere in this profile.',
       },
       {
         label: 'Memories of real moments',
         reflection:
-          'Replaying real experiences means your desire is anchored in connection and lived sensation. It also means you know exactly which moments worked. That\'s information a partner would love to have.',
+          'Reliance on autobiographical material indicates arousal anchored in lived context. It also identifies which encounters registered most strongly.',
       },
       {
         label: 'Whatever I find in the moment. No pattern',
         reflection:
-          'No fixed pattern usually means your arousal is flexible and novelty-friendly. That openness is an asset. It also means this quiz\'s spark round probably surprised you in a few good ways.',
+          'Unpatterned selection suggests novelty-responsive arousal with low cue specificity.',
       },
       {
         label: 'Nothing. It\'s purely physical for me',
         reflection:
-          'For some people solo pleasure is simply a body process, no mental content required. That\'s a real and common pattern, not a lack of imagination. It\'s just efficiency.',
+          'Solo experience without mental content is a documented pattern. No inference about imagination or desire follows from it.',
       },
     ],
   },
@@ -1502,27 +1502,27 @@ const PERSONAL_QUESTIONS = [
       {
         label: 'Relaxed and clear-headed',
         reflection:
-          'That post-release calm is your parasympathetic nervous system doing its job. Using it for sleep, stress, or focus is one of the oldest self-care tools humans have.',
+          'The post-orgasm calm reflects parasympathetic activation. Deliberate use for sleep or stress regulation is common and unproblematic.',
       },
       {
         label: 'Satisfied, but a little guilty',
         reflection:
-          'Here\'s the thing about that guilt: it\'s learned, not built in. Every major medical organization treats masturbation as a normal part of human sexuality. The guilt usually traces back to messages you absorbed, not anything you\'re doing. It can be unlearned, and naming it is the first step.',
+          'Post-masturbation guilt correlates with acquired beliefs, not with any measured harm; medical consensus classifies masturbation as normal sexual behavior. The response typically diminishes when examined directly.',
       },
       {
         label: 'Neutral. It\'s like scratching an itch',
         reflection:
-          'Purely functional is a fine relationship to have with solo pleasure. Not everything needs to be profound. Sometimes maintenance is just maintenance.',
+          'A purely functional relationship with solo sex is a stable, common pattern requiring no interpretation.',
       },
       {
         label: 'Sometimes a little lonely',
         reflection:
-          'That ache afterward is telling you something real: solo release and human connection are different needs, and one can\'t fully substitute for the other. The loneliness isn\'t shameful. It\'s a signal about what you want more of.',
+          'Post-solo loneliness separates the physical function from the attachment function. It is information about unmet connection need, distinct from anything about the act itself.',
       },
       {
         label: 'Energized and in a better mood',
         reflection:
-          'The mood lift is real chemistry: dopamine, endorphins, and oxytocin all show up. Using that boost on purpose is a perfectly good life strategy.',
+          'The reported mood elevation matches the documented dopamine and endorphin response profile.',
       },
     ],
   },
@@ -1530,11 +1530,11 @@ const PERSONAL_QUESTIONS = [
 
 /* General self-discovery suggestions appended to everyone's results. */
 const GENERAL_SUGGESTIONS = [
-  'Keep a private desire journal. Noting what sparked a "yes," a "curious," or a "no" teaches you your own patterns faster than anything else.',
-  'Share one result from this quiz with a partner as a conversation starter. "This said I might like X, what do you think?" is a famously easy opener.',
-  'Learn the basics of consent culture: safewords, check-ins, and aftercare. They make every experiment on this list better.',
-  'Two books worth your time: "Come As You Are" by Emily Nagoski on how desire works, and "The New Topping Book" and "The New Bottoming Book" by Easton and Hardy on power play.',
-  'Retake this quiz in six months. Desire changes as you do, and watching your own answers shift is self-knowledge in motion.',
+  'Track your reactions over time: recording which items drew yes, curious, or no responses reveals patterns a single session misses.',
+  'Results work well as a discussion instrument with partners. Comparing profiles locates overlap and mismatch quickly.',
+  'Safewords, check-ins, and aftercare are the standard risk controls for every practice measured here. Learn them before experimenting.',
+  'Relevant reading: Nagoski, "Come As You Are" (desire mechanics); Easton and Hardy, "The New Topping Book" and "The New Bottoming Book" (power exchange practice).',
+  'Retest at intervals. Preference profiles shift with time and context, and the differences between runs are themselves informative.',
 ];
 
 /* Make the database available to the server for building result emails. */

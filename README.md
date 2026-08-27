@@ -7,9 +7,9 @@ An interactive, sex-positive quiz with a custom SVG line-icon set (no emoji) tha
 
 ## How it works
 
-1. The participant enters a **first name and email**, checks a consent notice, and answers **71 multiple-choice questions** in four parts:
+1. The participant enters a **first name and email**, checks a consent notice, and answers **71 base questions plus adaptive follow-ups** in four parts:
    - *Part 1, Play Style*: 20 weighted scenario questions, including differentiators that separate close identities (dominant vs sadist vs disciplinarian, submissive vs masochist vs brat).
-   - *Part 2, Spark Round*: 39 rapid-fire questions, one per niche kink, answered on a gut-reaction scale (Yes please / Curious / Take it or leave it / Not for me). For the 32 kinks where giving and receiving are different experiences, the "yes" answer splits into sides with tailored labels ("Yes, tying" / "Yes, being tied" / "Yes, both sides"), so someone who loves doing a thing but not receiving it gets an accurate profile. The chosen side appears on their result cards, the spectrum map, the summary, and the email.
+   - *Part 2, Interest Inventory*: 39 direct questions, one per niche kink, on a four-point scale (Strongly appeals / Curious / Neutral / Does not appeal). Every full "yes" triggers an adaptive centrality follow-up (central / regular / occasional / peripheral) that weights the score, so rankings discriminate between core interests and peripheral ones. For the 32 kinks where giving and receiving are different experiences, the "yes" answer splits into sides with tailored labels ("Yes, tying" / "Yes, being tied" / "Yes, both sides"), so someone who loves doing a thing but not receiving it gets an accurate profile. The chosen side appears on their result cards, the spectrum map, the summary, and the email.
    - *Part 3, Desire & Solo Life*: 8 questions about turn-ons, turn-offs, what pulls them out of the moment, and their solo life (how often they masturbate, how, what they turn to, and how they feel after). Each answer gets a supportive, research-grounded reflection in the results.
    - *Part 4, Kinsey Scale*: 4 attraction questions.
 2. A **live reading sidebar** analyzes answers as they come in, with animated category bars and a running read on where the profile is leaning.
@@ -51,7 +51,7 @@ With the server running:
 CHROMIUM_PATH=/path/to/chrome node test/smoke.js
 ```
 
-This drives the whole quiz in a real browser (name and email entry, all 71 questions, submission) and asserts the results render with no JS errors.
+This drives the whole quiz in a real browser (name and email entry, all questions, submission) and asserts the results render with no JS errors.
 
 ## Production
 
