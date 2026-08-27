@@ -288,6 +288,7 @@ input[type="text"]:focus, input[type="email"]:focus {
   gap: 12px;
   margin-bottom: 10px;
 }
+.spark-header[hidden] { display: none; }
 .spark-icon {
   width: 52px;
   height: 52px;
@@ -474,6 +475,39 @@ input[type="text"]:focus, input[type="email"]:focus {
   display: flex;
   gap: 12px;
   margin-top: 4px;
+}
+
+/* ---------- Select-all-that-apply ---------- */
+.multi-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.check-box {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  border: 2px solid var(--accent-soft);
+  border-radius: 6px;
+  background: #fff;
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+}
+.multi-option:hover .check-box { border-color: var(--accent); }
+.multi-option.selected .check-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.multi-option.selected .check-box::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1.5px;
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2.4px 2.4px 0;
+  transform: rotate(45deg);
 }
 
 .theme-item {

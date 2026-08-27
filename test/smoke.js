@@ -48,6 +48,22 @@ const { chromium } = require('playwright-core');
     }
 
     await page.waitForSelector('.option', { state: 'visible' });
+
+    // Select-all-that-apply questions: toggle two options, then Continue.
+    if ((await page.locator('.multi-option').count()) > 0) {
+      const multi = page.locator('.multi-option');
+      const m = await multi.count();
+      try {
+        await multi.nth(i % (m - 1)).click({ timeout: 3000 }); // skip the exclusive last option
+        await multi.nth((i + 1) % (m - 1)).click({ timeout: 3000 });
+        await page.locator('.text-actions .btn.primary').click({ timeout: 3000 });
+      } catch (e) {
+        continue;
+      }
+      await page.waitForTimeout(400);
+      continue;
+    }
+
     const options = page.locator('.option');
     const n = await options.count();
     try {

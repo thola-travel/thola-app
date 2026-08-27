@@ -1027,12 +1027,14 @@ const QUESTIONS = [
     ],
   },
   {
-    question: 'Which of these fantasies have you replayed more than once?',
+    question: 'Which of these fantasies have you replayed more than once? Select all that apply.',
+    multi: true,
     options: [
       { label: 'Being completely at someone\'s mercy (safely, with someone I trust)', scores: { submission: 2, bondage: 2 } },
       { label: 'Having someone completely at mine', scores: { dominance: 2, bondage: 1 } },
       { label: 'Watching, or being watched, with total permission', scores: { voyeurism: 2, exhibition: 1 } },
       { label: 'A perfect, deeply romantic night where time slows down', scores: { sensual: 3 } },
+      { label: 'None of these', exclusive: true, scores: {} },
     ],
   },
   {
@@ -1144,12 +1146,14 @@ const QUESTIONS = [
     ],
   },
   {
-    question: 'Which daydream comes closest to one of yours?',
+    question: 'Which of these daydreams have you had? Select all that apply.',
+    multi: true,
     options: [
       { label: 'A partner begging, and me deciding whether to say yes', scores: { dominance: 2, sadism: 1 } },
       { label: 'Being pushed right to my limit by someone I trust completely', scores: { masochism: 2, submission: 1 } },
       { label: 'An audience that can\'t look away from me', scores: { exhibition: 2 } },
       { label: 'A slow morning with nowhere to be and nothing to prove', scores: { sensual: 2 } },
+      { label: 'None of these', exclusive: true, scores: {} },
     ],
   },
   {
@@ -1264,7 +1268,8 @@ const KINSEY_RESULTS = {
 const PERSONAL_QUESTIONS = [
   {
     id: 'turnon_primary',
-    question: 'Your biggest turn-on. What gets you there fastest?',
+    question: 'Which of these reliably turn you on? Select all that apply.',
+    multi: true,
     options: [
       {
         label: 'Confident, take-charge energy from a partner',
@@ -1332,7 +1337,8 @@ const PERSONAL_QUESTIONS = [
   },
   {
     id: 'turnoff_main',
-    question: 'Now the other side. What kills the mood fastest for you?',
+    question: 'The other side. Which of these kill the mood for you? Select all that apply.',
+    multi: true,
     options: [
       {
         label: 'Feeling rushed or pressured',
@@ -1363,7 +1369,8 @@ const PERSONAL_QUESTIONS = [
   },
   {
     id: 'turnoff_moment',
-    question: 'During intimacy, what most pulls you out of the moment?',
+    question: 'During intimacy, what pulls you out of the moment? Select all that apply.',
+    multi: true,
     options: [
       {
         label: 'Worrying about how I look',
@@ -1387,6 +1394,7 @@ const PERSONAL_QUESTIONS = [
       },
       {
         label: 'Nothing much. I stay present pretty easily',
+        exclusive: true,
         reflection:
           'Sustained present-focus during intimacy is the state mindfulness-based interventions aim to produce. No correction indicated.',
       },
@@ -1425,7 +1433,8 @@ const PERSONAL_QUESTIONS = [
   },
   {
     id: 'solo_method',
-    question: 'When you do, what\'s your usual approach?',
+    question: 'When you do, which approaches do you use? Select all that apply.',
+    multi: true,
     options: [
       {
         label: 'Hands, nothing fancy',
@@ -1454,6 +1463,7 @@ const PERSONAL_QUESTIONS = [
       },
       {
         label: 'This one doesn\'t apply to me',
+        exclusive: true,
         reflection:
           'A non-applicable response is valid, and no inference is drawn from it.',
       },
@@ -1461,7 +1471,8 @@ const PERSONAL_QUESTIONS = [
   },
   {
     id: 'solo_fuel',
-    question: 'What do you usually turn to for solo inspiration?',
+    question: 'What do you turn to for solo inspiration? Select all that apply.',
+    multi: true,
     options: [
       {
         label: 'My imagination. I write the whole script',
@@ -1490,6 +1501,7 @@ const PERSONAL_QUESTIONS = [
       },
       {
         label: 'Nothing. It\'s purely physical for me',
+        exclusive: true,
         reflection:
           'Solo experience without mental content is a documented pattern. No inference about imagination or desire follows from it.',
       },
@@ -1497,7 +1509,8 @@ const PERSONAL_QUESTIONS = [
   },
   {
     id: 'solo_after',
-    question: 'How do you usually feel afterward?',
+    question: 'How do you feel afterward? Select all that apply.',
+    multi: true,
     options: [
       {
         label: 'Relaxed and clear-headed',

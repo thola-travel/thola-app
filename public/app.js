@@ -66,12 +66,14 @@
   }
 
   // Max possible weighted score per broad category (Parts 1 and 3), for
-  // normalizing totals to percentages.
+  // normalizing totals to percentages. Single-choice questions contribute
+  // their best option; select-all questions contribute the sum across
+  // options, since every applicable option can be chosen.
   const broadMax = {};
   Object.keys(CATEGORIES).forEach((key) => {
     broadMax[key] = QUESTIONS.concat(PERSONAL_QUESTIONS).reduce((sum, q) => {
-      const best = Math.max(...q.options.map((o) => (o.scores && o.scores[key]) || 0));
-      return sum + best;
+      const perOption = q.options.map((o) => (o.scores && o.scores[key]) || 0);
+      return sum + (q.multi ? perOption.reduce((a, b) => a + b, 0) : Math.max(...perOption));
     }, 0);
   });
 
@@ -149,8 +151,11 @@
       const q = allQuestions[i];
       if (sel === null) return;
       if (q.type === 'kink' || q.type === 'personal') {
-        Object.entries(q.options[sel].scores || {}).forEach(([k, pts]) => {
-          totals[k] = (totals[k] || 0) + pts;
+        const picks = Array.isArray(sel) ? sel : [sel];
+        picks.forEach((p) => {
+          Object.entries((q.options[p] && q.options[p].scores) || {}).forEach(([k, pts]) => {
+            totals[k] = (totals[k] || 0) + pts;
+          });
         });
       } else if (q.type === 'spark') {
         totals[q.categoryKey] = q.options[sel].value; // 0..1 interest scale
@@ -265,7 +270,56 @@
       host.className = 'options' + (q.type === 'spark' ? ' spark-grid' : '');
       host.innerHTML = '';
 
-      if (q.type === 'text') {
+      if (q.multi && (q.type === 'kink' || q.type === 'personal')) {
+        // Select-all-that-apply: options toggle; Continue advances.
+        const current = new Set(Array.isArray(state.selections[state.index]) ? state.selections[state.index] : []);
+        const buttons = [];
+        const cont = document.createElement('button');
+        cont.type = 'button';
+        cont.className = 'btn primary';
+        cont.textContent = 'Continue';
+        const sync = () => {
+          buttons.forEach((b, i) => b.classList.toggle('selected', current.has(i)));
+          cont.disabled = current.size === 0;
+        };
+        q.options.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'option multi-option';
+          btn.type = 'button';
+          btn.innerHTML = '<span class="check-box" aria-hidden="true"></span><span>' + opt.label + '</span>';
+          btn.addEventListener('click', () => {
+            if (current.has(i)) {
+              current.delete(i);
+            } else if (opt.exclusive) {
+              current.clear();
+              current.add(i);
+            } else {
+              q.options.forEach((o, j) => { if (o.exclusive) current.delete(j); });
+              current.add(i);
+            }
+            sync();
+            state.selections[state.index] = current.size > 0 ? [...current].sort((a, b) => a - b) : null;
+            updateLivePanel();
+          });
+          buttons.push(btn);
+          host.appendChild(btn);
+        });
+        const row = document.createElement('div');
+        row.className = 'text-actions';
+        cont.addEventListener('click', () => {
+          if (current.size === 0) return;
+          state.selections[state.index] = [...current].sort((a, b) => a - b);
+          if (state.index < allQuestions.length - 1) {
+            state.index += 1;
+            renderQuestion(true);
+          } else {
+            beginAnalysis();
+          }
+        });
+        row.appendChild(cont);
+        host.appendChild(row);
+        sync();
+      } else if (q.type === 'text') {
         const area = document.createElement('textarea');
         area.className = 'text-answer';
         area.rows = 6;
@@ -314,7 +368,9 @@
       }
 
       $('btn-back').style.visibility = state.index === 0 ? 'hidden' : 'visible';
-      $('nav-hint').textContent = PART_HINTS[q.type];
+      $('nav-hint').textContent = q.multi
+        ? 'Select every answer that applies, then Continue'
+        : PART_HINTS[q.type];
       updateLivePanel();
     };
 
@@ -505,15 +561,19 @@
     }
     const kinsey = { key: String(kinseyKey), ...KINSEY_RESULTS[kinseyKey] };
 
-    // Reflections for the turn-on / turn-off / solo-life questions.
+    // Reflections for the turn-on / turn-off / solo-life questions. A
+    // select-all question yields one reflection per selected option.
     const aboutYou = [];
     allQuestions.forEach((q, i) => {
       const sel = state.selections[i];
       if (q.type !== 'personal' || sel === null) return;
-      const opt = q.options[sel];
-      if (opt.reflection) {
-        aboutYou.push({ question: q.question, answer: opt.label, reflection: opt.reflection });
-      }
+      const picks = Array.isArray(sel) ? sel : [sel];
+      picks.forEach((p) => {
+        const opt = q.options[p];
+        if (opt && opt.reflection) {
+          aboutYou.push({ question: q.question, answer: opt.label, reflection: opt.reflection });
+        }
+      });
     });
 
     const suggestions = buildSuggestions(kinkProfile);
@@ -615,6 +675,8 @@
       let answer;
       if (q.type === 'text') {
         answer = typeof sel === 'string' && sel.trim() !== '' ? sel : '(no response)';
+      } else if (Array.isArray(sel)) {
+        answer = sel.map((p) => q.options[p].label).join('; ');
       } else {
         answer = sel !== null ? q.options[sel].label : '(skipped)';
       }
