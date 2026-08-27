@@ -445,6 +445,52 @@ input[type="text"]:focus, input[type="email"]:focus {
 .summary-card h1 { margin-bottom: 14px; }
 .results-summary { white-space: pre-line; font-size: 1.02rem; }
 
+/* ---------- Completion banner ---------- */
+.thanks-banner {
+  border-left: 6px solid var(--good);
+}
+.thanks-banner h2 { color: var(--accent); margin-bottom: 8px; }
+
+/* ---------- Open response ---------- */
+.text-answer {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--accent-soft);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 130px;
+  outline: none;
+  background: #fff;
+  color: var(--ink);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.text-answer:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
+}
+.text-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.theme-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: rgba(124, 58, 237, 0.06);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.theme-name { font-weight: 600; }
+.theme-name .icon { color: var(--accent); }
+.theme-terms { font-size: 0.85rem; color: var(--ink-soft); }
+
 /* ---------- Ranked list ---------- */
 .ranked-list { list-style: none; display: grid; gap: 8px; margin-top: 6px; }
 .ranked-item {

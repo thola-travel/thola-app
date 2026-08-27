@@ -35,6 +35,7 @@
         : SPARK_SCALE.map((s) => ({ label: s.label, value: s.value })),
     })),
     ...PERSONAL_QUESTIONS.map((q) => ({ ...q, type: 'personal' })),
+    ...TEXT_QUESTIONS.map((q) => ({ ...q, type: 'text' })),
     ...KINSEY_QUESTIONS.map((q) => ({ ...q, type: 'kinsey' })),
   ];
 
@@ -227,13 +228,15 @@
     spark: 'Part 2 · Interest Inventory',
     sparkDepth: 'Part 2 · Interest Inventory',
     personal: 'Part 3 · Desire & Solo Patterns',
-    kinsey: 'Part 4 · Kinsey Scale',
+    text: 'Part 4 · In Your Words',
+    kinsey: 'Part 5 · Attraction',
   };
   const PART_HINTS = {
     kink: 'Select the closest answer',
     spark: 'Answer by first instinct',
     sparkDepth: 'This weights the score for your ranking',
     personal: 'Answer privately and candidly',
+    text: 'Optional. Analyzed by keyword and phrase matching, and stored with your responses',
     kinsey: 'Attraction, not behavior',
   };
 
@@ -261,18 +264,54 @@
       const host = $('options');
       host.className = 'options' + (q.type === 'spark' ? ' spark-grid' : '');
       host.innerHTML = '';
-      q.options.forEach((opt, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'option' + (state.selections[state.index] === i ? ' selected' : '');
-        btn.type = 'button';
-        if (q.type === 'spark') {
-          btn.innerHTML = sparkValueIcon(opt.value) + '<span>' + opt.label + '</span>';
-        } else {
-          btn.textContent = opt.label;
-        }
-        btn.addEventListener('click', () => selectOption(i));
-        host.appendChild(btn);
-      });
+
+      if (q.type === 'text') {
+        const area = document.createElement('textarea');
+        area.className = 'text-answer';
+        area.rows = 6;
+        area.maxLength = 2000;
+        area.placeholder = q.placeholder || '';
+        area.value = typeof state.selections[state.index] === 'string' ? state.selections[state.index] : '';
+        const row = document.createElement('div');
+        row.className = 'text-actions';
+        const cont = document.createElement('button');
+        cont.type = 'button';
+        cont.className = 'btn primary';
+        cont.textContent = 'Continue';
+        const skip = document.createElement('button');
+        skip.type = 'button';
+        skip.className = 'btn ghost';
+        skip.textContent = 'Skip';
+        const store = (value) => {
+          state.selections[state.index] = value;
+          if (state.index < allQuestions.length - 1) {
+            state.index += 1;
+            renderQuestion(true);
+          } else {
+            beginAnalysis();
+          }
+        };
+        cont.addEventListener('click', () => store(area.value.trim().slice(0, 2000)));
+        skip.addEventListener('click', () => store(''));
+        row.appendChild(cont);
+        row.appendChild(skip);
+        host.appendChild(area);
+        host.appendChild(row);
+        area.focus();
+      } else {
+        q.options.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'option' + (state.selections[state.index] === i ? ' selected' : '');
+          btn.type = 'button';
+          if (q.type === 'spark') {
+            btn.innerHTML = sparkValueIcon(opt.value) + '<span>' + opt.label + '</span>';
+          } else {
+            btn.textContent = opt.label;
+          }
+          btn.addEventListener('click', () => selectOption(i));
+          host.appendChild(btn);
+        });
+      }
 
       $('btn-back').style.visibility = state.index === 0 ? 'hidden' : 'visible';
       $('nav-hint').textContent = PART_HINTS[q.type];
@@ -339,6 +378,60 @@
     }
   });
 
+  // ---------- Open-response analysis ----------
+  /**
+   * Keyword and phrase matching against the category lexicon. Multi-word
+   * terms match as phrases; single words require a left word boundary
+   * (stems are allowed to extend right). A match preceded within four
+   * words by a negation term is excluded.
+   */
+  function analyzeText(fullText) {
+    const text = ' ' + fullText.toLowerCase().replace(/\s+/g, ' ') + ' ';
+    const wordish = /[a-z0-9]/;
+    const themes = [];
+    Object.entries(KEYWORDS).forEach(([key, terms]) => {
+      const found = [];
+      terms.forEach((term) => {
+        const t = term.toLowerCase();
+        let idx = 0;
+        while ((idx = text.indexOf(t, idx)) !== -1) {
+          const beforeChar = text[idx - 1];
+          if (beforeChar && wordish.test(beforeChar)) {
+            idx += t.length;
+            continue;
+          }
+          const beforeWords = text
+            .slice(Math.max(0, idx - 44), idx)
+            .trim()
+            .split(' ')
+            .slice(-4)
+            .map((w) => w.replace(/[^a-z']/g, ''));
+          const negated = beforeWords.some((w) => NEGATION_TERMS.includes(w));
+          if (!negated) {
+            found.push(term.trim());
+            break;
+          }
+          idx += t.length;
+        }
+      });
+      if (found.length > 0) {
+        themes.push({ key, name: CATEGORIES[key].name, terms: [...new Set(found)] });
+      }
+    });
+    return themes;
+  }
+
+  function collectTextResponses() {
+    const parts = [];
+    allQuestions.forEach((q, i) => {
+      const sel = state.selections[i];
+      if (q.type === 'text' && typeof sel === 'string' && sel.trim() !== '') {
+        parts.push(sel);
+      }
+    });
+    return parts;
+  }
+
   // ---------- Full analysis ----------
   function levelFor(percent) {
     if (percent >= 60) return { level: 'Strong match', cls: '' };
@@ -363,9 +456,19 @@
       }
     });
 
+    // Open-response analysis: themes weight into the category scores.
+    const textParts = collectTextResponses();
+    const textThemes = textParts.length > 0 ? analyzeText(textParts.join('\n')) : [];
+    const themeKeys = new Set(textThemes.map((t) => t.key));
+
     const kinkProfile = Object.entries(CATEGORIES)
       .map(([key, cat]) => {
-        const percent = percentFor(key, scores) || 0;
+        let percent = percentFor(key, scores) || 0;
+        const textSignal = themeKeys.has(key);
+        if (textSignal) {
+          // A positive written mention adds weight and sets a floor.
+          percent = Math.min(100, Math.max(percent + 15, 40));
+        }
         const { level, cls } = levelFor(percent);
         return {
           key,
@@ -375,6 +478,7 @@
           percent,
           level,
           cls,
+          textSignal,
           role: roleChoices[key] || null,
         };
       })
@@ -413,8 +517,8 @@
     });
 
     const suggestions = buildSuggestions(kinkProfile);
-    const summaryText = buildSummary(kinkProfile, kinsey);
-    return { kinkProfile, kinsey, aboutYou, summaryText, suggestions };
+    const summaryText = buildSummary(kinkProfile, kinsey, textThemes);
+    return { kinkProfile, kinsey, aboutYou, textThemes, summaryText, suggestions };
   }
 
   function buildSuggestions(kinkProfile) {
@@ -426,7 +530,7 @@
     return personal.concat(GENERAL_SUGGESTIONS);
   }
 
-  function buildSummary(kinkProfile, kinsey) {
+  function buildSummary(kinkProfile, kinsey, textThemes) {
     const strong = kinkProfile.filter((k) => k.level === 'Strong match');
     const curious = kinkProfile.filter((k) => k.level === 'Curious spark');
     const name = state.name;
@@ -467,9 +571,18 @@
       );
     }
 
+    if (textThemes && textThemes.length > 0) {
+      lines.push(
+        'Your written responses were analyzed by keyword and phrase matching and contained identifiable themes matching ' +
+        joinNicely(textThemes.slice(0, 6).map((t) => t.name.toLowerCase())) +
+        (textThemes.length > 6 ? ', among others' : '') +
+        '. These matches are weighted into the ranked scores above.'
+      );
+    }
+
     lines.push(
       'Orientation: your attraction responses place you at ' + kinsey.label.split(':')[0].replace('Kinsey', 'point') +
-      ' on the Kinsey scale. ' + kinsey.description
+      ' on the Kinsey scale, explained in the orientation section below. ' + kinsey.description
     );
 
     lines.push(
@@ -492,18 +605,28 @@
     spark: 'Interest Inventory',
     sparkDepth: 'Interest Inventory',
     personal: 'Desire & Solo Patterns',
-    kinsey: 'Kinsey Scale',
+    text: 'Open Response',
+    kinsey: 'Attraction',
   };
 
   function collectAnswers() {
-    return allQuestions.map((q, i) => ({
-      section: SECTION_NAMES[q.type],
-      question:
-        q.type === 'spark' || q.type === 'sparkDepth'
-          ? CATEGORIES[q.categoryKey].name + ': ' + q.question
-          : q.question,
-      answer: state.selections[i] !== null ? q.options[state.selections[i]].label : '(skipped)',
-    }));
+    return allQuestions.map((q, i) => {
+      const sel = state.selections[i];
+      let answer;
+      if (q.type === 'text') {
+        answer = typeof sel === 'string' && sel.trim() !== '' ? sel : '(no response)';
+      } else {
+        answer = sel !== null ? q.options[sel].label : '(skipped)';
+      }
+      return {
+        section: SECTION_NAMES[q.type],
+        question:
+          q.type === 'spark' || q.type === 'sparkDepth'
+            ? CATEGORIES[q.categoryKey].name + ': ' + q.question
+            : q.question,
+        answer,
+      };
+    });
   }
 
   function beginAnalysis() {
@@ -512,7 +635,8 @@
       'Compiling responses…',
       'Scoring play-style scenarios…',
       'Scoring the interest inventory…',
-      'Computing Kinsey placement…',
+      'Analyzing written responses…',
+      'Computing attraction placement…',
       'Writing your report…',
     ];
     let s = 0;
@@ -593,6 +717,21 @@
   }
 
   function renderResults(results, serverResp) {
+    // Completion confirmation, driven by the server's actual delivery state.
+    const thanksText = $('thanks-text');
+    if (serverResp && serverResp.participantEmailSent && serverResp.testMode && serverResp.previewUrl) {
+      thanksText.innerHTML =
+        'Your responses have been recorded. Test mode is active, so the report email was captured instead of delivered: ' +
+        '<a href="' + serverResp.previewUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">open the exact email here</a>.';
+    } else if (serverResp && serverResp.participantEmailSent) {
+      thanksText.textContent =
+        'Your responses have been recorded and your full report is being sent to ' + state.email +
+        '. It is sent only to that address. Your results are also shown below.';
+    } else {
+      thanksText.textContent =
+        'Your responses have been recorded. Email delivery is currently unavailable, so save this page; your full results are shown below.';
+    }
+
     $('results-title').textContent = 'Assessment results: ' + state.name;
     $('results-summary').textContent = results.summaryText;
 
@@ -644,6 +783,19 @@
       desireHost.appendChild(row);
     });
     $('desire-card').style.display = (results.aboutYou || []).length > 0 ? '' : 'none';
+
+    // Written response themes.
+    const themesHost = $('text-themes');
+    themesHost.innerHTML = '';
+    (results.textThemes || []).forEach((t) => {
+      const row = document.createElement('div');
+      row.className = 'theme-item';
+      row.innerHTML =
+        '<span class="theme-name">' + icon(t.key) + ' ' + t.name + '</span>' +
+        '<span class="theme-terms">matched: ' + t.terms.map((x) => '&ldquo;' + x + '&rdquo;').join(', ') + '</span>';
+      themesHost.appendChild(row);
+    });
+    $('text-card').style.display = (results.textThemes || []).length > 0 ? '' : 'none';
 
     // Featured cards: strong in full, curious compact.
     const host = $('kink-results');

@@ -263,11 +263,21 @@ function buildParticipantEmailHtml(submission) {
     )
     .join('');
 
+  const themeRows = (results.textThemes || [])
+    .map(
+      (t) => `
+      <tr>
+        <td style="padding:6px 10px;font-weight:bold;">${escapeHtml(t.name)}</td>
+        <td style="padding:6px 10px;color:#7c6f92;font-size:13px;">matched: ${(t.terms || []).map((x) => '&ldquo;' + escapeHtml(x) + '&rdquo;').join(', ')}</td>
+      </tr>`
+    )
+    .join('');
+
   return `
   <div style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;max-width:640px;margin:0 auto;color:#2b2140;line-height:1.6;">
     <div style="background:linear-gradient(120deg,#7c3aed,#ec4899);border-radius:16px;padding:28px;color:#fff;text-align:center;">
       <h1 style="margin:0;">Your Desire Profile</h1>
-      <p style="margin:8px 0 0;opacity:.9;">Assessment report for ${escapeHtml(name)}. Sent only to this address.</p>
+      <p style="margin:8px 0 0;opacity:.9;">Thank you for completing the assessment, ${escapeHtml(name)}. This report was generated from your responses and sent only to this address.</p>
     </div>
 
     <h2 style="color:#6d28d9;margin-top:28px;">Ranked results</h2>
@@ -293,7 +303,15 @@ function buildParticipantEmailHtml(submission) {
     <p style="color:#7c6f92;margin:4px 0 10px;">Accelerators, inhibitors, and solo patterns, interpreted from your responses.</p>
     ${desireMap}` : ''}
 
-    <h2 style="color:#6d28d9;margin-top:28px;">Where you fall on the Kinsey scale</h2>
+    ${themeRows ? `
+    <h2 style="color:#6d28d9;margin-top:28px;">Written response analysis</h2>
+    <p style="color:#7c6f92;margin:4px 0 10px;">Your open responses were analyzed by keyword and phrase matching. These themes were identified and weighted into your ranked scores.</p>
+    <div style="background:#faf7ff;border-radius:12px;padding:10px 12px;">
+      <table style="border-collapse:collapse;width:100%;">${themeRows}</table>
+    </div>` : ''}
+
+    <h2 style="color:#6d28d9;margin-top:28px;">Your pattern of attraction</h2>
+    <p style="color:#7c6f92;margin:4px 0 10px;">Your attraction responses are scored on the Kinsey scale, a 0-to-6 classification of sexual orientation introduced by Alfred Kinsey's research team in 1948. Position 0 denotes exclusively heterosexual attraction, 6 exclusively homosexual, the numbers between denote mixed patterns, and X denotes little or no sexual attraction.</p>
     <div style="${CARD_STYLE}">
       <h3 style="margin:0 0 6px;color:#6d28d9;">${escapeHtml(results.kinsey.label)}</h3>
       <p style="margin:0;">${escapeHtml(results.kinsey.description)}</p>
@@ -378,7 +396,7 @@ function sanitizeSubmission(body) {
     answers: answers.map((a) => ({
       section: str(a && a.section, 60),
       question: str(a && a.question, 500),
-      answer: str(a && a.answer, 500),
+      answer: str(a && a.answer, 2200), // open-response answers run long
     })),
     results: {
       kinkProfile: kinkProfile.map((k) => ({
@@ -401,6 +419,11 @@ function sanitizeSubmission(body) {
         question: str(item && item.question, 300),
         answer: str(item && item.answer, 300),
         reflection: str(item && item.reflection, 800),
+      })),
+      textThemes: (Array.isArray(results.textThemes) ? results.textThemes : []).slice(0, 60).map((t) => ({
+        key: str(t && t.key, 40),
+        name: str(t && t.name, 80),
+        terms: (Array.isArray(t && t.terms) ? t.terms : []).slice(0, 12).map((x) => str(x, 60)),
       })),
       suggestions: (Array.isArray(results.suggestions) ? results.suggestions : []).slice(0, 50).map((s) => str(s, 500)),
       summaryText: str(summaryText, 20000),

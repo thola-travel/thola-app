@@ -33,8 +33,21 @@ const { chromium } = require('playwright-core');
       await page.waitForSelector('#screen-results.active', { timeout: 60000 });
       break;
     }
-    await page.waitForSelector('.option', { state: 'visible' });
     const before = await page.textContent('#progress-count');
+
+    // Open-response questions: fill the textarea (with themed content so the
+    // text-analysis path is exercised) and continue.
+    if ((await page.locator('.text-answer').count()) > 0) {
+      await page.fill(
+        '.text-answer',
+        'I fantasize about being tied up with rope, spanked, and hearing praise. Not into feet at all.'
+      );
+      await page.locator('.text-actions .btn.primary').click();
+      await page.waitForTimeout(400);
+      continue;
+    }
+
+    await page.waitForSelector('.option', { state: 'visible' });
     const options = page.locator('.option');
     const n = await options.count();
     try {
@@ -62,7 +75,12 @@ const { chromium } = require('playwright-core');
   const suggestions = await page.locator('#suggestions-list li').count();
   const desireItems = await page.locator('.desire-item').count();
   const rankedItems = await page.locator('.ranked-item').count();
+  const themeItems = await page.locator('.theme-item').count();
+  const thanksText = (await page.textContent('#thanks-text')).trim();
+  const themeNames = await page.locator('.theme-name').allTextContents();
 
+  console.log('THANKS BANNER:', thanksText.slice(0, 90));
+  console.log('TEXT THEMES:', themeItems, '->', themeNames.map((t) => t.trim()).join(', '));
   console.log('RANKED ITEMS:', rankedItems);
   console.log('TITLE:', title.trim());
   console.log('KINSEY:', kinsey.trim());
@@ -73,7 +91,14 @@ const { chromium } = require('playwright-core');
   console.log('JS ERRORS:', errors.length ? errors : 'none');
 
   await browser.close();
-  if (errors.length || kinkCards === 0 || spectrumItems === 0 || desireItems === 0 || rankedItems === 0) {
+  const themesOk =
+    themeItems > 0 &&
+    themeNames.join(' ').includes('Rope') &&
+    !themeNames.join(' ').includes('Feet'); // negated mention must not match
+  if (!themesOk) console.error('theme analysis check failed');
+  if (!thanksText.includes('recorded')) console.error('thanks banner check failed');
+
+  if (errors.length || kinkCards === 0 || spectrumItems === 0 || desireItems === 0 || rankedItems === 0 || !themesOk || !thanksText.includes('recorded')) {
     console.error('SMOKE FAIL');
     process.exit(1);
   }

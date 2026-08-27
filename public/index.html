@@ -25,11 +25,11 @@
         <h1 class="gradient-text">The Desire Discovery Assessment</h1>
         <p class="lede">
           A structured self-assessment of sexual interests across 50 categories,
-          with placement on the Kinsey scale of sexual orientation.
+          your desire patterns, and your pattern of attraction.
         </p>
         <ul class="intro-points">
           <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 9 4.5l6 2 5-2v13l-5 2-6-2-5 2z"/><path d="M9 4.5v13M15 6.5v13"/></svg></span><div><strong>Coverage.</strong> 50 categories from mainstream to niche, including which side of each two-sided practice applies to you.</div></li>
-          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4.2" cy="6" r=".9" fill="currentColor"/><circle cx="4.2" cy="12" r=".9" fill="currentColor"/><circle cx="4.2" cy="18" r=".9" fill="currentColor"/></svg></span><div><strong>Method.</strong> Four sections: weighted scenarios, a direct interest inventory with follow-ups that calibrate each score, desire and solo patterns, and Kinsey-scale items.</div></li>
+          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4.2" cy="6" r=".9" fill="currentColor"/><circle cx="4.2" cy="12" r=".9" fill="currentColor"/><circle cx="4.2" cy="18" r=".9" fill="currentColor"/></svg></span><div><strong>Method.</strong> Five sections: weighted scenarios, a direct interest inventory with follow-ups that calibrate each score, desire and solo patterns, open-response items in your own words, and attraction items.</div></li>
           <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg></span><div><strong>Results.</strong> A ranked profile with a percentage per category, an analysis of your response patterns, and category-level explanations.</div></li>
           <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4.5 7 7.5 6 7.5-6"/></svg></span><div><strong>Confidentiality.</strong> Your report is sent directly to your email address. Responses are stored securely.</div></li>
         </ul>
@@ -110,6 +110,11 @@
     <!-- ============ RESULTS ============ -->
     <section id="screen-results" class="screen">
       <div class="results-wrap">
+        <div class="card glass thanks-banner reveal">
+          <h2>Thank you for completing the assessment</h2>
+          <p id="thanks-text"></p>
+        </div>
+
         <div class="card glass summary-card reveal">
           <h1 id="results-title" class="gradient-text"></h1>
           <p class="spectrum-note">Categories ranked by score. Each percentage combines your direct rating, its centrality follow-up, and scenario responses.</p>
@@ -130,8 +135,15 @@
           <div id="desire-map"></div>
         </div>
 
+        <div id="text-card" class="card glass reveal">
+          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg> Written response analysis</h2>
+          <p class="spectrum-note">Your open responses were analyzed by keyword and phrase matching. The themes below were identified and weighted into your ranked scores.</p>
+          <div id="text-themes"></div>
+        </div>
+
         <div class="card glass kinsey-card reveal">
-          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h16"/><path d="M4 12.5v5M9.3 13.5v3M14.6 13.5v3M20 12.5v5"/></svg> Where you fall on the Kinsey scale</h2>
+          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h16"/><path d="M4 12.5v5M9.3 13.5v3M14.6 13.5v3M20 12.5v5"/></svg> Your pattern of attraction</h2>
+          <p class="spectrum-note">Your attraction responses are scored on the Kinsey scale, a 0-to-6 classification of sexual orientation introduced by Alfred Kinsey's research team in 1948. Position 0 denotes exclusively heterosexual attraction, 6 exclusively homosexual, the numbers between denote mixed patterns, and X denotes little or no sexual attraction. Your placement:</p>
           <div class="kinsey-scale" id="kinsey-scale"></div>
           <h3 id="kinsey-label"></h3>
           <p id="kinsey-description"></p>

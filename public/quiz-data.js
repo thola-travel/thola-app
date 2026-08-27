@@ -1528,6 +1528,93 @@ const PERSONAL_QUESTIONS = [
   },
 ];
 
+/* ==================== PART 4: open-response items ==================== */
+/*
+ * Free-text questions. Responses are analyzed by keyword and phrase
+ * matching against the category lexicon below; positive matches are
+ * weighted into the category scores and reported as themes. Full text is
+ * stored with the submission.
+ */
+
+const TEXT_QUESTIONS = [
+  {
+    id: 'text_fantasy',
+    question: 'In your own words: describe a fantasy or scenario you find most arousing. As much or as little detail as you want.',
+    placeholder: 'Write freely. This is analyzed together with your other answers.',
+  },
+  {
+    id: 'text_untried',
+    question: 'Is there something you have wanted to try but have not? What has held you back?',
+    placeholder: 'Interest, hesitation, circumstances. Whatever applies.',
+  },
+  {
+    id: 'text_other',
+    question: 'Anything about your sexual interests, experiences, or desires that the previous questions did not capture?',
+    placeholder: 'Optional. Anything you consider relevant to an accurate profile.',
+  },
+];
+
+/*
+ * Category lexicon for open-response analysis. Terms are matched
+ * case-insensitively; multi-word entries as phrases, single words on word
+ * boundaries. A match preceded within four words by a negation term is
+ * excluded from scoring.
+ */
+const KEYWORDS = {
+  dominance: ['dominant', 'dominance', 'dom ', 'domme', 'in charge', 'take control', 'being in control', 'obey me', 'commanding'],
+  submission: ['submissive', 'submission', 'surrender', 'being controlled', 'told what to do', 'obeying', 'serving', 'give up control'],
+  sadism: ['sadist', 'sadism', 'watch them squirm', 'making them beg', 'their pain'],
+  masochism: ['masochist', 'masochism', 'enjoy pain', 'like pain', 'love pain', 'pain and pleasure', 'hurt me', 'hurts so good'],
+  bondage: ['bondage', 'restrained', 'restraints', 'tied down', 'tied up', 'tie me', 'cuffs', 'handcuff'],
+  rope: ['rope', 'shibari', 'rigging', 'knots'],
+  sensorydep: ['blindfold', 'sensory deprivation', 'earplugs', 'senses taken'],
+  impact: ['spank', 'paddle', 'flogger', 'flogging', 'whip', 'crop', 'caning'],
+  temperature: ['wax play', 'candle wax', 'hot wax', 'ice cube', 'ice play', 'temperature play'],
+  tickling: ['tickle', 'tickling', 'ticklish'],
+  electro: ['e-stim', 'estim', 'electro', 'tens unit', 'violet wand', 'electricity'],
+  marking: ['bite', 'biting', 'bitten', 'scratch', 'hickey', 'marks on', 'marked'],
+  edgeplay: ['knife play', 'fear play', 'breath play', 'choke', 'choking', 'gun play'],
+  roleplay: ['roleplay', 'role play', 'role-play', 'scenario', 'pretend', 'act out', 'acting out'],
+  costumes: ['uniform', 'costume', 'outfit', 'dressing up', 'dress up'],
+  authority: ['teacher', 'professor', 'boss', 'officer', 'principal', 'interrogat', 'authority figure'],
+  fantasy: ['monster', 'vampire', 'werewolf', 'alien', 'tentacle', 'dragon', 'furry', 'fursona', 'demon', 'cosplay'],
+  genderplay: ['crossdress', 'cross-dress', 'cross dress', 'feminization', 'feminized', 'gender swap', 'genderswap'],
+  medical: ['medical play', 'doctor play', 'nurse play', 'examination table', 'speculum', 'clinical'],
+  sizeplay: ['giantess', 'giant ', 'size difference', 'manhandle', 'manhandled', 'picked up and carried', 'throw me around', 'tossed around'],
+  breeding: ['breed', 'breeding', 'impregnat', 'bred'],
+  hypno: ['hypnosis', 'hypnotize', 'hypnotized', 'trance', 'mind control', 'mindless'],
+  sleepy: ['somnophilia', 'wake me up with', 'woken up with', 'half asleep', 'while sleeping', 'sleepy sex'],
+  filming: ['film us', 'film ourselves', 'record us', 'recording ourselves', 'on camera', 'sex tape', 'take photos', 'photograph'],
+  groupplay: ['threesome', 'foursome', 'orgy', 'group sex', 'swinging', 'swingers', 'more than one person', 'multiple partners', 'gangbang'],
+  compersion: ['cuckold', 'cuck', 'hotwife', 'watch my partner', 'watching my partner', 'share my partner', 'being shared', 'another man', 'another woman'],
+  exhibition: ['exhibitionist', 'exhibitionism', 'being watched', 'watch me', 'showing off', 'show off my body', 'audience', 'in public', 'semi-public', 'might get caught', 'getting caught'],
+  voyeurism: ['voyeur', 'watching others', 'watching people', 'watch other people', 'watching them'],
+  praise: ['praise', 'good girl', 'good boy', 'compliment', 'being told i\'m', 'affirmation', 'encouraging words'],
+  degradation: ['degrade', 'degradation', 'humiliate', 'humiliation', 'call me names', 'name calling', 'used like', 'worthless', 'slut'],
+  dirtytalk: ['dirty talk', 'talk dirty', 'talking dirty', 'sexting', 'phone sex', 'moaning in my ear', 'whisper'],
+  petplay: ['pet play', 'kitten play', 'puppy play', 'collar', 'leash', 'pony play', 'meow'],
+  caregiver: ['daddy', 'mommy', 'ddlg', 'caregiver', 'age play', 'ageplay', 'little space', 'babygirl', 'taken care of'],
+  bratplay: ['brat', 'bratting', 'brat tamer', 'talk back', 'talking back', 'misbehave', 'put me in my place'],
+  discipline: ['punish', 'punishment', 'discipline', 'obedience', 'protocol', 'rules to follow', 'findom', 'tribute'],
+  primal: ['primal', 'chase me', 'being chased', 'hunted', 'prey', 'growl', 'wrestle', 'wrestling', 'feral', 'animalistic'],
+  cnc: ['cnc', 'consensual non-consent', 'non-con', 'ravish', 'ravished', 'force me', 'forced', 'taken against', 'overpowered', 'rape fantasy', 'struggle'],
+  orgasmcontrol: ['edging', 'edge me', 'denial', 'denied', 'orgasm control', 'chastity', 'cage', 'ruined orgasm', 'begging to come', 'begging to cum', 'permission to'],
+  materials: ['latex', 'leather', 'pvc', 'rubber', 'nylon', 'spandex', 'satin'],
+  lingerie: ['lingerie', 'stockings', 'garter', 'panties', 'corset', 'thigh highs', 'fishnets'],
+  feet: ['feet', 'foot fetish', 'toes', 'soles', 'heels', 'boots', 'footjob'],
+  bodyworship: ['worship', 'adore my body', 'adore their body', 'muscles', 'muscle worship'],
+  nichebody: ['hands', 'forearms', 'veins', 'long hair', 'her hair', 'his hair', 'their hair', 'necks', 'collarbone', 'voice'],
+  wetmessy: ['whipped cream', 'food play', 'sploshing', 'chocolate sauce', 'covered in', 'messy play'],
+  watersports: ['watersports', 'golden shower', 'piss', 'peeing', 'urine', 'omorashi', 'wetting'],
+  sensation: ['feather', 'sensation play', 'light touch', 'nails down', 'goosebumps', 'shiver'],
+  sensual: ['romantic', 'candles', 'slow sex', 'gentle', 'cuddle', 'cuddling', 'eye contact', 'making love', 'intimacy', 'vanilla', 'kissing'],
+  tantric: ['tantra', 'tantric', 'breathwork', 'mindful', 'meditative'],
+  switchplay: ['switch', 'both roles', 'versatile', 'take turns being in charge'],
+  objects: ['balloon', 'inflatable', 'plush', 'looner'],
+};
+
+const NEGATION_TERMS = ['not', 'no', 'never', 'don\'t', 'dont', 'hate', 'dislike', 'without', 'isn\'t', 'isnt', 'aren\'t', 'arent', 'wouldn\'t', 'wouldnt', 'stop', 'avoid', 'past'];
+
 /* General self-discovery suggestions appended to everyone's results. */
 const GENERAL_SUGGESTIONS = [
   'Track your reactions over time: recording which items drew yes, curious, or no responses reveals patterns a single session misses.',
@@ -1539,5 +1626,5 @@ const GENERAL_SUGGESTIONS = [
 
 /* Make the database available to the server for building result emails. */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { GROUPS, SPARK_SCALE, CATEGORIES, QUESTIONS, PERSONAL_QUESTIONS, KINSEY_QUESTIONS, KINSEY_RESULTS, GENERAL_SUGGESTIONS };
+  module.exports = { GROUPS, SPARK_SCALE, CATEGORIES, QUESTIONS, PERSONAL_QUESTIONS, TEXT_QUESTIONS, KEYWORDS, NEGATION_TERMS, KINSEY_QUESTIONS, KINSEY_RESULTS, GENERAL_SUGGESTIONS };
 }
