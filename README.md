@@ -31,7 +31,7 @@ npm start              # http://localhost:3000
 
 ### Email setup
 
-Any SMTP provider works. With Gmail: enable 2-Step Verification, create an App password at https://myaccount.google.com/apppasswords, and use it as `SMTP_PASS`. If you want the quiz fully untraceable to a personal account, send from a dedicated address created just for this.
+Two providers are supported; set one. **Resend (recommended):** create a free account at https://resend.com, make an API key, and set `RESEND_API_KEY`. Resend delivers over HTTPS, so it works on hosts that block SMTP ports (Render's free tier). To send to participants rather than only yourself, verify a domain in Resend and set `RESEND_FROM` to an address on it; the default `onboarding@resend.dev` sender only delivers to the Resend account owner's address. Capacity on Resend's free tier is 100 emails a day and 3,000 a month; with `ADMIN_EMAIL` set, each submission sends two emails, so plan on at most 50 submissions a day before upgrading. **SMTP:** any SMTP provider works. With Gmail: enable 2-Step Verification, create an App password at https://myaccount.google.com/apppasswords, and use it as `SMTP_PASS`. If you want the quiz fully untraceable to a personal account, send from a dedicated address created just for this.
 
 **Testing without credentials:** with no SMTP settings, the app starts in test mode. Every submission's email is genuinely composed and sent over SMTP, a throwaway Ethereal inbox captures it instead of delivering, and the results page shows an "open the exact email" link so you can inspect precisely what the participant would have received. Set `EMAIL_MODE=off` to disable email entirely. Either way, results always display and submissions are saved to `./submissions/`; a slow or unreachable mail server can never delay someone's results (hard 20-second send deadline).
 
@@ -39,6 +39,7 @@ There's also an automated delivery test that runs a real SMTP server locally and
 
 ```bash
 node test/email-delivery.js   # real-SMTP delivery, content, and confirmation checks
+node test/resend-delivery.js  # Resend HTTPS delivery path (works where SMTP is blocked)
 node test/text-analysis.js    # open-response analyzer: phrases, boundaries, negation
 ```
 
@@ -80,7 +81,7 @@ docker run -p 3000:3000 --env-file .env desire-quiz
 
 Render specifics worth knowing:
 
-- **Email needs a paid instance.** Render's free tier blocks all outbound SMTP ports (25, 465, and 587), so neither real delivery nor Ethereal test mode can send from a free instance. The app detects the blocked port on the first submission, disables email with a clear log line, and keeps showing full results on screen. To turn email on, upgrade the service to any paid instance type (Starter is the cheapest) and fill in the `SMTP_*` variables in the Environment tab (Gmail: app password, host `smtp.gmail.com`, port `465`, secure `true`). Port 25 is blocked on every Render tier; never use it.
+- **Email on the free tier: use Resend.** Render's free tier blocks all outbound SMTP ports (25, 465, 587), but Resend delivers over HTTPS and works there. Set `RESEND_API_KEY` (and `RESEND_FROM` once you have verified a domain in Resend) in the service's Environment tab. Resend's free tier covers 100 emails a day (3,000 a month), which is 50 submissions a day when `ADMIN_EMAIL` doubles the volume. Without a key, the app detects the blocked SMTP port on the first submission, disables email with a clear log line, and keeps showing full results on screen. SMTP (`SMTP_*` variables) remains available on paid instances; port 25 is blocked on every Render tier.
 - **The filesystem is ephemeral.** `submissions/` backups do not survive restarts, deploys, or free-tier spin-downs. Once email works, set `ADMIN_EMAIL` for a durable record, or attach a persistent disk on a paid plan.
 - **Free instances sleep.** After ~15 idle minutes the first request takes up to a minute to answer.
 - **Branch pinning.** Deploys track the branch named in `render.yaml`; update it after merging.

@@ -78,6 +78,12 @@ const samplePayload = {
       SMTP_PASS: 'test',
       SMTP_FROM: 'Desire Discovery Quiz <quiz@test.local>',
       ADMIN_EMAIL: 'admin@example.com',
+      // Blank out any Resend config from the developer's .env so this test
+      // exercises the SMTP path and never posts to the real Resend API.
+      RESEND_API_KEY: '',
+      RESEND_API_URL: '',
+      RESEND_FROM: '',
+      SAVE_SUBMISSIONS: 'off',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });

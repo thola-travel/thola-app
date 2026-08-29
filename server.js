@@ -20,6 +20,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
+const { randomUUID } = require('crypto');
 const nodemailer = require('nodemailer');
 
 const DB = require('./public/quiz-data.js');
@@ -44,8 +45,15 @@ function validateEnvironment() {
   if (smtpSet.length > 0 && smtpSet.length < smtpVars.length) {
     problems.push(
       'Partial SMTP configuration: ' + smtpSet.join(', ') + ' set but ' +
-      smtpVars.filter((v) => !process.env[v]).join(', ') + ' missing. Email will run in test mode until all three are set.'
+      smtpVars.filter((v) => !process.env[v]).join(', ') + ' missing. ' +
+      (process.env.RESEND_API_KEY ? 'Resend will be used until all three are set.' : 'Email will run in test mode until all three are set.')
     );
+  }
+  if (process.env.RESEND_API_KEY && smtpSet.length === smtpVars.length) {
+    problems.push('Both RESEND_API_KEY and full SMTP settings are present; Resend takes precedence.');
+  }
+  if (EMAIL_OFF && (process.env.RESEND_API_KEY || smtpSet.length === smtpVars.length)) {
+    problems.push('EMAIL_MODE=off is ignored because a mail provider is configured; unset the provider to disable email.');
   }
   if (ADMIN_EMAIL && !EMAIL_RE.test(ADMIN_EMAIL)) {
     problems.push(`ADMIN_EMAIL is not a valid email address ("${ADMIN_EMAIL}")`);
@@ -118,7 +126,7 @@ app.get('/healthz', (_req, res) => {
   res.json({
     ok: true,
     uptimeSeconds: Math.round(process.uptime()),
-    email: smtpConfigured() ? 'smtp' : EMAIL_OFF ? 'off' : 'test-mode',
+    email: resendConfigured() ? 'resend' : smtpConfigured() ? 'smtp' : EMAIL_OFF ? 'off' : 'test-mode',
   });
 });
 
@@ -126,13 +134,59 @@ app.get('/api/config', (_req, res) => {
   res.json({ adminCopy: Boolean(ADMIN_EMAIL) });
 });
 
+function resendConfigured() {
+  return Boolean(process.env.RESEND_API_KEY);
+}
+
 function smtpConfigured() {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
-// Generous but finite: a slow mail server must never hold up a submission.
+// Generous but finite: a slow mail provider must never hold up a submission.
 const MAIL_TIMEOUTS = { connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 };
 const SEND_DEADLINE_MS = 20000;
+
+// Resend (https://resend.com) delivers over HTTPS on port 443, which works
+// on hosts that block outbound SMTP (e.g. Render's free tier). The API URL
+// is overridable so the delivery test can point at a local capture server.
+const RESEND_API_URL = process.env.RESEND_API_URL || 'https://api.resend.com/emails';
+const RESEND_FROM = process.env.RESEND_FROM || 'Desire Discovery Assessment <onboarding@resend.dev>';
+
+async function resendSend(message, idempotencyKey) {
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(new Error('Resend send timed out after ' + SEND_DEADLINE_MS + 'ms')),
+    SEND_DEADLINE_MS
+  );
+  try {
+    const res = await fetch(RESEND_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+        // Reused across retry attempts so a timed-out-but-accepted first
+        // attempt cannot produce a duplicate email.
+        ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
+      },
+      body: JSON.stringify({
+        from: message.from,
+        to: [message.to],
+        subject: message.subject,
+        html: message.html,
+      }),
+      signal: controller.signal,
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const err = new Error(`Resend API ${res.status}: ${body && body.message ? body.message : 'request failed'}`);
+      err.statusCode = res.status;
+      throw err;
+    }
+    return body; // { id }
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 function buildTransporter() {
   return nodemailer.createTransport({
@@ -154,19 +208,32 @@ function sendWithDeadline(transporter, message) {
 }
 
 /*
- * Email modes:
- *  - Real SMTP when SMTP_HOST/USER/PASS are set: mail goes to the address
- *    the participant entered.
- *  - Test mode otherwise (unless EMAIL_MODE=off): a throwaway Ethereal
- *    inbox is created on first use. The email is genuinely sent over SMTP,
- *    Ethereal captures it instead of delivering, and the API response
- *    carries a preview URL so the exact email can be inspected.
+ * Email providers, in priority order:
+ *  - Resend when RESEND_API_KEY is set: HTTPS delivery on port 443, works
+ *    on hosts that block SMTP. RESEND_FROM must be an address on a domain
+ *    verified in Resend (the default onboarding@resend.dev sender can only
+ *    deliver to the Resend account owner's own address).
+ *  - SMTP when SMTP_HOST/USER/PASS are set.
+ *  - Off when EMAIL_MODE=off.
+ *  - Test mode otherwise: a throwaway Ethereal inbox captures each email
+ *    and the API response carries a preview URL. The SMTP connection is
+ *    verified once up front so hosts that block SMTP ports disable test
+ *    mode with one log line instead of stalling every submission.
  */
 let testTransportPromise = null;
 
 async function getMailer() {
+  if (resendConfigured()) {
+    return { send: resendSend, testMode: false, from: RESEND_FROM, provider: 'resend' };
+  }
   if (smtpConfigured()) {
-    return { transporter: buildTransporter(), testMode: false, from: process.env.SMTP_FROM || process.env.SMTP_USER };
+    const transporter = buildTransporter();
+    return {
+      send: (message) => sendWithDeadline(transporter, message),
+      testMode: false,
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      provider: 'smtp',
+    };
   }
   if (String(process.env.EMAIL_MODE || '').toLowerCase() === 'off') return null;
   if (!testTransportPromise) {
@@ -180,22 +247,23 @@ async function getMailer() {
           auth: { user: acct.user, pass: acct.pass },
           ...MAIL_TIMEOUTS,
         });
-        // Some hosts (e.g. Render's free tier) block outbound SMTP ports
-        // entirely. Verify the connection once up front so a blocked port
-        // disables test mode with a single log line instead of stalling
-        // every submission on connect timeouts.
         await transporter.verify();
         return transporter;
       })
       .catch((err) => {
-        console.warn('Test inbox unavailable (' + err.message + '); email is disabled until SMTP is configured.');
-        console.warn('Note: some hosts block outbound SMTP ports on free tiers (Render blocks 25/465/587 on free web services).');
+        console.warn('Test inbox unavailable (' + err.message + '); email is disabled until Resend or SMTP is configured.');
+        console.warn('Note: some hosts block outbound SMTP ports on free tiers; set RESEND_API_KEY to deliver over HTTPS instead.');
         return null; // cache the failure: fail fast on later submissions
       });
   }
   const transporter = await testTransportPromise;
   if (!transporter) return null;
-  return { transporter, testMode: true, from: '"Desire Discovery Quiz" <quiz@example.com>' };
+  return {
+    send: (message) => sendWithDeadline(transporter, message),
+    testMode: true,
+    from: '"Desire Discovery Quiz" <quiz@example.com>',
+    provider: 'ethereal',
+  };
 }
 
 function escapeHtml(value) {
@@ -463,12 +531,19 @@ function sanitizeSubmission(body) {
 /* ---------- Routes ---------- */
 
 async function deliverEmail(mailer, message, label) {
-  // One retry for transient failures; a second failure is logged and moved past.
+  // One retry for transient failures (network, timeout, 429, 5xx); a
+  // permanent client error (4xx validation/auth) fails identically on
+  // retry, so it is logged once and not repeated. The idempotency key is
+  // reused across attempts so providers that support it cannot double-send.
+  const idempotencyKey = randomUUID();
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      return await sendWithDeadline(mailer.transporter, message);
+      return await mailer.send(message, idempotencyKey);
     } catch (mailErr) {
       console.error(`${label} attempt ${attempt} failed:`, mailErr.message);
+      const s = mailErr.statusCode;
+      const permanent = s >= 400 && s < 500 && s !== 429 && s !== 408;
+      if (permanent) return null;
       if (attempt === 1) await new Promise((r) => setTimeout(r, 2000));
     }
   }
@@ -490,7 +565,7 @@ app.post('/api/submit', submitLimiter, async (req, res) => {
     }
 
     // Local backup first (unless disabled); a mail outage should never lose
-    // one — and a failed disk write must never block the email either.
+    // one, and a failed disk write must never block the email either.
     let backupFile = null;
     if (SAVE_SUBMISSIONS) {
       try {
@@ -604,7 +679,13 @@ retentionTimer.unref();
 
 const server = app.listen(PORT, () => {
   console.log(`Desire Discovery Quiz running at http://localhost:${PORT}`);
-  if (smtpConfigured()) {
+  if (resendConfigured()) {
+    console.log('Email: real delivery via Resend (HTTPS). From:', RESEND_FROM);
+    if (RESEND_FROM.includes('resend.dev')) {
+      console.log('Note: the onboarding@resend.dev sender only delivers to the Resend account owner\'s address.');
+      console.log('Verify a domain in Resend and set RESEND_FROM to send to participants.');
+    }
+  } else if (smtpConfigured()) {
     console.log('Email: real delivery via', process.env.SMTP_HOST);
   } else if (EMAIL_OFF) {
     console.log('Email: off (EMAIL_MODE=off).');
