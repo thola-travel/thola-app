@@ -100,6 +100,21 @@
 
   // ---------- Elements ----------
   const $ = (id) => document.getElementById(id);
+  const REDUCED_MOTION =
+    window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Count a percentage element up from zero; paints the final value at once
+  // when the visitor prefers reduced motion.
+  function animateCount(el, to, ms) {
+    if (REDUCED_MOTION) { el.textContent = to + '%'; return; }
+    const start = performance.now();
+    function tick(now) {
+      const t = Math.min(1, (now - start) / ms);
+      el.textContent = Math.round(to * (1 - Math.pow(1 - t, 3))) + '%';
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
   const screens = {
     intro: $('screen-intro'),
     quiz: $('screen-quiz'),
@@ -767,29 +782,66 @@
     ];
     const host = $('analysis-steps');
     host.innerHTML = '';
-    const fills = steps.map((label) => {
+    const rows = steps.map((label) => {
       const row = document.createElement('div');
       row.className = 'analysis-step';
       row.innerHTML =
-        '<div class="as-label"><span>' + label + '</span><em class="as-pct">0%</em></div>' +
-        '<div class="as-track"><div class="as-fill"></div></div>';
+        '<span class="as-dot"><svg class="as-check" viewBox="0 0 16 16"><path d="M2.5 8.5l3.5 3.5 7-8"/></svg></span>' +
+        '<span>' + label + '</span>';
       host.appendChild(row);
       return row;
     });
-    let s = 0;
-    const advance = () => {
-      if (s >= fills.length) return;
-      const row = fills[s];
-      row.querySelector('.as-fill').style.width = '100%';
-      row.querySelector('.as-pct').textContent = '100%';
-      row.classList.add('done');
-      s += 1;
-    };
-    advance();
-    const ticker = setInterval(() => {
-      advance();
-      if (s >= fills.length) clearInterval(ticker);
-    }, 560);
+
+    // Progress ring: eases toward 92% while the submission is in flight,
+    // then closes to 100% once the server has answered. Step rows flip from
+    // pending to active to done as the displayed progress crosses them.
+    const ringFill = $('ring-fill');
+    const ringCount = $('ring-count');
+    const calcSub = $('calc-sub');
+    const CIRC = 327; // stroke-dasharray set in the stylesheet
+    let shown = 0;
+    let announced = -1;
+    function paint(p) {
+      shown = p;
+      ringFill.style.strokeDashoffset = String(CIRC * (1 - p / 100));
+      ringCount.textContent = Math.round(p) + '%';
+      const span = 100 / rows.length;
+      rows.forEach((row, i) => {
+        const done = p >= (i + 1) * span - 0.5;
+        row.classList.toggle('done', done);
+        row.classList.toggle('active', !done && p >= i * span);
+      });
+      // Mirror the active step into the status line; it is a live region,
+      // so progress is announced to screen readers (the ring is aria-hidden).
+      const stepIdx = p >= 100 ? rows.length : Math.min(rows.length - 1, Math.floor(p / span));
+      if (stepIdx !== announced) {
+        announced = stepIdx;
+        calcSub.textContent = stepIdx >= rows.length ? 'Report ready.' : steps[stepIdx] + '.';
+      }
+    }
+    let closing = false;
+    const t0 = performance.now();
+    function drift(now) {
+      if (closing) return;
+      const t = Math.min(1, (now - t0) / 3400);
+      paint(Math.max(shown, 92 * (1 - Math.pow(1 - t, 2.2))));
+      requestAnimationFrame(drift);
+    }
+    function completeRing(cb) {
+      closing = true;
+      if (REDUCED_MOTION) { paint(100); setTimeout(cb, 200); return; }
+      const from = shown;
+      const c0 = performance.now();
+      function closer(now) {
+        const t = Math.min(1, (now - c0) / 450);
+        paint(from + (100 - from) * (1 - Math.pow(1 - t, 3)));
+        if (t < 1) requestAnimationFrame(closer);
+        else setTimeout(cb, 350);
+      }
+      requestAnimationFrame(closer);
+    }
+    if (REDUCED_MOTION) paint(92);
+    else requestAnimationFrame(drift);
 
     const results = analyze();
     const payload = {
@@ -814,7 +866,8 @@
       .catch(() => ({ ok: false }))
       .then((resp) => {
         clearTimeout(deadline);
-        setTimeout(() => renderResults(results, resp), 3200);
+        const minWait = REDUCED_MOTION ? 300 : Math.max(0, 3400 - (performance.now() - t0));
+        setTimeout(() => completeRing(() => renderResults(results, resp)), minWait);
       });
   }
 
@@ -886,7 +939,7 @@
         (k.role && k.role.side !== 'both sides' ? '<em class="rank-side">' + k.role.side.toLowerCase() + '</em>' : '') +
         '</span>' +
         '<span class="rank-track"><span class="rank-fill" data-w="' + k.percent + '"></span></span>' +
-        '<span class="rank-pct">' + k.percent + '%</span>';
+        '<span class="rank-pct" data-count="' + k.percent + '">0%</span>';
       rankedHost.appendChild(li);
     });
 
@@ -916,7 +969,7 @@
       const row = document.createElement('div');
       row.className = 'dim-row';
       row.innerHTML =
-        '<div class="dim-head"><span class="dim-name">' + meta.name + '</span><span class="dim-value">' + value + '%</span></div>' +
+        '<div class="dim-head"><span class="dim-name">' + meta.name + '</span><span class="dim-value" data-count="' + value + '">0%</span></div>' +
         '<div class="dim-track"><div class="dim-fill" data-w="' + value + '"></div></div>' +
         '<p class="dim-desc">' + meta.description + '</p>';
       dimHost.appendChild(row);
@@ -978,14 +1031,14 @@
 
     featured.strong.forEach((k, i) => {
       const card = document.createElement('div');
-      card.className = 'card glass kink-card reveal ' + k.cls;
+      card.className = 'card kink-card reveal ' + k.cls;
       card.style.animationDelay = (0.1 + i * 0.08) + 's';
       card.innerHTML = fullCardHtml(k);
       host.appendChild(card);
     });
     featured.curious.forEach((k, i) => {
       const card = document.createElement('div');
-      card.className = 'card glass kink-card reveal ' + k.cls;
+      card.className = 'card kink-card reveal ' + k.cls;
       card.style.animationDelay = (0.1 + (featured.strong.length + i) * 0.08) + 's';
       card.innerHTML = compactCardHtml(k);
       host.appendChild(card);
@@ -1042,11 +1095,14 @@
 
     showScreen('results');
 
-    // Animate all meters after first paint.
+    // Animate all meters and percentage counters after first paint.
     requestAnimationFrame(() => {
       setTimeout(() => {
         document.querySelectorAll('[data-w]').forEach((el) => {
           el.style.width = el.getAttribute('data-w') + '%';
+        });
+        document.querySelectorAll('[data-count]').forEach((el) => {
+          animateCount(el, parseInt(el.getAttribute('data-count'), 10) || 0, 900);
         });
       }, 120);
     });
