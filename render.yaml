@@ -1,0 +1,46 @@
+# Render Blueprint: deploys the Desire Discovery Assessment as a web service.
+# In Render: New + -> Blueprint -> select this repo and branch -> Apply.
+#
+# Email on Render: the FREE tier blocks all outbound SMTP ports (25/465/587),
+# so email cannot send from a free instance -- the app detects this, disables
+# email gracefully, and results still display on screen. For working email,
+# use any paid instance type (e.g. starter) and fill in the SMTP_* variables
+# on the dashboard (Gmail: smtp.gmail.com, port 465, secure true, app
+# password). Never use port 25; Render blocks it on every tier.
+#
+# Storage: the filesystem is ephemeral (free tier cannot attach disks), so
+# ./submissions/ backups do not survive restarts. Once SMTP works, set
+# ADMIN_EMAIL to receive the durable full copy of each submission.
+#
+# Branch: deploys are pinned to the feature branch below. After merging,
+# change `branch:` to your long-lived branch (or remove it for the default).
+services:
+  - type: web
+    name: desire-discovery-assessment
+    runtime: node
+    plan: free
+    branch: claude/kink-preference-quiz-6uoz8c
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: TRUST_PROXY
+        value: "1"
+      # Fill these in on the dashboard when on a paid instance to enable
+      # real email delivery. Leave empty on the free tier.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false

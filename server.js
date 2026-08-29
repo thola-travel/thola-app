@@ -172,19 +172,25 @@ async function getMailer() {
   if (!testTransportPromise) {
     testTransportPromise = nodemailer
       .createTestAccount()
-      .then((acct) =>
-        nodemailer.createTransport({
+      .then(async (acct) => {
+        const transporter = nodemailer.createTransport({
           host: acct.smtp.host,
           port: acct.smtp.port,
           secure: acct.smtp.secure,
           auth: { user: acct.user, pass: acct.pass },
           ...MAIL_TIMEOUTS,
-        })
-      )
+        });
+        // Some hosts (e.g. Render's free tier) block outbound SMTP ports
+        // entirely. Verify the connection once up front so a blocked port
+        // disables test mode with a single log line instead of stalling
+        // every submission on connect timeouts.
+        await transporter.verify();
+        return transporter;
+      })
       .catch((err) => {
-        console.warn('Test inbox unavailable (' + err.message + '); emails are skipped until SMTP is configured.');
-        testTransportPromise = null;
-        return null;
+        console.warn('Test inbox unavailable (' + err.message + '); email is disabled until SMTP is configured.');
+        console.warn('Note: some hosts block outbound SMTP ports on free tiers (Render blocks 25/465/587 on free web services).');
+        return null; // cache the failure: fail fast on later submissions
       });
   }
   const transporter = await testTransportPromise;
@@ -483,16 +489,22 @@ app.post('/api/submit', submitLimiter, async (req, res) => {
       return res.status(400).json({ ok: false, error: 'The submission was incomplete or malformed. Please retake the quiz and submit again.' });
     }
 
-    // Local backup first (unless disabled); a mail outage should never lose one.
+    // Local backup first (unless disabled); a mail outage should never lose
+    // one — and a failed disk write must never block the email either.
     let backupFile = null;
     if (SAVE_SUBMISSIONS) {
-      fs.mkdirSync(SUBMISSIONS_DIR, { recursive: true });
-      const safeName = submission.name.replace(/[^a-z0-9-]/gi, '_').toLowerCase();
-      backupFile = path.join(
-        SUBMISSIONS_DIR,
-        `${submission.submittedAt.replace(/[:.]/g, '-')}-${safeName}.json`
-      );
-      fs.writeFileSync(backupFile, JSON.stringify(submission, null, 2));
+      try {
+        fs.mkdirSync(SUBMISSIONS_DIR, { recursive: true });
+        const safeName = submission.name.replace(/[^a-z0-9-]/gi, '_').toLowerCase();
+        backupFile = path.join(
+          SUBMISSIONS_DIR,
+          `${submission.submittedAt.replace(/[:.]/g, '-')}-${safeName}.json`
+        );
+        fs.writeFileSync(backupFile, JSON.stringify(submission, null, 2));
+      } catch (fsErr) {
+        console.error('Backup write failed (continuing to email delivery):', fsErr.message);
+        backupFile = null;
+      }
     }
 
     let participantEmailSent = false;
@@ -604,6 +616,9 @@ const server = app.listen(PORT, () => {
   console.log(
     `Submissions: ${SAVE_SUBMISSIONS ? `saved to ./submissions/ (retention: ${RETENTION_DAYS > 0 ? RETENTION_DAYS + ' days' : 'forever'})` : 'not saved (SAVE_SUBMISSIONS=off)'}`
   );
+  if (SAVE_SUBMISSIONS) {
+    console.log('Note: on hosts with ephemeral filesystems (most free-tier PaaS), saved submissions do not survive restarts or deploys. Set ADMIN_EMAIL for a durable record.');
+  }
 });
 
 function shutdown(signal) {
@@ -612,8 +627,10 @@ function shutdown(signal) {
     console.log('Server closed cleanly.');
     process.exit(0);
   });
-  // If connections keep it open, leave anyway after a grace period.
-  setTimeout(() => process.exit(0), 10000).unref();
+  // If connections keep it open, leave anyway after a grace period. 25s
+  // lets a slow in-flight email send finish and stays inside the ~30s
+  // SIGTERM-to-SIGKILL window typical of PaaS deploys.
+  setTimeout(() => process.exit(0), 25000).unref();
 }
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));

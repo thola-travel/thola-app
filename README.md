@@ -76,7 +76,16 @@ docker build -t desire-quiz .
 docker run -p 3000:3000 --env-file .env desire-quiz
 ```
 
-Render/Railway/Fly: point the service at this repo, set the environment variables from `.env.example`, and use `npm start` (or the Dockerfile). The app listens on `PORT` and reports readiness at `/healthz`. Run it behind HTTPS (all these hosts provide it by default); the quiz collects intimate data and must not be served over plain HTTP.
+**Render (one-click Blueprint):** this repo ships a `render.yaml`. In the Render dashboard choose **New + → Blueprint**, select this repository and the deploy branch, and click **Apply**. The blueprint creates a free-plan Node web service with the health check on `/healthz` and `TRUST_PROXY=1` preset.
+
+Render specifics worth knowing:
+
+- **Email needs a paid instance.** Render's free tier blocks all outbound SMTP ports (25, 465, and 587), so neither real delivery nor Ethereal test mode can send from a free instance. The app detects the blocked port on the first submission, disables email with a clear log line, and keeps showing full results on screen. To turn email on, upgrade the service to any paid instance type (Starter is the cheapest) and fill in the `SMTP_*` variables in the Environment tab (Gmail: app password, host `smtp.gmail.com`, port `465`, secure `true`). Port 25 is blocked on every Render tier; never use it.
+- **The filesystem is ephemeral.** `submissions/` backups do not survive restarts, deploys, or free-tier spin-downs. Once email works, set `ADMIN_EMAIL` for a durable record, or attach a persistent disk on a paid plan.
+- **Free instances sleep.** After ~15 idle minutes the first request takes up to a minute to answer.
+- **Branch pinning.** Deploys track the branch named in `render.yaml`; update it after merging.
+
+Railway/Fly: point the service at this repo, set the environment variables from `.env.example`, and use `npm start` (or the Dockerfile). The app listens on `PORT` and reports readiness at `/healthz`. Run it behind HTTPS (all these hosts provide it by default); the quiz collects intimate data and must not be served over plain HTTP.
 
 ## Privacy notes
 
