@@ -289,6 +289,18 @@ function buildParticipantEmailHtml(submission) {
       <p style="margin:0;">No category crossed the interest thresholds. Your responses consistently favored connection and presence, which is itself a stable and common preference profile.</p>
     </div>`}
 
+    ${results.dimensions ? `
+    <h2 style="color:#6d28d9;margin-top:28px;">Profile dimensions</h2>
+    <div style="background:#faf7ff;border-radius:12px;padding:10px 12px;">
+      <table style="border-collapse:collapse;width:100%;">
+        <tr><td style="padding:6px 10px;font-weight:bold;">Drive</td><td style="padding:6px 10px;text-align:right;font-weight:bold;color:#6d28d9;">${results.dimensions.drive}%</td></tr>
+        <tr><td style="padding:6px 10px;font-weight:bold;">Adventurousness</td><td style="padding:6px 10px;text-align:right;font-weight:bold;color:#6d28d9;">${results.dimensions.adventure}%</td></tr>
+        <tr><td style="padding:6px 10px;font-weight:bold;">Connection</td><td style="padding:6px 10px;text-align:right;font-weight:bold;color:#6d28d9;">${results.dimensions.connection}%</td></tr>
+        <tr><td style="padding:6px 10px;font-weight:bold;">Intensity appetite</td><td style="padding:6px 10px;text-align:right;font-weight:bold;color:#6d28d9;">${results.dimensions.intensity}%</td></tr>
+        <tr><td style="padding:6px 10px;font-weight:bold;">Power lean</td><td style="padding:6px 10px;text-align:right;font-weight:bold;color:#6d28d9;">${results.dimensions.powerLean > 25 ? 'dominant ' + results.dimensions.powerLean : results.dimensions.powerLean < -25 ? 'submissive ' + Math.abs(results.dimensions.powerLean) : 'balanced'}</td></tr>
+      </table>
+    </div>` : ''}
+
     <h2 style="color:#6d28d9;margin-top:28px;">Analysis</h2>
     <div style="background:#faf7ff;border-radius:12px;padding:18px 20px;white-space:pre-wrap;">${escapeHtml(results.summaryText)}</div>
 
@@ -420,6 +432,17 @@ function sanitizeSubmission(body) {
         answer: str(item && item.answer, 300),
         reflection: str(item && item.reflection, 800),
       })),
+      dimensions:
+        results.dimensions && typeof results.dimensions === 'object'
+          ? {
+              drive: Math.max(0, Math.min(100, Math.round(Number(results.dimensions.drive) || 0))),
+              adventure: Math.max(0, Math.min(100, Math.round(Number(results.dimensions.adventure) || 0))),
+              connection: Math.max(0, Math.min(100, Math.round(Number(results.dimensions.connection) || 0))),
+              intensity: Math.max(0, Math.min(100, Math.round(Number(results.dimensions.intensity) || 0))),
+              powerLean: Math.max(-100, Math.min(100, Math.round(Number(results.dimensions.powerLean) || 0))),
+            }
+          : null,
+      persona: str(results.persona, 220),
       textThemes: (Array.isArray(results.textThemes) ? results.textThemes : []).slice(0, 60).map((t) => ({
         key: str(t && t.key, 40),
         name: str(t && t.name, 80),

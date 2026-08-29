@@ -978,7 +978,59 @@ const CATEGORIES = {
   },
 };
 
-/* ==================== PART 1: broad weighted questions ==================== */
+/* ==================== PART 1: dimension statements ==================== */
+/*
+ * First-person statements rated on a five-point agreement scale. Each
+ * dimension is measured by one forward and one reversed item; the pair is
+ * averaged to a 0-100 score. Power is scored as a bipolar lean from the
+ * dominant and submissive items.
+ */
+
+const LIKERT_OPTIONS = [
+  { label: 'Strongly agree', v: 4 },
+  { label: 'Agree', v: 3 },
+  { label: 'Neutral', v: 2 },
+  { label: 'Disagree', v: 1 },
+  { label: 'Strongly disagree', v: 0 },
+];
+
+const DIMENSION_STATEMENTS = [
+  { id: 'dim_drive_f', dim: 'drive', reverse: false, text: 'Sexual desire is a regular presence in my life.' },
+  { id: 'dim_drive_r', dim: 'drive', reverse: true, text: 'Weeks can pass without me thinking about sex.' },
+  { id: 'dim_adv_f', dim: 'adventure', reverse: false, text: 'If it sounds interesting, I want to try it at least once.' },
+  { id: 'dim_adv_r', dim: 'adventure', reverse: true, text: 'I prefer to keep sex familiar and predictable.' },
+  { id: 'dim_conn_f', dim: 'connection', reverse: false, text: 'Sex without an emotional bond does little for me.' },
+  { id: 'dim_conn_r', dim: 'connection', reverse: true, text: 'Physical chemistry matters more to me than closeness.' },
+  { id: 'dim_int_f', dim: 'intensity', reverse: false, text: 'The edge where pleasure meets intensity excites me.' },
+  { id: 'dim_int_r', dim: 'intensity', reverse: true, text: 'Gentle is exactly as intense as I want it.' },
+  { id: 'dim_pow_dom', dim: 'powerDom', reverse: false, text: 'Taking charge in bed comes naturally to me.' },
+  { id: 'dim_pow_sub', dim: 'powerSub', reverse: false, text: 'I relax most when my partner runs the show.' },
+];
+
+const DIMENSIONS_META = {
+  drive: {
+    name: 'Drive',
+    description: 'How present sexual desire is in your daily life. Drive varies widely between people and across life phases; every level is within normal range.',
+  },
+  adventure: {
+    name: 'Adventurousness',
+    description: 'Your appetite for novelty and experimentation versus preference for the familiar. Both ends predict satisfaction when partners are matched.',
+  },
+  connection: {
+    name: 'Connection',
+    description: 'How strongly your arousal is gated on emotional context. High scores favor bonded intimacy; low scores separate physical and emotional tracks.',
+  },
+  intensity: {
+    name: 'Intensity appetite',
+    description: 'Preferred stimulation intensity, from gentle through the pleasure-intensity boundary. This tracks the sensation and impact scores below.',
+  },
+  power: {
+    name: 'Power lean',
+    description: 'Your position between directing and surrendering, scored from the dominant and submissive statements. Near-center readings suggest switch flexibility.',
+  },
+};
+
+/* ==================== PART 2: broad weighted questions ==================== */
 
 const QUESTIONS = [
   {
@@ -1541,7 +1593,98 @@ const PERSONAL_QUESTIONS = [
   },
 ];
 
-/* ==================== PART 4: open-response items ==================== */
+const EXPERIENCE_QUESTION = {
+  id: 'experience_multi',
+  question: 'Which of these have you actually tried, at least once? Select all that apply.',
+  multi: true,
+  options: [
+    {
+      label: 'Restraint (holding down, cuffs, rope, blindfolds)',
+      scores: { bondage: 1 },
+      reflection: 'Restraint moves from interest to experience in your history. Experience data is weighted alongside stated interest; tried-and-still-interested is the strongest signal the assessment measures.',
+    },
+    {
+      label: 'Impact (spanking or firmer)',
+      scores: {},
+      reflection: 'You have direct experience with impact play, which makes your inventory answers on it experience-based rather than speculative.',
+    },
+    {
+      label: 'Roleplay, costumes, or characters',
+      scores: { roleplay: 1 },
+      reflection: 'Scenario play is tested ground for you rather than theory.',
+    },
+    {
+      label: 'Group settings (threesomes or more)',
+      scores: {},
+      reflection: 'You have first-hand data on group dynamics, which most people who fantasize about them do not. Your inventory answer reflects experience, not projection.',
+    },
+    {
+      label: 'Filming or photographing intimacy',
+      scores: {},
+      reflection: 'Recording is tried ground for you; the storage and consent practices noted in that category apply from experience.',
+    },
+    {
+      label: 'Toys or devices',
+      scores: {},
+      reflection: 'Device experience correlates with accurate knowledge of your own responses in the research; your solo-pattern answers rest on tested ground.',
+    },
+    {
+      label: 'Public or semi-public teasing (within legal bounds)',
+      scores: { exhibition: 1 },
+      reflection: 'The being-seen thrill is tested experience for you, consistent with your exhibitionism scoring.',
+    },
+    {
+      label: 'None of these yet',
+      exclusive: true,
+      scores: {},
+      reflection: 'Your profile is currently interest-based rather than experience-based. That is a normal starting state; interest measured here typically precedes experience by choice, not inability.',
+    },
+  ],
+};
+
+const CONTEXT_QUESTION = {
+  id: 'context_multi',
+  question: 'In which situations does your desire show up most? Select all that apply.',
+  multi: true,
+  options: [
+    {
+      label: 'Deep in an established, trusting relationship',
+      scores: { sensual: 2, praise: 1 },
+      reflection: 'Trust functions as your primary arousal context. This pairs with responsive desire patterns and predicts that investment in a relationship converts directly to desire.',
+    },
+    {
+      label: 'The spark of someone new',
+      scores: { exhibition: 1 },
+      reflection: 'Novelty of partner is a distinct arousal driver in your pattern, separate from novelty of activity.',
+    },
+    {
+      label: 'Alone, in my own fantasies',
+      scores: {},
+      reflection: 'Your fantasy life is a primary site of desire. The open-response analysis and your solo-pattern answers carry extra weight in your profile.',
+    },
+    {
+      label: 'Flirtation, messages, and buildup before anything physical',
+      scores: { praise: 1 },
+      reflection: 'Anticipation is a measurable arousal channel for you; the buildup is part of the act, consistent with verbal and praise scoring.',
+    },
+    {
+      label: 'Being desired or pursued',
+      scores: { praise: 1, exhibition: 1 },
+      reflection: 'Being wanted operates as a context of its own for you, aligning with the praise and exhibitionism dimensions of your profile.',
+    },
+    {
+      label: 'None of these consistently',
+      exclusive: true,
+      scores: {},
+      reflection: 'No single context dominates your desire pattern. Context-independence is a valid reading, as is a pattern still coming into focus.',
+    },
+  ],
+};
+
+PERSONAL_QUESTIONS.push(EXPERIENCE_QUESTION, CONTEXT_QUESTION);
+
+
+/* ==================== PART 5: open-response items ==================== */
 /*
  * Free-text questions. Responses are analyzed by keyword and phrase
  * matching against the category lexicon below; positive matches are
@@ -1639,5 +1782,5 @@ const GENERAL_SUGGESTIONS = [
 
 /* Make the database available to the server for building result emails. */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { GROUPS, SPARK_SCALE, CATEGORIES, QUESTIONS, PERSONAL_QUESTIONS, TEXT_QUESTIONS, KEYWORDS, NEGATION_TERMS, KINSEY_QUESTIONS, KINSEY_RESULTS, GENERAL_SUGGESTIONS };
+  module.exports = { GROUPS, SPARK_SCALE, LIKERT_OPTIONS, DIMENSION_STATEMENTS, DIMENSIONS_META, CATEGORIES, QUESTIONS, PERSONAL_QUESTIONS, TEXT_QUESTIONS, KEYWORDS, NEGATION_TERMS, KINSEY_QUESTIONS, KINSEY_RESULTS, GENERAL_SUGGESTIONS };
 }

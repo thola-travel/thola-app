@@ -92,11 +92,13 @@ const { chromium } = require('playwright-core');
   const desireItems = await page.locator('.desire-item').count();
   const rankedItems = await page.locator('.ranked-item').count();
   const themeItems = await page.locator('.theme-item').count();
+  const dimRows = await page.locator('.dim-row').count();
   const thanksText = (await page.textContent('#thanks-text')).trim();
   const themeNames = await page.locator('.theme-name').allTextContents();
 
   console.log('THANKS BANNER:', thanksText.slice(0, 90));
   console.log('TEXT THEMES:', themeItems, '->', themeNames.map((t) => t.trim()).join(', '));
+  console.log('DIMENSION ROWS:', dimRows);
   console.log('RANKED ITEMS:', rankedItems);
   console.log('TITLE:', title.trim());
   console.log('KINSEY:', kinsey.trim());
@@ -114,7 +116,7 @@ const { chromium } = require('playwright-core');
   if (!themesOk) console.error('theme analysis check failed');
   if (!thanksText.includes('recorded')) console.error('thanks banner check failed');
 
-  if (errors.length || kinkCards === 0 || spectrumItems === 0 || desireItems === 0 || rankedItems === 0 || !themesOk || !thanksText.includes('recorded')) {
+  if (errors.length || kinkCards === 0 || spectrumItems === 0 || desireItems === 0 || rankedItems === 0 || dimRows !== 5 || !themesOk || !thanksText.includes('recorded')) {
     console.error('SMOKE FAIL');
     process.exit(1);
   }

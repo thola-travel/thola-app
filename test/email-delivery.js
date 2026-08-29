@@ -57,6 +57,8 @@ const samplePayload = {
     kinsey: { key: '1', label: 'Kinsey 1: Predominantly heterosexual, only incidentally homosexual', description: 'Sample description.' },
     aboutYou: [{ question: 'Turn-on?', answer: 'Touch', reflection: 'Your desire lives in your body.' }],
     textThemes: [{ key: 'rope', name: 'Rope & Shibari', terms: ['rope', 'tied up'] }],
+    dimensions: { drive: 72, adventure: 61, connection: 55, intensity: 48, powerLean: 38 },
+    persona: 'High-drive, dominant-leaning profile, centered on power and control.',
     suggestions: ['Keep a private desire journal.'],
     summaryText: 'DeliveryTest, here is your RANKED-SUMMARY-TOKEN.',
   },
@@ -119,6 +121,7 @@ const samplePayload = {
     if (!html.includes('Thank you for completing')) failures.push('participant email is missing the completion thank-you');
     if (!html.includes('Rope')) failures.push('participant email is missing written-response themes');
     if (!html.includes('introduced by Alfred Kinsey')) failures.push('participant email is missing the Kinsey explainer');
+    if (!html.includes('Profile dimensions') || !html.includes('72%')) failures.push('participant email is missing the dimensions section');
     if (html.includes('SECRET-ANSWER-TOKEN')) failures.push('participant email leaked raw answers');
   }
   if (admin) {

@@ -16,6 +16,14 @@
   const sparkCategories = Object.entries(CATEGORIES).filter(([, c]) => c.sparkPrompt);
 
   const allQuestions = [
+    ...DIMENSION_STATEMENTS.map((s) => ({
+      type: 'likert',
+      id: s.id,
+      dim: s.dim,
+      reverse: s.reverse,
+      question: s.text,
+      options: LIKERT_OPTIONS.map((o) => ({ label: o.label, v: o.v })),
+    })),
     ...QUESTIONS.map((q) => ({ ...q, type: 'kink' })),
     ...sparkCategories.map(([key, cat]) => ({
       type: 'spark',
@@ -229,14 +237,16 @@
 
   // ---------- Quiz rendering ----------
   const PART_TAGS = {
-    kink: 'Part 1 · Play Style',
-    spark: 'Part 2 · Interest Inventory',
-    sparkDepth: 'Part 2 · Interest Inventory',
-    personal: 'Part 3 · Desire & Solo Patterns',
-    text: 'Part 4 · In Your Words',
-    kinsey: 'Part 5 · Attraction',
+    likert: 'Part 1 · How You Relate to Sex',
+    kink: 'Part 2 · Play Style',
+    spark: 'Part 3 · Interest Inventory',
+    sparkDepth: 'Part 3 · Interest Inventory',
+    personal: 'Part 4 · Desire & Solo Patterns',
+    text: 'Part 5 · In Your Words',
+    kinsey: 'Part 6 · Attraction',
   };
   const PART_HINTS = {
+    likert: 'Rate your agreement with the statement',
     kink: 'Select the closest answer',
     spark: 'Answer by first instinct',
     sparkDepth: 'This weights the score for your ranking',
@@ -488,6 +498,57 @@
     return parts;
   }
 
+  // ---------- Dimension scoring ----------
+  /**
+   * Each unipolar dimension is the average of one forward and one reversed
+   * item, scaled to 0-100. Power is bipolar: dominant minus submissive
+   * agreement, scaled to -100..100.
+   */
+  function computeDimensions() {
+    const raw = {};
+    allQuestions.forEach((q, i) => {
+      const sel = state.selections[i];
+      if (q.type !== 'likert' || sel === null) return;
+      const v = q.options[sel].v; // 0..4
+      raw[q.id] = q.reverse ? 4 - v : v;
+    });
+    const pair = (f, r) => {
+      const a = raw[f] !== undefined ? raw[f] : 2;
+      const b = raw[r] !== undefined ? raw[r] : 2;
+      return Math.round(((a + b) / 8) * 100);
+    };
+    const dom = raw.dim_pow_dom !== undefined ? raw.dim_pow_dom : 2;
+    const sub = raw.dim_pow_sub !== undefined ? raw.dim_pow_sub : 2;
+    return {
+      drive: pair('dim_drive_f', 'dim_drive_r'),
+      adventure: pair('dim_adv_f', 'dim_adv_r'),
+      connection: pair('dim_conn_f', 'dim_conn_r'),
+      intensity: pair('dim_int_f', 'dim_int_r'),
+      powerLean: Math.round(((dom - sub) / 4) * 100),
+      domScore: Math.round((dom / 4) * 100),
+      subScore: Math.round((sub / 4) * 100),
+    };
+  }
+
+  function personaLine(dims, kinkProfile) {
+    const parts = [];
+    parts.push(dims.drive >= 65 ? 'High-drive' : dims.drive >= 35 ? 'Moderate-drive' : 'Low-drive');
+    if (dims.adventure >= 65) parts.push('exploratory');
+    else if (dims.adventure < 35) parts.push('selective');
+    parts.push(dims.powerLean > 25 ? 'dominant-leaning' : dims.powerLean < -25 ? 'submissive-leaning' : 'switch-balanced');
+    const featured = kinkProfile.filter((k) => k.level !== 'Not a focus right now');
+    let centre = '';
+    if (featured.length > 0) {
+      const groupTallies = {};
+      featured.slice(0, 8).forEach((k) => {
+        groupTallies[k.group] = (groupTallies[k.group] || 0) + k.percent;
+      });
+      const topGroup = Object.entries(groupTallies).sort((a, b) => b[1] - a[1])[0][0];
+      centre = ', centered on ' + GROUPS[topGroup].toLowerCase();
+    }
+    return parts.join(', ') + ' profile' + centre + '.';
+  }
+
   // ---------- Full analysis ----------
   function levelFor(percent) {
     if (percent >= 60) return { level: 'Strong match', cls: '' };
@@ -576,9 +637,11 @@
       });
     });
 
+    const dimensions = computeDimensions();
+    const persona = personaLine(dimensions, kinkProfile);
     const suggestions = buildSuggestions(kinkProfile);
-    const summaryText = buildSummary(kinkProfile, kinsey, textThemes);
-    return { kinkProfile, kinsey, aboutYou, textThemes, summaryText, suggestions };
+    const summaryText = 'Profile overview: ' + persona + '\n\n' + buildSummary(kinkProfile, kinsey, textThemes);
+    return { kinkProfile, kinsey, aboutYou, textThemes, dimensions, persona, summaryText, suggestions };
   }
 
   function buildSuggestions(kinkProfile) {
@@ -661,6 +724,7 @@
 
   // ---------- Submission flow ----------
   const SECTION_NAMES = {
+    likert: 'How You Relate to Sex',
     kink: 'Play Style',
     spark: 'Interest Inventory',
     sparkDepth: 'Interest Inventory',
@@ -694,28 +758,38 @@
   function beginAnalysis() {
     showScreen('analyzing');
     const steps = [
-      'Compiling responses…',
-      'Scoring play-style scenarios…',
-      'Scoring the interest inventory…',
-      'Analyzing written responses…',
-      'Computing attraction placement…',
-      'Writing your report…',
+      'Compiling responses',
+      'Scoring profile dimensions',
+      'Scoring the interest inventory',
+      'Analyzing written responses',
+      'Computing attraction placement',
+      'Writing your report',
     ];
+    const host = $('analysis-steps');
+    host.innerHTML = '';
+    const fills = steps.map((label) => {
+      const row = document.createElement('div');
+      row.className = 'analysis-step';
+      row.innerHTML =
+        '<div class="as-label"><span>' + label + '</span><em class="as-pct">0%</em></div>' +
+        '<div class="as-track"><div class="as-fill"></div></div>';
+      host.appendChild(row);
+      return row;
+    });
     let s = 0;
-    const stepEl = $('analyzing-step');
-    stepEl.textContent = steps[0];
-    const ticker = setInterval(() => {
+    const advance = () => {
+      if (s >= fills.length) return;
+      const row = fills[s];
+      row.querySelector('.as-fill').style.width = '100%';
+      row.querySelector('.as-pct').textContent = '100%';
+      row.classList.add('done');
       s += 1;
-      if (s < steps.length) {
-        stepEl.style.opacity = 0;
-        setTimeout(() => {
-          stepEl.textContent = steps[s] || steps[steps.length - 1];
-          stepEl.style.opacity = 1;
-        }, 250);
-      } else {
-        clearInterval(ticker);
-      }
-    }, 620);
+    };
+    advance();
+    const ticker = setInterval(() => {
+      advance();
+      if (s >= fills.length) clearInterval(ticker);
+    }, 560);
 
     const results = analyze();
     const payload = {
@@ -827,6 +901,40 @@
     });
     $('kinsey-label').textContent = results.kinsey.label;
     $('kinsey-description').textContent = results.kinsey.description;
+
+    // Profile dimensions.
+    const dims = results.dimensions;
+    const dimHost = $('dimension-bars');
+    dimHost.innerHTML = '';
+    [
+      ['drive', dims.drive],
+      ['adventure', dims.adventure],
+      ['connection', dims.connection],
+      ['intensity', dims.intensity],
+    ].forEach(([key, value]) => {
+      const meta = DIMENSIONS_META[key];
+      const row = document.createElement('div');
+      row.className = 'dim-row';
+      row.innerHTML =
+        '<div class="dim-head"><span class="dim-name">' + meta.name + '</span><span class="dim-value">' + value + '%</span></div>' +
+        '<div class="dim-track"><div class="dim-fill" data-w="' + value + '"></div></div>' +
+        '<p class="dim-desc">' + meta.description + '</p>';
+      dimHost.appendChild(row);
+    });
+    // Power lean: bipolar.
+    const lean = dims.powerLean;
+    const marker = Math.max(2, Math.min(98, (lean + 100) / 2));
+    const leanRow = document.createElement('div');
+    leanRow.className = 'dim-row';
+    leanRow.innerHTML =
+      '<div class="dim-head"><span class="dim-name">' + DIMENSIONS_META.power.name + '</span><span class="dim-value">' +
+      (lean > 25 ? 'dominant ' + lean : lean < -25 ? 'submissive ' + Math.abs(lean) : 'balanced') + '</span></div>' +
+      '<div class="dim-bipolar"><span class="dim-pole">Surrendering</span>' +
+      '<div class="dim-bitrack"><div class="dim-marker"></div></div>' +
+      '<span class="dim-pole">Directing</span></div>' +
+      '<p class="dim-desc">' + DIMENSIONS_META.power.description + '</p>';
+    dimHost.appendChild(leanRow);
+    leanRow.querySelector('.dim-marker').style.left = marker + '%';
 
     // Desire map: reflections on turn-ons, turn-offs, and solo life.
     const desireHost = $('desire-map');

@@ -430,7 +430,86 @@ input[type="text"]:focus, input[type="email"]:focus {
   animation: spin 3.2s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-#analyzing-step { color: var(--ink-soft); margin-top: 8px; transition: opacity 0.3s; }
+.analysis-steps { margin-top: 18px; display: grid; gap: 14px; text-align: left; }
+.analysis-step .as-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+}
+.analysis-step .as-pct { font-style: normal; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.as-track {
+  height: 8px;
+  background: var(--accent-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.as-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.55s ease;
+}
+.analysis-step.done .as-label span { color: var(--ink); }
+
+/* ---------- Profile dimensions ---------- */
+.dim-row { margin-bottom: 18px; }
+.dim-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+.dim-name { font-weight: 700; }
+.dim-value { font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.dim-track {
+  height: 9px;
+  background: var(--accent-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.dim-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.9s var(--spring);
+}
+.dim-desc { font-size: 0.85rem; color: var(--ink-soft); margin-top: 6px; }
+.dim-bipolar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dim-pole {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.dim-bitrack {
+  position: relative;
+  flex: 1;
+  height: 9px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent-soft) 50%, var(--accent));
+  opacity: 0.9;
+}
+.dim-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--ink);
+  box-shadow: 0 2px 8px rgba(20, 8, 45, 0.35);
+}
 
 /* ---------- Results ---------- */
 .results-wrap { display: grid; gap: 22px; }
