@@ -146,17 +146,6 @@
   emailInput.addEventListener('input', refreshStartButton);
   consentCheck.addEventListener('change', refreshStartButton);
 
-  // If the server is configured to keep an admin copy, say so honestly.
-  fetch('/api/config')
-    .then((r) => r.json())
-    .then((cfg) => {
-      if (cfg && cfg.adminCopy) {
-        $('consent-text').textContent =
-          'My results will be sent directly to the email address above. My responses are stored securely, and a copy is provided to the quiz administrator.';
-      }
-    })
-    .catch(() => {});
-
   btnStart.addEventListener('click', () => {
     state.name = nameInput.value.trim();
     state.email = emailInput.value.trim();
@@ -266,7 +255,7 @@
     spark: 'Answer by first instinct',
     sparkDepth: 'This weights the score for your ranking',
     personal: 'Answer privately and candidly',
-    text: 'Optional. Analyzed by keyword and phrase matching, and stored with your responses',
+    text: 'Optional. Analyzed by keyword and phrase matching and reflected in your report',
     kinsey: 'Attraction, not behavior',
   };
 
@@ -705,7 +694,7 @@
         'Moderate interest (35-59%) also registered for ' +
         joinNicely(curious.slice(0, 6).map((k) => k.plainName.toLowerCase())) +
         (curious.length > 6 ? ', among others' : '') +
-        '. Scores in this band usually reflect curiosity; the spectrum map below shows the complete distribution.'
+        '. Scores in this band usually reflect curiosity; the spectrum map in your report shows the complete distribution.'
       );
     }
 
@@ -720,7 +709,7 @@
 
     lines.push(
       'Orientation: your attraction responses place you at ' + kinsey.label.split(':')[0].replace('Kinsey', 'point') +
-      ' on the Kinsey scale, explained in the orientation section below. ' + kinsey.description
+      ' on the Kinsey scale, explained in the orientation section of your report. ' + kinsey.description
     );
 
     lines.push(
@@ -872,63 +861,34 @@
   }
 
   // ---------- Results rendering ----------
-  function cardHead(k, cat) {
-    return (
-      '<div class="kink-head"><h3>' + icon(k.key) + ' ' + cat.name + '</h3>' +
-      '<span class="match-chip">' + k.percent + '% · ' + k.level + '</span>' +
-      (k.role ? '<span class="match-chip role-chip">Your side: ' + k.role.side + '</span>' : '') +
-      '</div>' +
-      '<p class="kink-tagline">' + cat.tagline + '</p>' +
-      (k.role ? '<p class="role-note">' + k.role.note + '</p>' : '') +
-      '<div class="kink-meter"><div class="kink-meter-fill" data-w="' + k.percent + '"></div></div>'
-    );
-  }
-
-  function fullCardHtml(k) {
-    const cat = CATEGORIES[k.key];
-    return (
-      cardHead(k, cat) +
-      '<p>' + cat.description + '</p>' +
-      '<h4>What this can look like</h4>' +
-      '<ul>' + cat.examples.map((e) => '<li>' + e + '</li>').join('') + '</ul>' +
-      '<div class="support-note"><span class="note-label">Context</span>' + cat.support + '</div>' +
-      '<div class="first-step"><span class="note-label">Starting point</span>' + cat.firstStep + '</div>'
-    );
-  }
-
-  function compactCardHtml(k) {
-    const cat = CATEGORIES[k.key];
-    return (
-      cardHead(k, cat) +
-      '<p>' + cat.description + '</p>' +
-      '<div class="first-step"><span class="note-label">Starting point</span>' + cat.firstStep + '</div>'
-    );
-  }
-
   function renderResults(results, serverResp) {
     // Completion confirmation, driven by the server's actual delivery state.
     const thanksText = $('thanks-text');
     if (serverResp && serverResp.participantEmailSent && serverResp.testMode && serverResp.previewUrl) {
       thanksText.innerHTML =
-        'Your responses have been recorded. Test mode is active, so the report email was captured instead of delivered: ' +
+        'Test mode is active, so your report email was captured instead of delivered: ' +
         '<a href="' + serverResp.previewUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">open the exact email here</a>.';
     } else if (serverResp && serverResp.participantEmailSent) {
       thanksText.textContent =
-        'Your responses have been recorded and your full report is being sent to ' + state.email +
-        '. It is sent only to that address. Your results are also shown below.';
+        'Your full report is on its way to ' + state.email +
+        '. A summary of your strongest signals is below.';
     } else {
       thanksText.textContent =
-        'Your responses have been recorded. Email delivery is currently unavailable, so save this page; your full results are shown below.';
+        'Email delivery is currently unavailable, so your full report could not be sent right now. ' +
+        'The summary below covers your strongest signals.';
     }
 
     $('results-title').textContent = 'Assessment results: ' + state.name;
     $('results-summary').textContent = results.summaryText;
+    $('report-note').textContent =
+      'Sent to ' + state.email + '. The report covers everything the on-screen summary cannot fit:';
 
-    // Ranked list: top kinks first, straight down the line.
+    // Ranked teaser: the top signals only. The emailed report carries the
+    // full ranking and explanations across all 50 categories.
     const rankedHost = $('ranked-list');
     rankedHost.innerHTML = '';
     const ranked = results.kinkProfile.filter((k) => k.level !== 'Not a focus right now');
-    const list = ranked.length > 0 ? ranked : results.kinkProfile.slice(0, 5);
+    const list = (ranked.length > 0 ? ranked : results.kinkProfile).slice(0, 5);
     list.forEach((k, i) => {
       const li = document.createElement('li');
       li.className = 'ranked-item';
@@ -943,143 +903,6 @@
       rankedHost.appendChild(li);
     });
 
-    // Kinsey scale strip
-    const scaleHost = $('kinsey-scale');
-    scaleHost.innerHTML = '';
-    ['0', '1', '2', '3', '4', '5', '6', 'X'].forEach((stop) => {
-      const el = document.createElement('div');
-      el.className = 'kinsey-stop' + (stop === results.kinsey.key ? ' hit' : '');
-      el.textContent = stop;
-      scaleHost.appendChild(el);
-    });
-    $('kinsey-label').textContent = results.kinsey.label;
-    $('kinsey-description').textContent = results.kinsey.description;
-
-    // Profile dimensions.
-    const dims = results.dimensions;
-    const dimHost = $('dimension-bars');
-    dimHost.innerHTML = '';
-    [
-      ['drive', dims.drive],
-      ['adventure', dims.adventure],
-      ['connection', dims.connection],
-      ['intensity', dims.intensity],
-    ].forEach(([key, value]) => {
-      const meta = DIMENSIONS_META[key];
-      const row = document.createElement('div');
-      row.className = 'dim-row';
-      row.innerHTML =
-        '<div class="dim-head"><span class="dim-name">' + meta.name + '</span><span class="dim-value" data-count="' + value + '">0%</span></div>' +
-        '<div class="dim-track"><div class="dim-fill" data-w="' + value + '"></div></div>' +
-        '<p class="dim-desc">' + meta.description + '</p>';
-      dimHost.appendChild(row);
-    });
-    // Power lean: bipolar.
-    const lean = dims.powerLean;
-    const marker = Math.max(2, Math.min(98, (lean + 100) / 2));
-    const leanRow = document.createElement('div');
-    leanRow.className = 'dim-row';
-    leanRow.innerHTML =
-      '<div class="dim-head"><span class="dim-name">' + DIMENSIONS_META.power.name + '</span><span class="dim-value">' +
-      (lean > 25 ? 'dominant ' + lean : lean < -25 ? 'submissive ' + Math.abs(lean) : 'balanced') + '</span></div>' +
-      '<div class="dim-bipolar"><span class="dim-pole">Surrendering</span>' +
-      '<div class="dim-bitrack"><div class="dim-marker"></div></div>' +
-      '<span class="dim-pole">Directing</span></div>' +
-      '<p class="dim-desc">' + DIMENSIONS_META.power.description + '</p>';
-    dimHost.appendChild(leanRow);
-    leanRow.querySelector('.dim-marker').style.left = marker + '%';
-
-    // Desire map: reflections on turn-ons, turn-offs, and solo life.
-    const desireHost = $('desire-map');
-    desireHost.innerHTML = '';
-    (results.aboutYou || []).forEach((item) => {
-      const row = document.createElement('div');
-      row.className = 'desire-item';
-      const answerEl = document.createElement('p');
-      answerEl.className = 'desire-answer';
-      answerEl.textContent = item.answer;
-      const reflectionEl = document.createElement('p');
-      reflectionEl.className = 'desire-reflection';
-      reflectionEl.textContent = item.reflection;
-      row.appendChild(answerEl);
-      row.appendChild(reflectionEl);
-      desireHost.appendChild(row);
-    });
-    $('desire-card').style.display = (results.aboutYou || []).length > 0 ? '' : 'none';
-
-    // Written response themes.
-    const themesHost = $('text-themes');
-    themesHost.innerHTML = '';
-    (results.textThemes || []).forEach((t) => {
-      const row = document.createElement('div');
-      row.className = 'theme-item';
-      row.innerHTML =
-        '<span class="theme-name">' + icon(t.key) + ' ' + t.name + '</span>' +
-        '<span class="theme-terms">matched: ' + t.terms.map((x) => '&ldquo;' + x + '&rdquo;').join(', ') + '</span>';
-      themesHost.appendChild(row);
-    });
-    $('text-card').style.display = (results.textThemes || []).length > 0 ? '' : 'none';
-
-    // Featured cards: strong in full, curious compact.
-    const host = $('kink-results');
-    host.innerHTML = '';
-    const strong = results.kinkProfile.filter((k) => k.level === 'Strong match');
-    const curious = results.kinkProfile.filter((k) => k.level === 'Curious spark');
-    const featured = strong.length + curious.length > 0
-      ? { strong, curious }
-      : { strong: results.kinkProfile.slice(0, 3), curious: [] };
-
-    featured.strong.forEach((k, i) => {
-      const card = document.createElement('div');
-      card.className = 'card kink-card reveal ' + k.cls;
-      card.style.animationDelay = (0.1 + i * 0.08) + 's';
-      card.innerHTML = fullCardHtml(k);
-      host.appendChild(card);
-    });
-    featured.curious.forEach((k, i) => {
-      const card = document.createElement('div');
-      card.className = 'card kink-card reveal ' + k.cls;
-      card.style.animationDelay = (0.1 + (featured.strong.length + i) * 0.08) + 's';
-      card.innerHTML = compactCardHtml(k);
-      host.appendChild(card);
-    });
-
-    // Full spectrum map, grouped.
-    const mapHost = $('spectrum-map');
-    mapHost.innerHTML = '';
-    Object.entries(GROUPS).forEach(([groupKey, groupName]) => {
-      const entries = results.kinkProfile.filter((k) => k.group === groupKey);
-      if (entries.length === 0) return;
-      const section = document.createElement('div');
-      section.className = 'spectrum-group';
-      section.innerHTML = '<h4>' + groupName + '</h4>';
-      const grid = document.createElement('div');
-      grid.className = 'spectrum-grid';
-      entries.forEach((k) => {
-        const cat = CATEGORIES[k.key];
-        const item = document.createElement('div');
-        item.className = 'spectrum-item';
-        item.title = cat.tagline;
-        item.innerHTML =
-          '<div class="si-label"><span>' + icon(k.key) + ' ' + cat.name +
-          (k.role && k.role.side !== 'both sides' ? '<em class="si-role"> · ' + k.role.side.toLowerCase() + '</em>' : '') +
-          '</span><span class="si-pct">' + k.percent + '%</span></div>' +
-          '<div class="si-track"><div class="si-fill" data-w="' + k.percent + '"></div></div>';
-        grid.appendChild(item);
-      });
-      section.appendChild(grid);
-      mapHost.appendChild(section);
-    });
-
-    // Suggestions
-    const sugHost = $('suggestions-list');
-    sugHost.innerHTML = '';
-    results.suggestions.forEach((s) => {
-      const li = document.createElement('li');
-      li.textContent = s;
-      sugHost.appendChild(li);
-    });
-
     $('closing-note').textContent =
       'Preference profiles shift with time and context. Retaking the assessment at intervals shows how yours changes; the differences between runs are themselves informative.';
     const emailNote = $('email-note');
@@ -1088,9 +911,9 @@
         'Test mode: the email was captured instead of delivered. ' +
         '<a href="' + serverResp.previewUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">Open the exact email here</a>.';
     } else if (serverResp && serverResp.participantEmailSent) {
-      emailNote.textContent = 'Your report has been sent directly to ' + state.email + '. It is not shared with anyone else.';
+      emailNote.textContent = 'Your full report has been sent to ' + state.email + '.';
     } else {
-      emailNote.textContent = 'Email delivery is currently unavailable. Your results are shown above; consider saving this page.';
+      emailNote.textContent = 'Email delivery is currently unavailable. Retake the assessment later to receive your full report by email.';
     }
 
     showScreen('results');

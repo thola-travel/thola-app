@@ -38,6 +38,10 @@ services:
       # Durable full copy of each submission once email works.
       - key: ADMIN_EMAIL
         sync: false
+      # Long random secret enabling the owner-only data export at
+      # /api/export?token=... (leave unset to keep the endpoint disabled).
+      - key: ADMIN_TOKEN
+        sync: false
       # SMTP fallback (paid instances only; free tier blocks SMTP ports).
       - key: SMTP_HOST
         sync: false

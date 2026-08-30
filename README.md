@@ -16,10 +16,10 @@ An interactive, sex-positive quiz with a custom SVG line-icon set (no emoji) tha
    - *Part 6, Attraction*: 4 attraction questions. The Kinsey scale is never mentioned before the results; the results section explains what the scale is, then gives the placement and its meaning.
 2. A **live reading sidebar** analyzes answers as they come in, with animated category bars and a running read on where the profile is leaning.
 3. On submission the full analysis runs. Every category gets a percentage and a grade (*Strong match* at 60% and up, *Curious spark* at 35% and up, *Not a focus* below that). Kinsey answers are averaged to a placement. Personalized suggestions are assembled and a plain-language summary is written.
-4. The results page opens with a completion banner confirming the submission and stating, from the server's actual delivery status, that the report is being sent to the address provided, followed by a **ranked list of their kinks with percentages** and a **profile dimensions** card (with a one-line persona overview opening the analysis) (top kink first, straight down the line, each with the side they chose), then the written summary, then full explanation cards for their top kinks, then everything else: the desire map, an animated Kinsey scale, a **spectrum map** of all 50 categories, and suggestions for self-discovery.
-5. **The participant gets an email copy** in the same order: ranked list, summary, top-kink explanations, desire map, Kinsey result, and suggestions. Their raw answers are never included in that email.
+4. The results page shows a **high-level summary only**: a completion banner (worded from the server's actual delivery status), the top five ranked signals with percentages and count-up animation, the written summary paragraph, and a card listing what the full report contains. Everything else lives in the email.
+5. **The participant's full report arrives by email**: the complete ranking across all 50 categories with explanations, profile dimensions, desire map, written-response analysis, Kinsey result, and suggestions. Their raw answers are never included in that email.
 
-Every submission is also written to `./submissions/` as a JSON backup on the server, so a mail outage never loses one.
+Every submission (all answers plus computed results) is recorded server-side: written to `./submissions/` as a JSON backup (`SAVE_SUBMISSIONS`, on by default) and, with `ADMIN_EMAIL` set, emailed in full to the administrator. The participant-facing consent line discloses that responses are collected.
 
 ## Setup
 
@@ -43,9 +43,15 @@ node test/resend-delivery.js  # Resend HTTPS delivery path (works where SMTP is 
 node test/text-analysis.js    # open-response analyzer: phrases, boundaries, negation
 ```
 
-### Optional admin copy
+### Collecting the data
 
-By default nothing is sent anywhere except to the participant. If you set `ADMIN_EMAIL` in `.env`, a full copy of each submission (answers plus results) is emailed there, and the consent notice on the intro screen automatically updates to disclose that a copy is kept by the quiz administrator. Nobody gets collected from silently.
+Three channels, use them together:
+
+1. **`ADMIN_EMAIL`** (recommended, durable): set it and a full copy of each submission (every answer plus the computed results) is emailed there the moment it arrives. On hosts with ephemeral disks this is the only record that survives restarts.
+2. **`/api/export`** (live pull): set `ADMIN_TOKEN` to a long random secret (`openssl rand -hex 24`), then open `https://your-app.onrender.com/api/export?token=YOUR_TOKEN` in a browser (or send the token in an `X-Admin-Token` header) to download everything currently stored on the server as JSON, newest first. Without `ADMIN_TOKEN` the endpoint does not exist (404).
+3. **`./submissions/`** (on-disk JSON): one file per submission, on by default (`SAVE_SUBMISSIONS`), auto-deleted after `SUBMISSION_RETENTION_DAYS` (default 30; set 0 to keep forever). On Render's free tier this disk is wiped on every restart, deploy, and spin-down, so treat it as a cache the export endpoint reads, not an archive.
+
+The consent line participants tick discloses that their responses are collected and handled securely.
 
 ## Testing
 

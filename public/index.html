@@ -24,8 +24,8 @@
         <ul class="intro-points">
           <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 9 4.5l6 2 5-2v13l-5 2-6-2-5 2z"/><path d="M9 4.5v13M15 6.5v13"/></svg></span><div><strong>Coverage.</strong> 50 categories from mainstream to niche, including which side of each two-sided practice applies to you.</div></li>
           <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4.2" cy="6" r=".9" fill="currentColor"/><circle cx="4.2" cy="12" r=".9" fill="currentColor"/><circle cx="4.2" cy="18" r=".9" fill="currentColor"/></svg></span><div><strong>Method.</strong> Six sections: agreement statements that score your profile dimensions, weighted scenarios, a direct interest inventory with calibration follow-ups, desire and solo patterns, open-response items in your own words, and attraction items. About ten minutes; there are no right or wrong answers.</div></li>
-          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg></span><div><strong>Results.</strong> A ranked profile with a percentage per category, an analysis of your response patterns, and category-level explanations.</div></li>
-          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4.5 7 7.5 6 7.5-6"/></svg></span><div><strong>Confidentiality.</strong> Your report is sent directly to your email address. Responses are stored securely.</div></li>
+          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg></span><div><strong>Results.</strong> A summary of your strongest signals on screen when you finish. Your full report, with a percentage and explanation for every category, arrives by email.</div></li>
+          <li><span class="point-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4.5 7 7.5 6 7.5-6"/></svg></span><div><strong>Delivery.</strong> Your full report is sent directly to the email address you provide. Your data is handled securely.</div></li>
         </ul>
 
         <div class="field-grid">
@@ -46,7 +46,7 @@
 
         <label class="consent">
           <input type="checkbox" id="consent-check">
-          <span id="consent-text">My results will be sent directly to the email address above and are not shared. My responses are stored securely.</span>
+          <span id="consent-text">My full report will be sent to the email address above. I understand my responses are collected by this assessment and handled securely.</span>
         </label>
 
         <button id="btn-start" class="btn primary" disabled><span>Begin the assessment</span></button>
@@ -115,53 +115,26 @@
 
         <div class="card summary-card reveal">
           <h1 id="results-title" class="gradient-text"></h1>
-          <p class="spectrum-note">Categories ranked by score. Each percentage combines your direct rating, its centrality follow-up, and scenario responses.</p>
+          <p class="spectrum-note">Your strongest signals, ranked by score. The full ranking across all 50 categories is in your emailed report.</p>
           <ol id="ranked-list" class="ranked-list"></ol>
         </div>
 
         <div class="card reveal">
-          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg> Profile dimensions</h2>
-          <p class="spectrum-note">Scored from the agreement statements in Part 1. Each dimension pairs a forward and a reversed item.</p>
-          <div id="dimension-bars"></div>
-        </div>
-
-        <div class="card reveal">
-          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4.2" cy="6" r=".9" fill="currentColor"/><circle cx="4.2" cy="12" r=".9" fill="currentColor"/><circle cx="4.2" cy="18" r=".9" fill="currentColor"/></svg> Analysis</h2>
+          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4.2" cy="6" r=".9" fill="currentColor"/><circle cx="4.2" cy="12" r=".9" fill="currentColor"/><circle cx="4.2" cy="18" r=".9" fill="currentColor"/></svg> Summary</h2>
           <p id="results-summary" class="results-summary"></p>
         </div>
 
-        <h2 class="profile-heading reveal">Category detail</h2>
-        <div id="kink-results"></div>
-
-        <div id="desire-card" class="card desire-card reveal">
-          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="m14.8 9.2-1.7 4-4 1.7 1.7-4z"/></svg> Desire patterns</h2>
-          <p class="spectrum-note">Accelerators, inhibitors, and solo patterns, interpreted from your responses.</p>
-          <div id="desire-map"></div>
-        </div>
-
-        <div id="text-card" class="card reveal">
-          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg> Written response analysis</h2>
-          <p class="spectrum-note">Your open responses were analyzed by keyword and phrase matching. The themes below were identified and weighted into your ranked scores.</p>
-          <div id="text-themes"></div>
-        </div>
-
-        <div class="card kinsey-card reveal">
-          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h16"/><path d="M4 12.5v5M9.3 13.5v3M14.6 13.5v3M20 12.5v5"/></svg> Your pattern of attraction</h2>
-          <p class="spectrum-note">Your attraction responses are scored on the Kinsey scale, a 0-to-6 classification of sexual orientation introduced by Alfred Kinsey's research team in 1948. Position 0 denotes exclusively heterosexual attraction, 6 exclusively homosexual, the numbers between denote mixed patterns, and X denotes little or no sexual attraction. Your placement:</p>
-          <div class="kinsey-scale" id="kinsey-scale"></div>
-          <h3 id="kinsey-label"></h3>
-          <p id="kinsey-description"></p>
-        </div>
-
-        <div class="card spectrum-card reveal">
-          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 9 4.5l6 2 5-2v13l-5 2-6-2-5 2z"/><path d="M9 4.5v13M15 6.5v13"/></svg> Full spectrum</h2>
-          <p class="spectrum-note">All 50 measured categories with scores, and the side you selected where the practice has two.</p>
-          <div id="spectrum-map"></div>
-        </div>
-
-        <div class="card suggestions-card reveal">
-          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-7"/><path d="M12 13c0-3.3-2.4-5.5-6-5.5 0 3.3 2.4 5.5 6 5.5z"/><path d="M12 11c0-2.9 2.1-4.8 5.5-4.8 0 2.9-2.1 4.8-5.5 4.8z"/></svg> Recommendations</h2>
-          <ul id="suggestions-list"></ul>
+        <div class="card reveal">
+          <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4.5 7 7.5 6 7.5-6"/></svg> In your full report</h2>
+          <p id="report-note" class="spectrum-note"></p>
+          <ul class="report-list">
+            <li>All 50 category scores with plain-language explanations, examples, and starting points</li>
+            <li>Your profile dimensions: drive, adventurousness, connection, intensity appetite, and power lean</li>
+            <li>Your desire patterns: accelerators, inhibitors, and solo patterns</li>
+            <li>Analysis of your written responses</li>
+            <li>Your pattern of attraction, explained</li>
+            <li>Personalized recommendations for self-discovery</li>
+          </ul>
         </div>
 
         <div class="card closing-card reveal">

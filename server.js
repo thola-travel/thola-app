@@ -2,10 +2,12 @@
  * Desire Discovery Quiz: backend
  *
  * Serves the quiz frontend and receives submissions at POST /api/submit.
- * Each participant receives their own results email (summary, meanings,
- * examples, and suggestions, never their raw answers). If ADMIN_EMAIL is
- * set, a full copy (including answers) also goes there and the frontend
- * discloses that in the consent notice via GET /api/config.
+ * Each participant receives their full report by email (summary, meanings,
+ * examples, and suggestions, never their raw answers); the screen shows a
+ * high-level summary only. Every submission is recorded server-side: a JSON
+ * backup on disk (SAVE_SUBMISSIONS) plus, if ADMIN_EMAIL is set, a full
+ * copy (including answers) by email. GET /api/export (enabled by
+ * ADMIN_TOKEN) returns everything currently on disk to the owner.
  *
  * Production posture: security headers with a strict CSP, per-IP rate
  * limits, server-side payload sanitization, a bot honeypot, request
@@ -20,7 +22,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
-const { randomUUID } = require('crypto');
+const { randomUUID, timingSafeEqual } = require('crypto');
 const nodemailer = require('nodemailer');
 
 const DB = require('./public/quiz-data.js');
@@ -29,6 +31,7 @@ const DB = require('./public/quiz-data.js');
 
 const PORT = Number(process.env.PORT || 3000);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 const SUBMISSIONS_DIR = path.join(__dirname, 'submissions');
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SAVE_SUBMISSIONS = String(process.env.SAVE_SUBMISSIONS || 'on').toLowerCase() !== 'off';
@@ -57,6 +60,9 @@ function validateEnvironment() {
   }
   if (ADMIN_EMAIL && !EMAIL_RE.test(ADMIN_EMAIL)) {
     problems.push(`ADMIN_EMAIL is not a valid email address ("${ADMIN_EMAIL}")`);
+  }
+  if (ADMIN_TOKEN && ADMIN_TOKEN.length < 16) {
+    problems.push('ADMIN_TOKEN is shorter than 16 characters; use a long random value, it protects the data export.');
   }
   if (!Number.isFinite(RETENTION_DAYS) || RETENTION_DAYS < 0) {
     problems.push(`SUBMISSION_RETENTION_DAYS must be 0 (keep forever) or a positive number (got "${process.env.SUBMISSION_RETENTION_DAYS}")`);
@@ -132,6 +138,54 @@ app.get('/healthz', (_req, res) => {
 
 app.get('/api/config', (_req, res) => {
   res.json({ adminCopy: Boolean(ADMIN_EMAIL) });
+});
+
+// Owner-only data export: every submission currently stored on this server,
+// newest first. Disabled entirely unless ADMIN_TOKEN is set. The token is
+// accepted in the X-Admin-Token header or, for browser access, ?token=.
+// Note that on hosts with ephemeral disks (Render's free tier) stored files
+// do not survive restarts; the ADMIN_EMAIL copy is the durable record.
+function tokenMatches(provided) {
+  if (!ADMIN_TOKEN || typeof provided !== 'string' || provided.length === 0) return false;
+  const a = Buffer.from(provided);
+  const b = Buffer.from(ADMIN_TOKEN);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+app.get('/api/export', (req, res) => {
+  if (!ADMIN_TOKEN) return res.status(404).json({ ok: false, error: 'Not found.' });
+  const provided = req.get('x-admin-token') || (typeof req.query.token === 'string' ? req.query.token : '');
+  if (!tokenMatches(provided)) {
+    return res.status(401).json({ ok: false, error: 'Invalid or missing token.' });
+  }
+  let files = [];
+  try {
+    files = fs.existsSync(SUBMISSIONS_DIR)
+      ? fs.readdirSync(SUBMISSIONS_DIR).filter((f) => f.endsWith('.json'))
+      : [];
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: 'Could not read stored submissions.' });
+  }
+  const submissions = [];
+  const unreadable = [];
+  files.forEach((f) => {
+    try {
+      submissions.push(JSON.parse(fs.readFileSync(path.join(SUBMISSIONS_DIR, f), 'utf8')));
+    } catch (err) {
+      unreadable.push(f);
+    }
+  });
+  submissions.sort((x, y) => String(y.submittedAt || '').localeCompare(String(x.submittedAt || '')));
+  res.json({
+    ok: true,
+    count: submissions.length,
+    storage: SAVE_SUBMISSIONS ? 'on' : 'off',
+    note: SAVE_SUBMISSIONS
+      ? 'Submissions currently held by this server instance. On ephemeral-disk hosts, files do not survive restarts or deploys; ADMIN_EMAIL copies are the durable record.'
+      : 'SAVE_SUBMISSIONS=off, so nothing is kept on disk here. Set ADMIN_EMAIL to receive a durable copy of each submission.',
+    unreadable,
+    submissions,
+  });
 });
 
 function resendConfigured() {

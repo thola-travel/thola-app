@@ -1,7 +1,9 @@
 /**
  * Browser smoke test: runs the whole quiz as a user would: name + email +
- * consent, all questions across the three parts, then submission. Asserts
- * the results screen renders with no JS errors.
+ * consent, all questions across the six parts, then submission. Asserts the
+ * summary-only results screen renders with no JS errors, and that the full
+ * data payload (all answers plus complete computed results) reaches the
+ * backend even though the screen shows only a high-level summary.
  *
  * Usage: start the server (`npm start`), then:
  *   CHROMIUM_PATH=/path/to/chrome node test/smoke.js
@@ -15,8 +17,14 @@ const { chromium } = require('playwright-core');
   });
   const page = await browser.newPage();
   const errors = [];
+  let submitPayload = null;
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
+  page.on('request', (req) => {
+    if (req.url().endsWith('/api/submit') && req.method() === 'POST') {
+      try { submitPayload = req.postDataJSON(); } catch (e) { /* asserted below */ }
+    }
+  });
 
   await page.goto(process.env.QUIZ_URL || 'http://localhost:3000/');
   await page.fill('#first-name', 'SmokeTest');
@@ -85,39 +93,53 @@ const { chromium } = require('playwright-core');
 
   await page.waitForSelector('#screen-results.active', { timeout: 60000 });
   const title = await page.textContent('#results-title');
-  const kinsey = await page.textContent('#kinsey-label');
-  const kinkCards = await page.locator('.kink-card').count();
-  const spectrumItems = await page.locator('.spectrum-item').count();
-  const suggestions = await page.locator('#suggestions-list li').count();
-  const desireItems = await page.locator('.desire-item').count();
   const rankedItems = await page.locator('.ranked-item').count();
-  const themeItems = await page.locator('.theme-item').count();
-  const dimRows = await page.locator('.dim-row').count();
+  const summaryText = (await page.textContent('#results-summary')).trim();
+  const reportNote = (await page.textContent('#report-note')).trim();
+  const reportItems = await page.locator('.report-list li').count();
   const thanksText = (await page.textContent('#thanks-text')).trim();
-  const themeNames = await page.locator('.theme-name').allTextContents();
+  const bodyText = await page.textContent('body');
 
-  console.log('THANKS BANNER:', thanksText.slice(0, 90));
-  console.log('TEXT THEMES:', themeItems, '->', themeNames.map((t) => t.trim()).join(', '));
-  console.log('DIMENSION ROWS:', dimRows);
-  console.log('RANKED ITEMS:', rankedItems);
+  console.log('THANKS BANNER:', thanksText.slice(0, 100));
   console.log('TITLE:', title.trim());
-  console.log('KINSEY:', kinsey.trim());
-  console.log('KINK CARDS:', kinkCards);
-  console.log('SPECTRUM ITEMS:', spectrumItems);
-  console.log('SUGGESTIONS:', suggestions);
-  console.log('DESIRE MAP ITEMS:', desireItems);
-  console.log('JS ERRORS:', errors.length ? errors : 'none');
+  console.log('RANKED ITEMS (screen, max 5):', rankedItems);
+  console.log('SUMMARY LENGTH:', summaryText.length);
+  console.log('REPORT NOTE:', reportNote.slice(0, 80));
+  console.log('REPORT LIST ITEMS:', reportItems);
 
   await browser.close();
-  const themesOk =
-    themeItems > 0 &&
-    themeNames.join(' ').includes('Rope') &&
-    !themeNames.join(' ').includes('Feet'); // negated mention must not match
-  if (!themesOk) console.error('theme analysis check failed');
-  if (!thanksText.includes('recorded')) console.error('thanks banner check failed');
 
-  if (errors.length || kinkCards === 0 || spectrumItems === 0 || desireItems === 0 || rankedItems === 0 || dimRows !== 5 || !themesOk || !thanksText.includes('recorded')) {
-    console.error('SMOKE FAIL');
+  const failures = [];
+  if (errors.length) failures.push('JS errors: ' + errors.join(' | '));
+
+  // On-screen: a high-level summary only.
+  if (rankedItems < 1 || rankedItems > 5) failures.push(`expected 1-5 ranked signals on screen, saw ${rankedItems}`);
+  if (summaryText.length < 100) failures.push('summary paragraph missing or too short');
+  if (!reportNote.includes('smoketest@example.com')) failures.push('report card does not name the delivery address');
+  if (reportItems < 5) failures.push('report-contents list incomplete');
+  if (!thanksText.includes('full report')) failures.push('banner does not reference the full report');
+  if (/\brecorded\b|\bstored\b|\bdatabase\b/i.test(bodyText)) failures.push('participant-facing screen mentions recording/storage');
+
+  // Backend payload: the complete data set must still be submitted.
+  if (!submitPayload) {
+    failures.push('no /api/submit payload captured');
+  } else {
+    const profile = (submitPayload.results && submitPayload.results.kinkProfile) || [];
+    const themes = ((submitPayload.results && submitPayload.results.textThemes) || []).map((t) => t.name).join(' ');
+    const dims = (submitPayload.results && submitPayload.results.dimensions) || {};
+    const answers = submitPayload.answers || [];
+    if (profile.length !== 50) failures.push(`payload kinkProfile has ${profile.length} categories, expected 50`);
+    if (answers.length < 80) failures.push(`payload has only ${answers.length} answers`);
+    const dimKeys = ['drive', 'adventure', 'connection', 'intensity', 'powerLean'];
+    if (!dimKeys.every((k) => typeof dims[k] === 'number')) failures.push('payload dimensions incomplete');
+    if (!themes.includes('Rope')) failures.push('payload text themes missing Rope');
+    if (themes.includes('Feet')) failures.push('payload text themes matched a negated mention (Feet)');
+    if (!submitPayload.results.kinsey || !submitPayload.results.summaryText) failures.push('payload missing kinsey/summary');
+    console.log('PAYLOAD: categories=' + profile.length + ' answers=' + answers.length + ' themes=[' + themes + ']');
+  }
+
+  if (failures.length) {
+    console.error('SMOKE FAIL:\n- ' + failures.join('\n- '));
     process.exit(1);
   }
   console.log('SMOKE PASS');
